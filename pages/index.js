@@ -10,7 +10,7 @@ function Home() {
       }}
     >
       {" "}
-      ❤️ Sou muito feliz por ter você como minha esposa! Te Amo!! 💃💖{" "}
+      Site em construção{" "}
     </h1>
   );
 }
