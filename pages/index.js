@@ -10,7 +10,7 @@ function Home() {
       }}
     >
       {" "}
-      Site em construção{" "}
+      Insight Daily: Site em construção{" "}
     </h1>
   );
 }
