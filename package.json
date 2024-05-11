@@ -3,23 +3,17 @@
   "version": "1.0.0",
   "description": "Projeto do curso https://www.tabnews.com.br para o https://curso.dev",
   "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
   "scripts": {
-    "dev": "next dev",
-    "lint:check": "prettier --check .",
-    "lint:fix": "prettier --write .",
-    "test": "jest",
-    "test:watch": "jest --watchAll"
+    "dev": "next dev"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
     "next": "^13.1.6",
-    "pg": "^8.11.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
-  },
-  "devDependencies": {
-    "jest": "^29.6.2",
-    "prettier": "^3.2.5"
   }
 }
