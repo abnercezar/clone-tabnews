@@ -1,3 +1,9 @@
+import orchestrator from "tests/orchestrator.js";
+
+beforeAll(async () => {
+  await orchestrator.waitForAllServices();
+});
+
 // Teste: "GET para api/v1/status deve retornar 200"
 test("GET to api/v1/status should return 200", async () => {
   // Faz uma requisição GET para a rota api/v1/status
