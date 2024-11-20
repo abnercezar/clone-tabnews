@@ -1,10 +1,11 @@
 import useSWR from "swr";
+
 async function fetchApi(key) {
   const response = await fetch(key);
-  // Converte a resposta para JSON
   const responseBody = await response.json();
   return responseBody;
 }
+
 export default function StatusPage() {
   return (
     <>
@@ -15,18 +16,26 @@ export default function StatusPage() {
 }
 
 function UpdatedAt() {
-  const { isLoading, data } = useSWR("/api/v1/status", fetchApi, {
+  const { isLoading, data, error } = useSWR("/api/v1/status", fetchApi, {
     refreshInterval: 2000,
   });
 
-  let updatedAtText = "Carregando...";
+  if (isLoading) {
+    return <div>Carregando...</div>;
+  }
 
-  let { version, max_connections, opened_connections } =
+  if (error) {
+    return <div>Erro ao carregar dados</div>;
+  }
+
+  if (!data || !data.dependencies || !data.dependencies.database) {
+    return <div>Dados incompletos</div>;
+  }
+
+  const updatedAtText = new Date(data.updated_at).toLocaleString("pt-BR");
+  const { version, max_connections, opened_connections } =
     data.dependencies.database;
 
-  if (!isLoading && data) {
-    updatedAtText = new Date(data.updated_at).toLocaleString("pt-BR");
-  }
   return (
     <div>
       <div style={{ marginBottom: "10px" }}>

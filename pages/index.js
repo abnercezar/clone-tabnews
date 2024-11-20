@@ -64,10 +64,11 @@ function Home() {
           Imagine um espaço onde tecnologia, ciência e exploração se encontram.
           O <strong>Insight Daily</strong> não é apenas uma plataforma – é o
           início de uma jornada para mentes que buscam entender e moldar o
-          futuro. Junte-se a nós e seja parte de algo grandioso.
+          futuro. Junte-se a nós e seja parte de algo grandioso.<br></br>
+          <strong>Aguarde...</strong>
         </p>
         <button
-          onClick={() => alert("Inscreva-se para a próxima grande ideia!")}
+          // onClick={() => alert("AGUARDE...")}
           style={{
             marginTop: "30px",
             padding: "12px 24px",
@@ -88,7 +89,7 @@ function Home() {
             e.target.style.backgroundColor = "#58a6ff";
           }}
         >
-          Receba Novidades
+          Em breve teremos novidades
         </button>
         <footer
           style={{
@@ -97,7 +98,8 @@ function Home() {
             color: "#8b949e",
           }}
         >
-          © 2024 Insight Daily. Criado para exploradores do amanhã.
+          © 2024 Insight Daily. Projetado para quem valoriza o aprendizado e a
+          criação de conhecimento autêntico.
         </footer>
       </div>
 

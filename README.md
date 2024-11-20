@@ -1,8 +1,8 @@
 Projeto do curso https://www.tabnews.com.br para o https://curso.dev
 
-# Insight Daily
+# 💡Insight Daily
 
-https://www.insigthdaily.com.br
+https://insightdaily.com.br/
 
 ## Apresentação
 
@@ -19,6 +19,8 @@ A plataforma é **destinada a debates e troca de conhecimentos**, permitindo que
 Nosso propósito é criar um ambiente onde cada postagem ou comentário tenha potencial para gerar insights valiosos, estimulando a reflexão e o aprendizado contínuo. Insight Daily é mais do que uma rede de conteúdo — é um espaço para a construção de um legado de conhecimento.
 
 ---
+
+Gosto de anotar minhas ideias em um caderno, insigths que surgem a qualquer hora do dia, baseado nisso resolvi criar um site para colocar esses insights e permitir que outras pessoas coloquem algo relevante. Aí bastou encontrar um nome relevante para este site, para que eu escolhesse a area que poderia ser explorada pois o próprio termo insight já figura conhecimentos profundos.
 
 <!-- Explore o repositório, veja as tecnologias que sustentam a plataforma e junte-se a nós para fazer parte dessa jornada de aprendizado e troca de ideias!
 
