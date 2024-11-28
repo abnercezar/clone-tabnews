@@ -61,10 +61,11 @@ function Home() {
             margin: "20px 0",
           }}
         >
-          Imagine um espaço onde tecnologia, ciência e exploração se encontram.
-          O <strong>Insight Daily</strong> não é apenas uma plataforma – é o
-          início de uma jornada para mentes que buscam entender e moldar o
-          futuro. Junte-se a nós e seja parte de algo grandioso.<br></br>
+          Imagine um espaço onde tecnologia, programação, ciência e exploração
+          se encontram. O <strong>Insight Daily</strong> não é apenas uma
+          plataforma – é o início de uma jornada para mentes que buscam entender
+          e moldar o futuro. Junte-se a nós e seja parte de algo grandioso.
+          <br></br>
           <strong>Aguarde...</strong>
         </p>
         <button
