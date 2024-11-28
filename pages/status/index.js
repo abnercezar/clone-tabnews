@@ -3,9 +3,8 @@ import useSWR from "swr";
 // Função para buscar dados da API
 async function fetchAPI(key) {
   const response = await fetch(key);
-  const responseBody = await response.json();
-  return responseBody;
-}
+  return response.json();
+};
 
 // Componente principal da página de status
 export default function StatusPage() {
@@ -61,4 +60,13 @@ function DatabaseStatus() {
       <div>{databaseStatusInformation}</div>
     </>
   );
-}
+};
+
+// Componente para exibir um item de status com um rótulo e valor
+const StatusItem = ({ label, value }) => (
+  <div style={{ marginBottom: "10px" }}>
+    {label}: {value}
+  </div>
+);
+
+export default StatusPage;
