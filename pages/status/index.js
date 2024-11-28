@@ -1,67 +1,64 @@
 import useSWR from "swr";
 
 // Função para buscar dados da API
-const fetchApi = async (key) => {
+async function fetchAPI(key) {
   const response = await fetch(key);
-  return response.json();
-};
+  const responseBody = await response.json();
+  return responseBody;
+}
 
 // Componente principal da página de status
-const StatusPage = () => (
-  <>
-    <h1>Status</h1>
-    <UpdatedAt />
-    <h1>DataBase</h1>
-    <DatabaseStatus />
-  </>
-);
+export default function StatusPage() {
+  return (
+    <>
+      <h1>Status</h1>
+      <UpdatedAt />
+      <DatabaseStatus />
+    </>
+  );
+}
 
 // Componente para exibir a última atualização
-const UpdatedAt = () => {
-  const { isLoading, data, error } = useSWR("/api/v1/status", fetchApi, {
+function UpdatedAt() {
+  const { isLoading, data } = useSWR("/api/v1/status", fetchAPI, {
     refreshInterval: 2000,
   });
 
-  if (isLoading) return <div>Carregando...</div>;
-  if (error) return <div>Erro ao carregar dados</div>;
-  if (!data) return <div>Dados incompletos</div>;
+  let updatedAtText = "Carregando...";
 
-  const updatedAtText = new Date(data.updated_at).toLocaleString("pt-BR");
+  if (!isLoading && data) {
+    updatedAtText = new Date(data.updated_at).toLocaleString("pt-BR");
+  }
 
-  return (
-    <div>
-      <StatusItem label="Última atualização" value={updatedAtText} />
-    </div>
-  );
-};
+  return <div>Última atualização: {updatedAtText}</div>;
+}
 
-// Componente para exibir informações do banco de dados
-const DatabaseStatus = () => {
-  const { isLoading, data, error } = useSWR("/api/v1/status", fetchApi, {
+// Componente para exibir o status do banco de dados
+function DatabaseStatus() {
+  const { isLoading, data } = useSWR("/api/v1/status", fetchAPI, {
     refreshInterval: 2000,
   });
 
-  if (isLoading) return <div>Carregando...</div>;
-  if (error) return <div>Erro ao carregar dados</div>;
-  if (!data?.dependencies?.database) return <div>Dados incompletos</div>;
+  let databaseStatusInformation = "Carregando...";
 
-  const { version, max_connections, opened_connections } =
-    data.dependencies.database;
+  if (!isLoading && data) {
+    databaseStatusInformation = (
+      <>
+        <div>Versão: {data.dependencies.database.version}</div>
+        <div>
+          Conexões abertas: {data.dependencies.database.opened_connections}
+        </div>
+        <div>
+          Conexões máximas: {data.dependencies.database.max_connections}
+        </div>
+      </>
+    );
+  }
 
   return (
-    <div>
-      <StatusItem label="Versão do banco de dados" value={version} />
-      <StatusItem label="Máximo de conexões" value={max_connections} />
-      <StatusItem label="Conexões abertas" value={opened_connections} />
-    </div>
+    <>
+      <h2>Database</h2>
+      <div>{databaseStatusInformation}</div>
+    </>
   );
-};
-
-// Componente para exibir um item de status com um rótulo e valor
-const StatusItem = ({ label, value }) => (
-  <div style={{ marginBottom: "10px" }}>
-    {label}: {value}
-  </div>
-);
-
-export default StatusPage;
+}
