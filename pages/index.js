@@ -41,7 +41,7 @@ function Home() {
             animation: "titleGlow ease-in-out infinite alternate",
           }}
         >
-          Insight Daily
+          💡Insight Daily
         </h1>
         <h2
           style={{
@@ -51,7 +51,7 @@ function Home() {
             animation: "subtitleGlow ease-in-out infinite alternate",
           }}
         >
-          Explorando o Futuro da Inovação
+          Explorando o Futuro da Tecnologia
         </h2>
         <p
           style={{
@@ -61,36 +61,14 @@ function Home() {
             margin: "20px 0",
           }}
         >
-          Imagine um espaço onde tecnologia, ciência e exploração se encontram.
-          O <strong>Insight Daily</strong> não é apenas uma plataforma – é o
-          início de uma jornada para mentes que buscam entender e moldar o
-          futuro. Junte-se a nós e seja parte de algo grandioso.<br></br>
+          Imagine um espaço onde tecnologia, programação, ciência e exploração
+          se encontram. O <strong>Insight Daily</strong> não é apenas uma
+          plataforma – é o início de uma jornada para mentes que buscam entender
+          e moldar o futuro. Junte-se a nós e seja parte de algo grandioso.
+          <br></br>
           <strong>Aguarde...</strong>
         </p>
-        <button
-          // onClick={() => alert("AGUARDE...")}
-          style={{
-            marginTop: "30px",
-            padding: "12px 24px",
-            fontSize: "1em",
-            color: "#0d1117",
-            backgroundColor: "#58a6ff",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            fontWeight: "bold",
-            position: "relative",
-            overflow: "hidden",
-          }}
-          onMouseOver={(e) => {
-            e.target.style.backgroundColor = "#1f6feb";
-          }}
-          onMouseOut={(e) => {
-            e.target.style.backgroundColor = "#58a6ff";
-          }}
-        >
-          Em breve teremos novidades
-        </button>
+
         <footer
           style={{
             marginTop: "30px",
