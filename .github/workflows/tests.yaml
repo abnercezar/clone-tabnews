@@ -7,12 +7,16 @@ jobs:
     name: Jest Ubuntu
     runs-on: ubuntu-latest
     steps:
+      # Faz o checkout do repositório
       - uses: actions/checkout@v4
 
+      # Configura o Node.js
       - uses: actions/setup-node@v4
         with:
           node-version: "lts/hydrogen"
 
+      # Instala as dependências do projeto
       - run: npm ci
 
+      # Executa os testes usando Jest
       - run: npm test

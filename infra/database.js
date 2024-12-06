@@ -18,7 +18,7 @@ async function query(queryObject) {
     await client.end();
   }
 }
-
+// Função para obter um novo cliente de banco de dados
 async function getNewClient() {
   const client = new Client({
     host: process.env.POSTGRES_HOST,
@@ -26,20 +26,21 @@ async function getNewClient() {
     user: process.env.POSTGRES_USER,
     database: process.env.POSTGRES_DB,
     password: process.env.POSTGRES_PASSWORD,
-    ssl: getSSLValues(),
+    ssl: getSSLValues(), // Configurações de SSL
   });
 
-  await client.connect();
+  await client.connect(); // Conecta ao banco de dados
   return client;
 }
 
+// Objeto de banco de dados com métodos disponíveis
 const database = {
   query,
   getNewClient,
 };
 
 export default database;
-
+// Função para obter valores de SSL
 function getSSLValues() {
   if (process.env.POSTGRES_CA) {
     return {
