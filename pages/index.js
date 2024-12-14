@@ -19,6 +19,7 @@ function Home() {
         backgroundColor: "#0d1117",
         backgroundImage:
           "url('https://www.transparenttextures.com/patterns/dark-matter.png')",
+        padding: "20px",
       }}
     >
       <div
@@ -27,46 +28,62 @@ function Home() {
           backgroundColor: "rgba(22, 27, 34, 0.95)",
           padding: "40px",
           borderRadius: "12px",
-          width: "90%",
+          width: "100%",
           maxWidth: "600px",
           opacity: visible ? 1 : 0,
           transition: "opacity 2s ease",
+          overflow: "auto",
         }}
       >
         <h1
           style={{
-            fontSize: "3.5em",
+            fontSize: "2.5em",
             color: "#58a6ff",
             margin: "10px 0",
             animation: "titleGlow ease-in-out infinite alternate",
           }}
         >
-          💡Insight Daily
+          💡 Insight Daily
         </h1>
         <h2
           style={{
-            fontSize: "1.8em",
+            fontSize: "1.4em",
             margin: "20px 0",
             color: "#8b949e",
             animation: "subtitleGlow ease-in-out infinite alternate",
           }}
         >
-          Explorando o Futuro da Tecnologia
+          Curadoria de Conhecimento e Ideias Transformadoras
         </h2>
         <p
           style={{
-            fontSize: "1.1em",
-            lineHeight: "1.8",
+            fontSize: "1em",
+            lineHeight: "1.6",
             color: "#c9d1d9",
-            margin: "20px 0",
+            textAlign: "justify",
           }}
         >
-          Imagine um espaço onde tecnologia, programação, ciência e exploração
-          se encontram. O <strong>Insight Daily</strong> não é apenas uma
-          plataforma – é o início de uma jornada para mentes que buscam entender
-          e moldar o futuro. Junte-se a nós e seja parte de algo grandioso.
-          <br></br>
-          <strong>Aguarde...</strong>
+          Vivemos em uma era de abundância de informações, onde o excesso
+          frequentemente gera a falta de profundidade e relevância nos
+          conteúdos. O <strong>Insight Daily</strong> surge como uma plataforma
+          inovadora para curadoria de conhecimento, debates e compartilhamento
+          de ideias. Conectamos mentes visionárias para inspirar a próxima
+          geração de inovadores.
+        </p>
+        <p
+          style={{
+            fontSize: "1em",
+            lineHeight: "1.6",
+            color: "#c9d1d9",
+            textAlign: "justify",
+          }}
+        >
+          Nossa missão é centralizar as melhores ideias sobre tecnologia,
+          ciência e inovação, ajudando programadores a transformar projetos em
+          realidade.
+        </p>
+        <p>
+          <strong>Em construção...</strong>
         </p>
 
         <footer
