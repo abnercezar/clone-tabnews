@@ -9,13 +9,14 @@ async function query(queryObject) {
     return result;
   } catch (error) {
     // Exibe o erro no terminal
+    console.log("\n Erro dentro do catch do database.js:");
     console.error(error);
 
     // Lança a exceção novamente para ser tratada pelo chamador da função
     throw error;
   } finally {
     // Certifique-se de fechar a conexão ao final, independentemente do sucesso ou falha
-    await client.end();
+    await client?.end();
   }
 }
 // Função para obter um novo cliente de banco de dados
