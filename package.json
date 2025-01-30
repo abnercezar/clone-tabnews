@@ -31,6 +31,7 @@
     "dotenv-expand": "11.0.6",
     "micromatch": "^4.0.8",
     "next": "14.2.6",
+    "next-connect": "1.0.0",
     "node-pg-migrate": "7.6.1",
     "pg": "8.12.0",
     "react": "18.3.1",
