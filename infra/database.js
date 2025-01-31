@@ -1,4 +1,5 @@
 import { Client } from "pg";
+import { ServiceError } from "./errors.js";
 
 //Função assíncrona para executar uma consulta no banco de dados.
 async function query(queryObject) {
@@ -8,12 +9,13 @@ async function query(queryObject) {
     const result = await client.query(queryObject);
     return result;
   } catch (error) {
-    // Exibe o erro no terminal
-    console.log("\n Erro dentro do catch do database.js:");
-    console.error(error);
+    const serviceErrorObject = new ServiceError({
+      message: "Erro na conexão com Banco ou na Query.",
+      cause: error,
+    });
 
     // Lança a exceção novamente para ser tratada pelo chamador da função
-    throw error;
+    throw serviceErrorObject;
   } finally {
     // Certifique-se de fechar a conexão ao final, independentemente do sucesso ou falha
     await client?.end();
