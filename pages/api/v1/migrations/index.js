@@ -1,70 +1,33 @@
-// Controller
 import { createRouter } from "next-connect";
-import migrationRunner from "node-pg-migrate";
-import { resolve } from "node:path";
-import database from "infra/database";
 import controller from "infra/controller.js";
+import migrator from "models/migrator.js";
 
 // Cria uma instância do roteador
 const router = createRouter();
 
-// Define o manipulador para o método GET e para o método POST
+// Define os manipuladores para os métodos GET e POST
 router.get(getHandler);
 router.post(postHandler);
 
 // Exporta o roteador com os manipuladores de erro personalizados
 export default router.handler(controller.errorHandlers);
 
-// Manipulador para métodos não permitidos
-
-const defaultMigrationOptions = {
-  dryRun: true,
-  dir: resolve("infra", "migrations"),
-  direction: "up",
-  verbose: true,
-  migrationsTable: "pgmigrations",
-};
-
+// Manipulador para requisições GET
 async function getHandler(request, response) {
-  let dbClient;
-
-  try {
-    // Abre a conexão com o banco de dados
-    dbClient = await database.getNewClient();
-
-    const pendingMigrations = await migrationRunner({
-      ...defaultMigrationOptions,
-      dbClient,
-    });
-    //Inclui a versão na resposta
-    return response.status(200).json(pendingMigrations);
-  } finally {
-    // Fecha a conexão com o banco de dados
-    await dbClient.end();
-  }
+  // Obtém a lista de migrações pendentes
+  const pendingMigrations = await migrator.listPendingMigrations();
+  return response.status(200).json(pendingMigrations);
 }
 
+// Manipulador para requisições POST
 async function postHandler(request, response) {
-  let dbClient;
+  // Executa as migrações pendentes
+  const migratedMigrations = await migrator.runPendingMigrations();
 
-  try {
-    // Abre a conexão com o banco de dados
-    dbClient = await database.getNewClient();
-
-    const migratedMigrations = await migrationRunner({
-      ...defaultMigrationOptions,
-      dbClient,
-      dryRun: false,
-    });
-
-    if (migratedMigrations.length > 0) {
-      return response.status(201).json(migratedMigrations);
-    }
-
-    //Inclui a versão na resposta
-    return response.status(200).json(migratedMigrations);
-  } finally {
-    // Fecha a conexão com o banco de dados
-    await dbClient.end();
+  // Retorna status 201 se houver migrações executadas, caso contrário, 200
+  if (migratedMigrations.length > 0) {
+    return response.status(201).json(migratedMigrations);
   }
+
+  return response.status(200).json(migratedMigrations);
 }
