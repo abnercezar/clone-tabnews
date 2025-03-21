@@ -64,24 +64,46 @@ export class ValidationError extends Error {
   }
 }
 
-// Classe de erro para erros internos do servidor
-export class MethodNotAllowedError extends Error {
-  constructor() {
+export class NotFoundError extends Error {
+  constructor({ cause, message, action }) {
     // Chama o construtor da classe pai (Error) com uma mensagem padrão e a causa do erro
-    super("Método não permitido para este endpoint.");
-    this.name = "MethodNotAllowedError"; // Nome do erro
+    super(message || "Não foi possível encontrar este recurso no sistema.", {
+      cause,
+    });
+    this.name = "NotFoundError";
     this.action =
-      "Verifique se o método HTTP enviado é valido para este endpoint."; // Ação recomendada ao usuário
-    this.statusCode = 405; // Código de status HTTP
+      action || "Verifique se os parâmetros enviados na consulta estão certos.";
+    this.statusCode = 404;
   }
 
   // Converte o erro para um formato JSON
   toJSON() {
     return {
-      name: this.name, // Nome do erro
-      message: this.message, // Mensagem do erro
-      action: this.action, // Ação recomendada ao usuário
-      status_code: this.statusCode, // Código de status HTTP
+      name: this.name,
+      message: this.message,
+      action: this.action,
+      status_code: this.statusCode,
+    };
+  }
+}
+
+// Classe de erro para erros internos do servidor
+export class MethodNotAllowedError extends Error {
+  constructor() {
+    super("Método não permitido para este endpoint.");
+    this.name = "MethodNotAllowedError";
+    this.action =
+      "Verifique se o método HTTP enviado é valido para este endpoint.";
+    this.statusCode = 405;
+  }
+
+  // Converte o erro para um formato JSON
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      action: this.action,
+      status_code: this.statusCode,
     };
   }
 }
