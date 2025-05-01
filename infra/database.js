@@ -14,14 +14,13 @@ async function query(queryObject) {
       cause: error,
     });
 
-    // Lança a exceção novamente para ser tratada pelo chamador da função
     throw serviceErrorObject;
   } finally {
     // Certifique-se de fechar a conexão ao final, independentemente do sucesso ou falha
     await client?.end();
   }
 }
-// Função para obter um novo cliente de banco de dados
+// Cria e conecta um novo cliente ao banco de dados PostgreSQL
 async function getNewClient() {
   const client = new Client({
     host: process.env.POSTGRES_HOST,
