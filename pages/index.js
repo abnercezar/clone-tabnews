@@ -6,70 +6,70 @@ export default function Home() {
       title: "Como declarar imposto de renda em 2025?",
       coin: "30 tabcoins",
       comments: "5 comentários",
-      author: "ContadorExpert",
+      author: "AgroEspecialista",
       time: "3 horas atrás",
     },
     {
-      title: "Principais mudanças na legislação tributária este ano",
+      title: "Principais mudanças na legislação rural este ano",
       coin: "25 tabcoins",
       comments: "8 comentários",
-      author: "FiscalNews",
+      author: "AgroNews",
       time: "1 dia atrás",
     },
     {
-      title: "Dicas para organizar a contabilidade da sua empresa",
+      title: "Dicas para organizar a gestão da sua fazenda",
       coin: "18 tabcoins",
       comments: "3 comentários",
-      author: "GestorFinanceiro",
+      author: "GestorRural",
       time: "6 horas atrás",
     },
     {
-      title: "Como funciona o Simples Nacional?",
+      title: "Como funciona o Pronaf?",
       coin: "20 tabcoins",
       comments: "10 comentários",
-      author: "ContabFácil",
+      author: "AgroFácil",
       time: "12 horas atrás",
     },
     {
-      title: "Erros comuns ao emitir notas fiscais",
+      title: "Erros comuns ao emitir notas fiscais do produtor",
       coin: "15 tabcoins",
       comments: "4 comentários",
-      author: "NotaFiscalPro",
+      author: "NotaRuralPro",
       time: "2 dias atrás",
     },
     {
-      title: "O que é eSocial e como ele impacta sua empresa?",
+      title: "O que é eSocial Rural e como impacta sua fazenda?",
       coin: "22 tabcoins",
       comments: "6 comentários",
-      author: "RHContábil",
+      author: "RHAgro",
       time: "1 dia atrás",
     },
     {
-      title: "Planejamento tributário: como pagar menos impostos legalmente",
+      title: "Planejamento rural: como aumentar a produtividade legalmente",
       coin: "28 tabcoins",
       comments: "7 comentários",
-      author: "TributárioMaster",
+      author: "AgroMaster",
       time: "5 horas atrás",
     },
     {
-      title: "Entenda a diferença entre lucro real e lucro presumido",
+      title: "Entenda a diferença entre agricultura familiar e empresarial",
       coin: "12 tabcoins",
       comments: "2 comentários",
-      author: "FinanceiroSimples",
+      author: "AgroSimples",
       time: "9 horas atrás",
     },
     {
-      title: "Como evitar multas fiscais na sua empresa",
+      title: "Como evitar multas ambientais na sua propriedade",
       coin: "16 tabcoins",
       comments: "5 comentários",
-      author: "AuditorFiscal",
+      author: "FiscalRural",
       time: "8 horas atrás",
     },
     {
-      title: "As principais tendências contábeis para 2025",
+      title: "As principais tendências do agronegócio para 2025",
       coin: "35 tabcoins",
       comments: "12 comentários",
-      author: "ContabTrends",
+      author: "AgroTrends",
       time: "1 dia atrás",
     },
   ];
@@ -93,7 +93,7 @@ export default function Home() {
                     fontSize: "42px",
                   }}
                 ></i>
-                Contab News
+                AgroTab
               </h1>
               <div className="nav-items">
                 <button className="nav-button">Relevantes</button>
@@ -143,7 +143,7 @@ export default function Home() {
       </main>
       <footer className="footer">
         <div className="container">
-          <p>&copy; 2025 Contabnews - Todos os direitos reservados</p>
+          <p>&copy; 2025 AgroTab - Todos os direitos reservados</p>
         </div>
       </footer>
       <style jsx>{`
@@ -161,11 +161,11 @@ export default function Home() {
         }
 
         .header {
-          background-color: #00244a; /* Azul */
+          background-color: rgb(4, 109, 4); /* Azul */
           color: #fff;
           padding: 20px 0; /* Aumenta o tamanho do header */
           border-radius: 15px; /* Deixa o header arredondado */
-          box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Adiciona sombra */
+          box-shadow: 0px 4px 6px rgb(4, 109, 4); /* Adiciona sombra */
           min-height: 80px; /* Define uma altura mínima */
         }
 
@@ -294,7 +294,7 @@ export default function Home() {
         }
 
         .footer {
-          background-color: #00244a;
+          background-color: rgb(0, 74, 30);
           color: white;
           text-align: center;
           padding: 20px 0;
