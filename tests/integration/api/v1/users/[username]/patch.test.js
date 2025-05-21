@@ -78,8 +78,6 @@ describe("PATCH /api/v1/users/[username]", () => {
         email: "email2@gmail.com",
       });
 
-      console.log(createdUser2);
-
       const response = await fetch(
         `http://localhost:3000/api/v1/users/${createdUser2.username}`,
         {
