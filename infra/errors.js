@@ -87,6 +87,28 @@ export class NotFoundError extends Error {
   }
 }
 
+export class UnauthorizedError extends Error {
+  constructor({ cause, message, action }) {
+    // Chama o construtor da classe pai (Error) com uma mensagem padrão e a causa do erro
+    super(message || "Usuário não autenticado.", {
+      cause,
+    });
+    this.name = "UnauthorizedError";
+    this.action = action || "Faça novamente o login para continuar.";
+    this.statusCode = 401;
+  }
+
+  // Converte o erro para um formato JSON
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      action: this.action,
+      status_code: this.statusCode,
+    };
+  }
+}
+
 // Classe de erro para erros internos do servidor
 export class MethodNotAllowedError extends Error {
   constructor() {
