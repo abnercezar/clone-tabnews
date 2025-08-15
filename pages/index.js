@@ -84,17 +84,12 @@ export default function Home() {
         <div className="container">
           <div className="header-content">
             <div className="header-left">
-              <h1 className="logo">
-                <i
-                  className="fa-solid fa-newspaper"
-                  style={{
-                    color: "#daa520",
-                    marginRight: "20px",
-                    fontSize: "42px",
-                  }}
-                ></i>
-                AgroTab
-              </h1>
+              <span
+                className="logo"
+                style={{ fontSize: "42px", marginRight: "20px" }}
+              >
+                🌾
+              </span>
               <div className="nav-items">
                 <button className="nav-button">Relevantes</button>
                 <button className="nav-button">Recentes</button>
