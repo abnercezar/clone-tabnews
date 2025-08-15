@@ -43,12 +43,24 @@ async function setSessionCookie(sessionToken, response) {
   response.setHeader("Set-Cookie", setCookie);
 }
 
+async function clearSessionCookie(response) {
+  // Define cookie de sessão
+  const setCookie = cookie.serialize("session_id", "invalid", {
+    path: "/",
+    maxAge: -1,
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+  });
+  response.setHeader("Set-Cookie", setCookie);
+}
+
 const controller = {
   errorHandlers: {
     onNoMatch: onNoMatchHandler, // Manipulador para métodos não permitidos
     onError: onErrorHandler, // Manipulador para erros internos do servidor
   },
   setSessionCookie, // Função para definir o cookie de sessão
+  clearSessionCookie, // Função para limpar o cookie de sessão
 };
 
 export default controller;
