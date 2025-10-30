@@ -1,4 +1,4 @@
-Projeto do curso https://www.tabnews.com.br para o https://curso.dev
+<!-- Projeto do curso https://www.tabnews.com.br para o https://curso.dev
 
 # 🌾Agro Tab
 
@@ -6,7 +6,7 @@ https://agrotab.com.br/
 
 ## Apresentação
 
-Bem-vindo ao **Agro Tab**!
+Bem-vindo ao **Agro Tab**! -->
 
 <!-- Agro Tab é uma plataforma inovadora voltada para a **curadoria e compartilhamento de conhecimento** de qualidade.
 Vivemos em uma era de abundância de informações, e, muitas vezes, o excesso gera a falta de profundidade e relevância nos conteúdos.
