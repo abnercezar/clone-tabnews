@@ -109,6 +109,29 @@ export class UnauthorizedError extends Error {
   }
 }
 
+export class ForbiddenError extends Error {
+  constructor({ cause, message, action }) {
+    // Chama o construtor da classe pai (Error) com uma mensagem padrão e a causa do erro
+    super(message || "Acesso negado.", {
+      cause,
+    });
+    this.name = "ForbiddenError";
+    this.action =
+      action || "Verifique as features necessárias antes de continuar.";
+    this.statusCode = 403;
+  }
+
+  // Converte o erro para um formato JSON
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      action: this.action,
+      status_code: this.statusCode,
+    };
+  }
+}
+
 // Classe de erro para erros internos do servidor
 export class MethodNotAllowedError extends Error {
   constructor() {
