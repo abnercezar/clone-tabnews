@@ -3,6 +3,7 @@ import { Faker, pt_BR } from "@faker-js/faker";
 import database from "infra/database.js";
 import migrator from "models/migrator.js";
 import user from "models/user.js";
+import activation from "models/activation.js";
 import session from "models/session.js";
 
 const emailHttpUrl = `http://${process.env.EMAIL_HTTP_HOST}:${process.env.EMAIL_HTTP_PORT}`;
@@ -58,12 +59,20 @@ async function runPendingMigrations() {
 
 // Cria um usuário de teste
 async function createUser(userObject) {
-  return await user.create({
+  const newUser = await user.create({
     username:
       userObject?.username || faker.internet.username().replace(/[_.-]/g, ""),
     email: userObject?.email || faker.internet.email(),
     password: userObject?.password || "validpassword",
   });
+
+  // Caso o teste solicite, ativa o usuário imediatamente (adiciona feature create:session)
+  if (userObject?.activate) {
+    const activatedUser = await activation.activateUserByUserId(newUser.id);
+    return activatedUser;
+  }
+
+  return newUser;
 }
 
 // Cria uma sessão de teste
@@ -101,6 +110,10 @@ function extractUUID(text) {
   return match ? match[0] : null;
 }
 
+async function activateUser(inactiveUser) {
+  return await activation.activateUserByUserId(inactiveUser.id);
+}
+
 // Exporta funções utilitárias para os testes
 const orchestrator = {
   waitForAllServices,
@@ -111,6 +124,7 @@ const orchestrator = {
   deleteAllEmails,
   getLastEmail,
   extractUUID,
+  activateUser,
 };
 
 export default orchestrator;
