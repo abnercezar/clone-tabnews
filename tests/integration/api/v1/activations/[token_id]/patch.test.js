@@ -137,7 +137,11 @@ describe("PATCH /api/v1/activations/[token_id]", () => {
     expect(expiresAt - createdAt).toBe(activation.EXPIRATION_IN_MILLISECONDS);
 
     const activatedUser = await user.findOneById(responseBody.user_id);
-    expect(activatedUser.features).toEqual(["create:session", "read:session"]);
+    expect(activatedUser.features).toEqual([
+      "create:session",
+      "read:session",
+      "update:user",
+    ]);
   });
 
   test("With valid token but already activated user", async () => {
