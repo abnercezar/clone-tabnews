@@ -59,18 +59,15 @@ describe("GET /api/v1/user", () => {
         username: "UserWithValidSession",
         email: createdUser.email,
         features: ["create:session", "read:session", "update:user"],
-        password: createdUser.password,
         created_at: createdUser.created_at.toISOString(),
         updated_at: activatedUser.updated_at.toISOString(),
       });
 
       expect(uuidVersion(responseBody.id)).toBe(4);
 
-      // Verifica se as datas de criação e atualização são válidas
       expect(Date.parse(responseBody.created_at)).not.toBeNaN();
       expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
 
-      // Asserções de renovação de sessão
       const renewedSessionObject = await session.findOneValidByToken(
         sessionObject.token,
       );
@@ -82,7 +79,6 @@ describe("GET /api/v1/user", () => {
         renewedSessionObject.updated_at > sessionObject.updated_at,
       ).toEqual(true);
 
-      // Afirmações Set-Cookie
       const parsedSetCookie = setCookieParser(response, {
         map: true,
       });
@@ -178,18 +174,15 @@ describe("GET /api/v1/user", () => {
         username: "UserWithHalfExpiredSession",
         email: createdUser.email,
         features: activatedUser.features,
-        password: createdUser.password,
         created_at: createdUser.created_at.toISOString(),
         updated_at: activatedUser.updated_at.toISOString(),
       });
 
       expect(uuidVersion(responseBody.id)).toBe(4);
 
-      // Verifica se as datas de criação e atualização são válidas
       expect(Date.parse(responseBody.created_at)).not.toBeNaN();
       expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
 
-      // Asserções de renovação de sessão
       const renewedSessionObject = await session.findOneValidByToken(
         sessionObject.token,
       );
@@ -201,7 +194,6 @@ describe("GET /api/v1/user", () => {
         renewedSessionObject.updated_at > sessionObject.updated_at,
       ).toEqual(true);
 
-      // Afirmações Set-Cookie
       const parsedSetCookie = setCookieParser(response, {
         map: true,
       });
@@ -214,32 +206,5 @@ describe("GET /api/v1/user", () => {
         httpOnly: true,
       });
     });
-
-    // test("With session about to expire (1 minute left, expires_at manipulated)", async () => {
-    //   // Cria usuário
-    //   const createdUser = await orchestrator.createUser({
-    //     username: "UserWithSessionAboutToExpire2",
-    //   });
-
-    //   // Cria sessão com expiração padrão
-    //   const sessionObject = await session.create(createdUser.id);
-
-    //   // Manipula o campo expires_at para faltar 1 minuto para expirar
-    //   const expiresSoon = new Date(Date.now() + 60 * 1000); // 1 minuto
-    //   await database.query({
-    //     text: `UPDATE sessions SET expires_at = $1 WHERE id = $2`,
-    //     values: [expiresSoon, sessionObject.id],
-    //   });
-
-    //   // Faz requisição usando a sessão
-    //   const response = await fetch("http://localhost:3000/api/v1/user", {
-    //     headers: {
-    //       Cookie: `session_id=${sessionObject.token}`,
-    //     },
-    //   });
-
-    //   // Se o sistema renova, espera 200.
-    //   expect([200]).toContain(response.status);
-    // });
   });
 });

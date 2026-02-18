@@ -37,9 +37,7 @@ describe("Use case: Registration Flow (all successful)", () => {
     expect(createUserResponseBody).toEqual({
       id: createUserResponseBody.id,
       username: "RegistrationFlow",
-      email: "registration.flow@agrotab.com",
       features: ["read:activation_token"],
-      password: createUserResponseBody.password,
       created_at: createUserResponseBody.created_at,
       updated_at: createUserResponseBody.updated_at,
     });
@@ -110,7 +108,6 @@ describe("Use case: Registration Flow (all successful)", () => {
   });
 
   test("Get user information", async () => {
-    // Usa a sessão criada no teste anterior
     const userResponse = await fetch("http://localhost:3000/api/v1/user", {
       headers: {
         cookie: `session_id=${createSessionsResponseBody.token}`,
