@@ -2,16 +2,15 @@ import { createRouter } from "next-connect";
 import controller from "infra/controller.js";
 import user from "models/user.js";
 import session from "models/session";
+import authorization from "models/authorization";
 
-// Instância do roteador
 const router = createRouter();
 
-// Handler GET
-router.get(getHandler);
+router.use(controller.injectAnonymousOrUser);
+router.get(controller.canRequest("read:session"), getHandler);
 
 export default router.handler(controller.errorHandlers);
 
-// Valida sessão e responde
 async function getHandler(request, response) {
   const sessionToken = request.cookies.session_id;
 
@@ -25,5 +24,12 @@ async function getHandler(request, response) {
     "Cache-Control",
     "no-store, no-cache, max-age=0, must-revalidate",
   );
-  return response.status(200).json(userFound);
+
+  const secureOutputValues = authorization.filterOutput(
+    userFound,
+    "read:user:self",
+    userFound,
+  );
+
+  return response.status(200).json(secureOutputValues);
 }

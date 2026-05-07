@@ -2,3 +2,8 @@
 node_modules
 ToDo
 ToDo.md
+.env
+.env.development
+.env.test
+.env.production
+architecture.md
