@@ -130,7 +130,7 @@ async function activateUserByUserId(userId) {
 
 async function sendEmailToUser(user, activationToken) {
   await email.send({
-    from: "Agrotab <agrotab@gmail.com>",
+    from: "Agrotab <agrotab@gmail.com.br>",
     to: user.email,
     subject: "Ative seu cadastro Agrotab",
     text: `${user.username}, clique no link abaixo para ativar seu cadastro no Agrotab:
