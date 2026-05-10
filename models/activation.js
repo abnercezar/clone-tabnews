@@ -3,7 +3,7 @@ import database from "infra/database.js";
 import webserver from "infra/webserver.js";
 import { ForbiddenError, NotFoundError } from "infra/errors.js";
 import user from "models/user.js";
-import authorization from "./authorization";
+import authorization from "./authorization.js";
 
 const EXPIRATION_IN_MILLISECONDS = 60 * 15 * 1000; // 15 minutes
 
@@ -130,7 +130,7 @@ async function activateUserByUserId(userId) {
 
 async function sendEmailToUser(user, activationToken) {
   await email.send({
-    from: "Agrotab <agrotab@gmail.com.br>",
+    from: "Agrotab <contato@agrotab.com.br>",
     to: user.email,
     subject: "Ative seu cadastro Agrotab",
     text: `${user.username}, clique no link abaixo para ativar seu cadastro no Agrotab:
