@@ -1,5 +1,4 @@
 import bcryptjs from "bcryptjs";
-import "dotenv/config";
 
 // Função para gerar o hash de uma senha com base no número de rounds
 async function hash(password) {

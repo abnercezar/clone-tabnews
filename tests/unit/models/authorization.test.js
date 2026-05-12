@@ -1,8 +1,8 @@
 import authorization from "models/authorization.js";
 import { InternalServerError } from "infra/errors.js";
 
-describe("models/authorization.js", () => {
-  describe(".can()", () => {
+describe("`models/authorization.js`", () => {
+  describe("`.can()`", () => {
     test("without `user`", () => {
       expect(() => {
         authorization.can();
@@ -19,7 +19,7 @@ describe("models/authorization.js", () => {
       }).toThrow(InternalServerError);
     });
 
-    test("with unknown feature`", () => {
+    test("with unknown `feature`", () => {
       const createdUser = {
         features: [],
       };
@@ -29,7 +29,7 @@ describe("models/authorization.js", () => {
       }).toThrow(InternalServerError);
     });
 
-    test("with valid `user` and known feature`", () => {
+    test("with valid `user` and known `feature`", () => {
       const createdUser = {
         features: ["create:user"],
       };
@@ -38,7 +38,7 @@ describe("models/authorization.js", () => {
     });
   });
 
-  describe(".filterOutput()", () => {
+  describe("`.filterOutput()`", () => {
     test("without `user`", () => {
       expect(() => {
         authorization.filterOutput();
@@ -55,7 +55,7 @@ describe("models/authorization.js", () => {
       }).toThrow(InternalServerError);
     });
 
-    test("with unknown feature`", () => {
+    test("with unknown `feature`", () => {
       const createdUser = {
         features: [],
       };
@@ -75,7 +75,7 @@ describe("models/authorization.js", () => {
       }).toThrow(InternalServerError);
     });
 
-    test("with valid `user`, known feature` and `resource`", () => {
+    test("with valid `user`, known `feature` and `resource`", () => {
       const createdUser = {
         features: ["read:user"],
       };
@@ -84,8 +84,8 @@ describe("models/authorization.js", () => {
         id: 1,
         username: "resource",
         features: ["read:user"],
-        created_at: "2026-0101T00:00:00.00Z",
-        updated_at: "2026-0101T00:00:00.00Z",
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
         email: "resource@resource.com",
         password: "resource",
       };
@@ -100,8 +100,8 @@ describe("models/authorization.js", () => {
         id: 1,
         username: "resource",
         features: ["read:user"],
-        created_at: "2026-0101T00:00:00.00Z",
-        updated_at: "2026-0101T00:00:00.00Z",
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
       });
     });
   });

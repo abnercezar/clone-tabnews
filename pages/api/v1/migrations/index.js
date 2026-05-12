@@ -3,14 +3,6 @@ import controller from "infra/controller.js";
 import migrator from "models/migrator.js";
 import authorization from "models/authorization";
 
-const router = createRouter();
-
-router.use(controller.injectAnonymousOrUser);
-router.get(controller.canRequest("read:migration"), getHandler);
-router.post(controller.canRequest("create:migration"), postHandler);
-
-export default router.handler(controller.errorHandlers);
-
 async function getHandler(request, response) {
   const userTryingToGet = request.context.user;
   const pendingMigrations = await migrator.listPendingMigrations();
@@ -40,3 +32,9 @@ async function postHandler(request, response) {
 
   return response.status(200).json(secureOutputValues);
 }
+
+export default createRouter()
+  .use(controller.injectAnonymousOrUser)
+  .get(controller.canRequest("read:migration"), getHandler)
+  .post(controller.canRequest("create:migration"), postHandler)
+  .handler(controller.errorHandlers);

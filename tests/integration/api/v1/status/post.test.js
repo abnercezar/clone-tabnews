@@ -1,15 +1,16 @@
+import webserver from "infra/webserver.js";
 import orchestrator from "tests/orchestrator.js";
 
 beforeAll(async () => {
   await orchestrator.waitForAllServices();
 });
 
-describe("POST /api/v1/status", () => {
+describe("`POST /api/v1/status`", () => {
   describe("Anonymous user", () => {
     // Teste: "GET para api/v1/status deve retornar 200"
-    test("Retrieving current system status", async () => {
+    test("`POST /api/v1/status` returns Method Not Allowed", async () => {
       // Faz uma requisição GET para a rota api/v1/status
-      const response = await fetch("http://localhost:3000/api/v1/status", {
+      const response = await fetch(`${webserver.origin}/api/v1/status`, {
         method: "POST",
       });
       // Espera que o status da resposta seja 200
