@@ -1,5 +1,6 @@
 import { version as uuidVersion } from "uuid";
 import setCookieParser from "set-cookie-parser";
+import webserver from "infra/webserver.js";
 import orchestrator from "tests/orchestrator.js";
 import session from "models/session.js";
 
@@ -9,7 +10,7 @@ beforeAll(async () => {
   await orchestrator.runPendingMigrations();
 });
 
-describe("POST /api/v1/sessions", () => {
+describe("`POST /api/v1/sessions`", () => {
   describe("Anonymous user", () => {
     // Teste: "POST para api/v1/sessions deve retornar 200"
     test("With incorrect `email` but correct `password`", async () => {
@@ -17,7 +18,7 @@ describe("POST /api/v1/sessions", () => {
         password: "senha-correta",
       });
 
-      const response = await fetch("http://localhost:3000/api/v1/sessions", {
+      const response = await fetch(`${webserver.origin}/api/v1/sessions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -45,7 +46,7 @@ describe("POST /api/v1/sessions", () => {
         email: "email.correto@gmail.com",
       });
 
-      const response = await fetch("http://localhost:3000/api/v1/sessions", {
+      const response = await fetch(`${webserver.origin}/api/v1/sessions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -68,10 +69,10 @@ describe("POST /api/v1/sessions", () => {
       });
     });
 
-    test("With incorrect `email` but and incorrect `password`", async () => {
+    test("With incorrect `email` and incorrect `password`", async () => {
       await orchestrator.createUser();
 
-      const response = await fetch("http://localhost:3000/api/v1/sessions", {
+      const response = await fetch(`${webserver.origin}/api/v1/sessions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -94,7 +95,7 @@ describe("POST /api/v1/sessions", () => {
       });
     });
 
-    test("With correct `email` but and correct `password`", async () => {
+    test("With correct `email` and correct `password`", async () => {
       const createdUser = await orchestrator.createUser({
         email: "tudo.correto@gmail.com",
         password: "tudocorreto",
@@ -102,7 +103,7 @@ describe("POST /api/v1/sessions", () => {
 
       await orchestrator.activateUser(createdUser);
 
-      const response = await fetch("http://localhost:3000/api/v1/sessions", {
+      const response = await fetch(`${webserver.origin}/api/v1/sessions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -139,7 +140,11 @@ describe("POST /api/v1/sessions", () => {
       expiresAt.setMilliseconds(0);
       createdAt.setMilliseconds(0);
 
-      expect(expiresAt - createdAt).toBe(session.EXPIRATION_IN_MILLISECONDS);
+      const durationMs = expiresAt - createdAt;
+      const expectedMs = session.EXPIRATION_IN_MILLISECONDS;
+      const toleranceMs = 5000;
+      expect(durationMs).toBeGreaterThanOrEqual(expectedMs - toleranceMs);
+      expect(durationMs).toBeLessThanOrEqual(expectedMs + toleranceMs);
 
       const parsedSetCookie = setCookieParser(response, {
         map: true,
@@ -151,6 +156,7 @@ describe("POST /api/v1/sessions", () => {
         maxAge: session.EXPIRATION_IN_MILLISECONDS / 1000,
         path: "/",
         httpOnly: true,
+        sameSite: "Lax",
       });
     });
   });

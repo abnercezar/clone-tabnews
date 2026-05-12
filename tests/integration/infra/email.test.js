@@ -5,8 +5,8 @@ beforeAll(async () => {
   await orchestrator.waitForAllServices();
 });
 
-describe("infra/email.js", () => {
-  test("send()", async () => {
+describe("`infra/email.js`", () => {
+  test("`send()`", async () => {
     await orchestrator.deleteAllEmails();
     await email.send({
       from: "AgroTab <contato@agrotab.com.br>",
