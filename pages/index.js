@@ -378,7 +378,10 @@ export default function Home() {
           border: 1px solid var(--borderColor-default, #d0d7de);
           border-radius: 12px;
           background: var(--br-white);
-          box-shadow: var(--shadow-resting-small, 0 1px 0 rgba(31, 35, 40, 0.04));
+          box-shadow: var(
+            --shadow-resting-small,
+            0 1px 0 rgba(31, 35, 40, 0.04)
+          );
         }
 
         .feature-card.tone-green {
