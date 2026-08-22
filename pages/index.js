@@ -1,326 +1,446 @@
-import React from "react";
+import {
+  Banner,
+  Header,
+  Heading,
+  Label,
+  LabelGroup,
+  LinkButton,
+  PageLayout,
+  Stack,
+  Text,
+  Timeline,
+} from "@primer/react";
+import {
+  ArrowRightIcon,
+  BeakerIcon,
+  CommentDiscussionIcon,
+  CpuIcon,
+  GraphIcon,
+  LightBulbIcon,
+  PeopleIcon,
+  ProjectIcon,
+  RocketIcon,
+  RssIcon,
+} from "@primer/octicons-react";
+
+const FEATURES = [
+  {
+    title: "Feed de conteúdo",
+    description:
+      "Curadoria de artigos, pesquisas e casos reais do agronegócio brasileiro.",
+    icon: RssIcon,
+    tone: "green",
+  },
+  {
+    title: "Discussões",
+    description:
+      "Comentários e debates em cima do conteúdo, com quem vive o campo e a agtech.",
+    icon: CommentDiscussionIcon,
+    tone: "blue",
+  },
+  {
+    title: "Cotações",
+    description:
+      "Acompanhamento de mercado para apoiar decisões no dia a dia da fazenda.",
+    icon: GraphIcon,
+    tone: "yellow",
+  },
+  {
+    title: "Comunidade",
+    description:
+      "A troca acontece no feed e nas discussões — sem ser uma rede social à parte.",
+    icon: PeopleIcon,
+    tone: "green",
+  },
+];
+
+const PILLARS = [
+  {
+    title: "Tecnologia",
+    description:
+      "Agtech, dados, automação e ferramentas digitais para o campo produzir com mais precisão e menos desperdício.",
+    icon: CpuIcon,
+    tone: "green",
+  },
+  {
+    title: "Inovação",
+    description:
+      "Novos modelos de negócio, práticas e soluções criadas no Brasil para os desafios reais da produção rural.",
+    icon: LightBulbIcon,
+    tone: "yellow",
+  },
+  {
+    title: "Ciência",
+    description:
+      "Pesquisa, evidências e conhecimento técnico traduzidos para quem decide na fazenda, na universidade e na indústria.",
+    icon: BeakerIcon,
+    tone: "blue",
+  },
+];
+
+const MILESTONES = [
+  {
+    title: "Fundação",
+    body: "Infraestrutura, contas e fluxo de cadastro.",
+    variant: "success",
+    done: true,
+  },
+  {
+    title: "Feed e discussões",
+    body: "Conteúdo curado e conversas sobre tecnologia, inovação e ciência no agro.",
+    variant: "attention",
+    done: false,
+  },
+  {
+    title: "Cotações e ferramentas",
+    body: "Indicadores de mercado e recursos para a gestão rural.",
+    variant: "accent",
+    done: false,
+  },
+];
 
 export default function Home() {
-  const posts = [
-    {
-      title: "Como declarar imposto de renda em 2025?",
-      coin: "30 tabcoins",
-      comments: "5 comentários",
-      author: "AgroEspecialista",
-      time: "3 horas atrás",
-    },
-    {
-      title: "Principais mudanças na legislação rural este ano",
-      coin: "25 tabcoins",
-      comments: "8 comentários",
-      author: "AgroNews",
-      time: "1 dia atrás",
-    },
-    {
-      title: "Dicas para organizar a gestão da sua fazenda",
-      coin: "18 tabcoins",
-      comments: "3 comentários",
-      author: "GestorRural",
-      time: "6 horas atrás",
-    },
-    {
-      title: "Como funciona o Pronaf?",
-      coin: "20 tabcoins",
-      comments: "10 comentários",
-      author: "AgroFácil",
-      time: "12 horas atrás",
-    },
-    {
-      title: "Erros comuns ao emitir notas fiscais do produtor",
-      coin: "15 tabcoins",
-      comments: "4 comentários",
-      author: "NotaRuralPro",
-      time: "2 dias atrás",
-    },
-    {
-      title: "O que é eSocial Rural e como impacta sua fazenda?",
-      coin: "22 tabcoins",
-      comments: "6 comentários",
-      author: "RHAgro",
-      time: "1 dia atrás",
-    },
-    {
-      title: "Planejamento rural: como aumentar a produtividade legalmente",
-      coin: "28 tabcoins",
-      comments: "7 comentários",
-      author: "AgroMaster",
-      time: "5 horas atrás",
-    },
-    {
-      title: "Entenda a diferença entre agricultura familiar e empresarial",
-      coin: "12 tabcoins",
-      comments: "2 comentários",
-      author: "AgroSimples",
-      time: "9 horas atrás",
-    },
-    {
-      title: "Como evitar multas ambientais na sua propriedade",
-      coin: "16 tabcoins",
-      comments: "5 comentários",
-      author: "FiscalRural",
-      time: "8 horas atrás",
-    },
-    {
-      title: "As principais tendências do agronegócio para 2025",
-      coin: "35 tabcoins",
-      comments: "12 comentários",
-      author: "AgroTrends",
-      time: "1 dia atrás",
-    },
-  ];
-
   return (
-    <>
-      <header className="header">
-        <link
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-          rel="stylesheet"
-        />
-        <div className="container">
-          <div className="header-content">
-            <div className="header-left">
-              <span
-                className="logo"
-                style={{ fontSize: "42px", marginRight: "20px" }}
+    <div className="page">
+      <div className="flag-bar" aria-hidden />
+      <Header>
+        <Header.Item full>
+          <Header.Link href="/" className="brand-link">
+            <span className="brand-avatar">
+              <img
+                src="/logo-agrotab.png"
+                alt="AgroTab"
+                className="brand-logo"
+              />
+            </span>
+          </Header.Link>
+        </Header.Item>
+        <Header.Item>
+          <Header.Link href="/cadastro">Cadastro</Header.Link>
+        </Header.Item>
+      </Header>
+
+      <PageLayout padding="normal" containerWidth="large">
+        <PageLayout.Content>
+          <Stack gap="spacious" paddingBlock="normal">
+            <Banner
+              variant="info"
+              title="Pré-lançamento"
+              description="Estamos preparando a plataforma. Cadastre-se para ser avisado no lançamento."
+            />
+
+            <section className="hero">
+              <LabelGroup>
+                <Label variant="success">AgroTab</Label>
+                <Label variant="attention">Pré-lançamento</Label>
+                <Label variant="accent">Brasil</Label>
+              </LabelGroup>
+
+              <Heading as="h1" variant="large" className="hero-title">
+                Tecnologia, inovação e ciência para o campo crescer
+              </Heading>
+
+              <Text as="p" className="hero-lead">
+                Curadoria e troca de conhecimento para o agronegócio: o que a
+                pesquisa, a inovação e o mercado estão dizendo sobre o campo —
+                do laboratório à lavoura.
+              </Text>
+
+              <Stack
+                direction={{ narrow: "vertical", regular: "horizontal" }}
+                gap="condensed"
+                align="center"
               >
-                🌾
-              </span>
-              <div className="nav-items">
-                <button className="nav-button">Relevantes</button>
-                <button className="nav-button">Recentes</button>
+                <LinkButton
+                  href="/cadastro"
+                  variant="primary"
+                  size="large"
+                  trailingVisual={ArrowRightIcon}
+                >
+                  Quero ser avisado no lançamento
+                </LinkButton>
+                <LinkButton href="#o-que-vem" variant="default" size="large">
+                  Ver o que está por vir
+                </LinkButton>
+              </Stack>
+            </section>
+
+            <section id="pilares" className="section">
+              <Heading as="h2" variant="medium">
+                Tecnologia, inovação e ciência
+              </Heading>
+              <Text as="p" className="muted">
+                Três frentes que sustentam o AgroTab: o que já existe no campo
+                brasileiro, o que ainda está nascendo e o que a pesquisa
+                comprova.
+              </Text>
+
+              <div className="pillar-grid">
+                {PILLARS.map(({ title, description, icon: Icon, tone }) => (
+                  <article
+                    key={title}
+                    className={`feature-card pillar tone-${tone}`}
+                  >
+                    <span className={`feature-icon tone-${tone}`}>
+                      <Icon size={20} />
+                    </span>
+                    <Heading as="h3" variant="small">
+                      {title}
+                    </Heading>
+                    <Text as="p" className="muted">
+                      {description}
+                    </Text>
+                  </article>
+                ))}
               </div>
-            </div>
-            <div className="header-right">
-              <div className="search-container">
-                <input
-                  type="text"
-                  className="search-input"
-                  placeholder="Pesquisar..."
-                />
-                <span className="search-icon">🔍</span>
+            </section>
+
+            <section id="o-que-vem" className="section">
+              <Heading as="h2" variant="medium">
+                O que o AgroTab oferece
+              </Heading>
+              <Text as="p" className="muted">
+                Conteúdo, discussões, cotações e comunidade para o agronegócio
+                brasileiro.
+              </Text>
+
+              <div className="feature-grid">
+                {FEATURES.map(({ title, description, icon: Icon, tone }) => (
+                  <article key={title} className={`feature-card tone-${tone}`}>
+                    <span className={`feature-icon tone-${tone}`}>
+                      <Icon size={20} />
+                    </span>
+                    <Heading as="h3" variant="small">
+                      {title}
+                    </Heading>
+                    <Text as="p" className="muted">
+                      {description}
+                    </Text>
+                  </article>
+                ))}
               </div>
-              <div className="plus-icon">+</div>
-              <div className="notifications">🟢 0</div>
-              <div className="notifications">🔴 0</div>
-              <div className="hamburger">☰</div>
-            </div>
-          </div>
-        </div>
-      </header>
-      <main className="main-content">
-        <div className="container">
-          <section className="post-list">
-            {posts.map((post, index) => (
-              <article key={index} className="post-item">
-                {index === 0 && ( // Exibe o anúncio apenas no primeiro item
-                  <a href="#" className="post-ad">
-                    Anúncio: Clique aqui para saber mais!
-                  </a>
-                )}
-                <p className="post-title">
-                  {index + 1}. {post.title}
-                </p>
-                <div className="post-info">
-                  <span className="post-coin">{post.coin}</span>
-                  <span className="post-comments">· {post.comments}</span>
-                  <span className="post-author">· {post.author}</span>
-                  <span className="post-time">· {post.time}</span>
-                </div>
-              </article>
-            ))}
-          </section>
-        </div>
-      </main>
-      <footer className="footer">
-        <div className="container">
-          <p>&copy; 2025 AgroTab - Todos os direitos reservados</p>
-        </div>
-      </footer>
+            </section>
+
+            <section className="section split">
+              <div>
+                <Heading as="h2" variant="medium">
+                  Roadmap
+                </Heading>
+                <Text as="p" className="muted">
+                  Acompanhe o que está sendo construído até o lançamento.
+                </Text>
+              </div>
+
+              <Timeline>
+                {MILESTONES.map((item) => (
+                  <Timeline.Item key={item.title}>
+                    <Timeline.Badge variant={item.variant}>
+                      {item.done ? <ProjectIcon /> : <RocketIcon />}
+                    </Timeline.Badge>
+                    <Timeline.Body>
+                      <Text as="strong">{item.title}</Text>
+                      <Text as="p" className="muted">
+                        {item.body}
+                      </Text>
+                    </Timeline.Body>
+                  </Timeline.Item>
+                ))}
+              </Timeline>
+            </section>
+          </Stack>
+        </PageLayout.Content>
+
+        <PageLayout.Footer divider="line">
+          <Text as="p" className="footer-copy">
+            &copy; {new Date().getFullYear()} AgroTab. Todos os direitos
+            reservados.
+          </Text>
+        </PageLayout.Footer>
+      </PageLayout>
+
       <style jsx>{`
-        * {
+        .page {
+          --br-green: #009c3b;
+          --br-green-soft: #e8f8ee;
+          --br-yellow: #ffdf00;
+          --br-yellow-soft: #fff8cc;
+          --br-blue: #002776;
+          --br-blue-soft: #e8eefc;
+          --br-white: #ffffff;
+          min-height: 100dvh;
+          background: linear-gradient(
+            180deg,
+            var(--br-white) 0%,
+            #f4fbf6 42%,
+            #f7f9ff 100%
+          );
+          color: var(--fgColor-default, #1f2328);
+        }
+
+        .flag-bar {
+          height: 4px;
+          background: linear-gradient(
+            90deg,
+            var(--br-green) 0%,
+            var(--br-green) 33.3%,
+            var(--br-yellow) 33.3%,
+            var(--br-yellow) 66.6%,
+            var(--br-blue) 66.6%,
+            var(--br-blue) 100%
+          );
+        }
+
+        .page :global(.brand-link) {
+          display: inline-flex;
+          align-items: center;
+          line-height: 0;
+        }
+
+        .brand-avatar {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          overflow: hidden;
+          background: var(--br-white, #ffffff);
+          border: 1px solid var(--borderColor-default, #d0d7de);
+          box-shadow: var(
+            --shadow-resting-small,
+            0 1px 0 rgba(31, 35, 40, 0.04)
+          );
+        }
+
+        .brand-logo {
+          width: 78%;
+          height: 78%;
+          object-fit: contain;
+        }
+
+        .hero {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 16px;
+          padding: 24px 0 8px;
+        }
+
+        .page :global(.hero-title) {
+          max-width: 18ch;
+          letter-spacing: -0.02em;
+        }
+
+        .page :global(.hero-lead) {
+          max-width: 62ch;
           margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-
-        body {
-          font-family: "Roboto", sans-serif;
-          background-color: #f7f7f7;
-          color: #333;
+          font-size: 18px;
           line-height: 1.6;
+          color: var(--fgColor-muted, #656d76);
         }
 
-        .header {
-          background-color: rgb(4, 109, 4); /* Azul */
-          color: #fff;
-          padding: 20px 0; /* Aumenta o tamanho do header */
-          border-radius: 15px; /* Deixa o header arredondado */
-          box-shadow: 0px 4px 6px rgb(4, 109, 4); /* Adiciona sombra */
-          min-height: 80px; /* Define uma altura mínima */
-        }
-
-        .header-content {
+        .section {
           display: flex;
-          justify-content: space-between;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .split {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          gap: 24px;
+        }
+
+        .page :global(.muted) {
+          margin: 0;
+          color: var(--fgColor-muted, #656d76);
+        }
+
+        .feature-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 16px;
+          margin-top: 8px;
+        }
+
+        .pillar-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 16px;
+          margin-top: 8px;
+        }
+
+        .feature-card {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          padding: 20px;
+          border: 1px solid var(--borderColor-default, #d0d7de);
+          border-radius: 12px;
+          background: var(--br-white);
+          box-shadow: var(
+            --shadow-resting-small,
+            0 1px 0 rgba(31, 35, 40, 0.04)
+          );
+        }
+
+        .feature-card.tone-green {
+          border-left: 6px solid var(--br-green);
+        }
+
+        .feature-card.tone-yellow {
+          border-left: 6px solid var(--br-yellow);
+        }
+
+        .feature-card.tone-blue {
+          border-left: 6px solid var(--br-blue);
+        }
+
+        .feature-icon {
+          display: inline-flex;
           align-items: center;
+          justify-content: center;
+          width: 36px;
+          height: 36px;
+          border-radius: 8px;
         }
 
-        .header-left {
-          display: flex;
-          align-items: center;
+        .feature-icon.tone-green {
+          color: var(--br-green);
+          background: var(--br-green-soft);
         }
 
-        .logo {
-          font-size: 28px; /* Aumenta o tamanho da fonte */
-          font-weight: bold;
-          margin-right: 30px;
-          margin-left: 40px;
+        .feature-icon.tone-yellow {
+          color: #8a7200;
+          background: var(--br-yellow-soft);
         }
 
-        .nav-items {
-          display: flex;
-          gap: 10px; /* Ajustado para 10px para manter consistência */
+        .feature-icon.tone-blue {
+          color: var(--br-blue);
+          background: var(--br-blue-soft);
         }
 
-        .nav-items li {
-          list-style: none;
-          font-size: 18px;
-          color: #fff;
+        .page :global(.footer-copy) {
+          margin: 0;
+          font-size: 13px;
+          color: var(--fgColor-muted, #656d76);
         }
 
-        .nav-items li:hover {
-          color: #ff7b00;
-        }
+        @media (min-width: 768px) {
+          .pillar-grid {
+            grid-template-columns: 1fr 1fr 1fr;
+          }
 
-        .nav-button {
-          background-color: #daa520; /* Cor dourada */
-          color: #fff;
-          border: none;
-          padding: 10px 20px;
-          font-size: 14px;
-          border-radius: 5px;
-          cursor: pointer;
-        }
+          .feature-grid {
+            grid-template-columns: 1fr 1fr;
+          }
 
-        .nav-button:hover {
-          background-color: #d3ad71; /* Dourado mais escuro ao passar o mouse */
-        }
-
-        .header-right {
-          display: flex;
-          align-items: center;
-          gap: 20px;
-        }
-
-        .search-icon,
-        .plus-icon,
-        .notifications,
-        .hamburger {
-          font-size: 20px;
-          color: #fff;
-          cursor: pointer;
-        }
-
-        .hamburger {
-          margin-left: 20px;
-          margin-right: 40px;
-        }
-
-        .search-icon:hover,
-        .plus-icon:hover,
-        .notifications:hover,
-        .hamburger:hover {
-          color: #ff7b00;
-        }
-
-        .post-list {
-          padding: 40px 0;
-          background-color: #fff;
-        }
-
-        .post-item {
-          padding: 15px;
-          border-bottom: 1px solid #e0e0e0;
-        }
-
-        .post-ad {
-          color: #28a745; /* Verde */
-          font-size: 14px;
-          font-weight: bold;
-          margin-bottom: 5px;
-          text-decoration: none; /* Remove o sublinhado */
-        }
-
-        .post-ad:hover {
-          text-decoration: underline; /* Adiciona sublinhado ao passar o mouse */
-        }
-
-        .post-title {
-          font-size: 18px;
-          font-weight: bold;
-          color: #333;
-          margin-bottom: 10px;
-        }
-
-        .post-info {
-          font-size: 14px;
-          color: #777;
-          display: flex;
-          gap: 10px;
-        }
-
-        .post-coin {
-          color: #ff7b00;
-        }
-
-        .post-comments,
-        .post-author,
-        .post-time {
-          color: #777;
-        }
-
-        .post-time {
-          font-style: italic;
-        }
-
-        .footer {
-          background-color: rgb(0, 74, 30);
-          color: white;
-          text-align: center;
-          padding: 20px 0;
-        }
-
-        .search-container {
-          position: relative;
-          display: flex;
-          align-items: center;
-        }
-
-        .search-input {
-          padding: 10px 40px 10px 15px; /* Espaço para o ícone */
-          border: 1px solid #ccc;
-          border-radius: 5px;
-          font-size: 14px;
-          outline: none;
-        }
-
-        .search-input:focus {
-          border-color: #ff7b00; /* Cor de destaque ao focar */
-        }
-
-        .search-icon {
-          position: absolute;
-          right: 10px; /* Posiciona a lupa dentro do campo */
-          font-size: 16px;
-          color: #777;
-          pointer-events: none; /* Evita interação com o ícone */
+          .split {
+            grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.2fr);
+            align-items: start;
+          }
         }
       `}</style>
-    </>
+    </div>
   );
 }
