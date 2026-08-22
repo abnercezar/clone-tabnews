@@ -124,15 +124,16 @@ export default function Home() {
         <PageLayout.Content>
           <Stack gap="spacious" paddingBlock="normal">
             <Banner
-              variant="info"
-              title="Pré-lançamento"
-              description="Estamos preparando a plataforma. Cadastre-se para ser avisado no lançamento."
+              variant="warning"
+              className="build-banner"
+              title="Aguarde, estamos construindo algo surpreendente"
+              description="Em construção"
             />
 
             <section className="hero">
               <LabelGroup>
                 <Label variant="success">AgroTab</Label>
-                <Label variant="attention">Pré-lançamento</Label>
+                <Label variant="attention">Em construção</Label>
                 <Label variant="accent">Brasil</Label>
               </LabelGroup>
 
@@ -277,7 +278,15 @@ export default function Home() {
           color: var(--fgColor-default, #1f2328);
         }
 
-        .flag-bar {
+        .page :global(.build-banner) {
+          font-size: 16px;
+        }
+
+        .page :global(.build-banner h2) {
+          font-size: clamp(18px, 2.4vw, 22px);
+          font-weight: 700;
+          line-height: 1.35;
+        }
           height: 4px;
           background: linear-gradient(
             90deg,
