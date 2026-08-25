@@ -1,11 +1,10 @@
+import DefaultLayout from "interface/DefaultLayout";
 import {
   Banner,
-  Header,
   Heading,
   Label,
   LabelGroup,
   LinkButton,
-  PageLayout,
   Stack,
   Text,
   Timeline,
@@ -101,163 +100,142 @@ const MILESTONES = [
 
 export default function Home() {
   return (
-    <div className="page">
-      <div className="flag-bar" aria-hidden />
-      <Header>
-        <Header.Item full>
-          <Header.Link href="/" className="brand-link">
-            <span className="brand-avatar">
-              <img
-                src="/logo-agrotab.png"
-                alt="AgroTab"
-                className="brand-logo"
-              />
-            </span>
-          </Header.Link>
-        </Header.Item>
-        <Header.Item>
-          <Header.Link href="/cadastro">Cadastro</Header.Link>
-        </Header.Item>
-      </Header>
+    <DefaultLayout
+      metadata={{
+        description:
+          "Menos ruído, mais fundamentos: um lugar para inteligência coletiva no agronegócio.",
+      }}
+    >
+      <div className="page">
+        <div className="flag-bar" aria-hidden />
 
-      <PageLayout padding="normal" containerWidth="large">
-        <PageLayout.Content>
-          <Stack gap="spacious" paddingBlock="normal">
-            <Banner
-              variant="warning"
-              className="build-banner"
-              title="Aguarde, estamos construindo algo surpreendente"
-              description="Em construção"
-            />
+        <Stack gap="spacious" paddingBlock="normal">
+          <Banner
+            variant="warning"
+            className="build-banner"
+            title="Aguarde, estamos construindo algo surpreendente"
+            description="Em construção"
+          />
 
-            <section className="hero">
-              <LabelGroup>
-                <Label variant="success">AgroTab</Label>
-                <Label variant="attention">Em construção</Label>
-                <Label variant="accent">Brasil</Label>
-              </LabelGroup>
+          <section className="hero">
+            <LabelGroup>
+              <Label variant="success">AgroTab</Label>
+              <Label variant="attention">Em construção</Label>
+              <Label variant="accent">Brasil</Label>
+            </LabelGroup>
 
-              <Heading as="h1" variant="large" className="hero-title">
-                Tecnologia, inovação e ciência para o campo crescer
-              </Heading>
+            <Heading as="h1" variant="large" className="hero-title">
+              Menos ruído, mais fundamentos: um lugar para inteligência coletiva
+              no agronegócio.
+            </Heading>
 
-              <Text as="p" className="hero-lead">
-                Curadoria e troca de conhecimento para o agronegócio: o que a
-                pesquisa, a inovação e o mercado estão dizendo sobre o campo —
-                do laboratório à lavoura.
-              </Text>
+            <Text as="p" className="hero-lead">
+              Tecnologia, inovação e ciência para o campo crescer — o que a
+              pesquisa e o mercado estão dizendo, do laboratório à lavoura.
+            </Text>
 
-              <Stack
-                direction={{ narrow: "vertical", regular: "horizontal" }}
-                gap="condensed"
-                align="center"
+            <Stack
+              direction={{ narrow: "vertical", regular: "horizontal" }}
+              gap="condensed"
+              align="center"
+            >
+              <LinkButton
+                href="/cadastro"
+                variant="primary"
+                size="large"
+                trailingVisual={ArrowRightIcon}
               >
-                <LinkButton
-                  href="/cadastro"
-                  variant="primary"
-                  size="large"
-                  trailingVisual={ArrowRightIcon}
+                Quero ser avisado no lançamento
+              </LinkButton>
+              <LinkButton href="#o-que-vem" variant="default" size="large">
+                Ver o que está por vir
+              </LinkButton>
+            </Stack>
+          </section>
+
+          <section id="pilares" className="section">
+            <Heading as="h2" variant="medium">
+              Tecnologia, inovação e ciência
+            </Heading>
+            <Text as="p" className="muted">
+              Três frentes que sustentam o AgroTab: o que já existe no campo
+              brasileiro, o que ainda está nascendo e o que a pesquisa comprova.
+            </Text>
+
+            <div className="pillar-grid">
+              {PILLARS.map(({ title, description, icon: Icon, tone }) => (
+                <article
+                  key={title}
+                  className={`feature-card pillar tone-${tone}`}
                 >
-                  Quero ser avisado no lançamento
-                </LinkButton>
-                <LinkButton href="#o-que-vem" variant="default" size="large">
-                  Ver o que está por vir
-                </LinkButton>
-              </Stack>
-            </section>
+                  <span className={`feature-icon tone-${tone}`}>
+                    <Icon size={20} />
+                  </span>
+                  <Heading as="h3" variant="small">
+                    {title}
+                  </Heading>
+                  <Text as="p" className="muted">
+                    {description}
+                  </Text>
+                </article>
+              ))}
+            </div>
+          </section>
 
-            <section id="pilares" className="section">
+          <section id="o-que-vem" className="section">
+            <Heading as="h2" variant="medium">
+              O que o AgroTab oferece
+            </Heading>
+            <Text as="p" className="muted">
+              Conteúdo, discussões, cotações e comunidade para o agronegócio
+              brasileiro.
+            </Text>
+
+            <div className="feature-grid">
+              {FEATURES.map(({ title, description, icon: Icon, tone }) => (
+                <article key={title} className={`feature-card tone-${tone}`}>
+                  <span className={`feature-icon tone-${tone}`}>
+                    <Icon size={20} />
+                  </span>
+                  <Heading as="h3" variant="small">
+                    {title}
+                  </Heading>
+                  <Text as="p" className="muted">
+                    {description}
+                  </Text>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="section split">
+            <div>
               <Heading as="h2" variant="medium">
-                Tecnologia, inovação e ciência
+                Roadmap
               </Heading>
               <Text as="p" className="muted">
-                Três frentes que sustentam o AgroTab: o que já existe no campo
-                brasileiro, o que ainda está nascendo e o que a pesquisa
-                comprova.
+                Acompanhe o que está sendo construído até o lançamento.
               </Text>
+            </div>
 
-              <div className="pillar-grid">
-                {PILLARS.map(({ title, description, icon: Icon, tone }) => (
-                  <article
-                    key={title}
-                    className={`feature-card pillar tone-${tone}`}
-                  >
-                    <span className={`feature-icon tone-${tone}`}>
-                      <Icon size={20} />
-                    </span>
-                    <Heading as="h3" variant="small">
-                      {title}
-                    </Heading>
+            <Timeline>
+              {MILESTONES.map((item) => (
+                <Timeline.Item key={item.title}>
+                  <Timeline.Badge variant={item.variant}>
+                    {item.done ? <ProjectIcon /> : <RocketIcon />}
+                  </Timeline.Badge>
+                  <Timeline.Body>
+                    <Text as="strong">{item.title}</Text>
                     <Text as="p" className="muted">
-                      {description}
+                      {item.body}
                     </Text>
-                  </article>
-                ))}
-              </div>
-            </section>
-
-            <section id="o-que-vem" className="section">
-              <Heading as="h2" variant="medium">
-                O que o AgroTab oferece
-              </Heading>
-              <Text as="p" className="muted">
-                Conteúdo, discussões, cotações e comunidade para o agronegócio
-                brasileiro.
-              </Text>
-
-              <div className="feature-grid">
-                {FEATURES.map(({ title, description, icon: Icon, tone }) => (
-                  <article key={title} className={`feature-card tone-${tone}`}>
-                    <span className={`feature-icon tone-${tone}`}>
-                      <Icon size={20} />
-                    </span>
-                    <Heading as="h3" variant="small">
-                      {title}
-                    </Heading>
-                    <Text as="p" className="muted">
-                      {description}
-                    </Text>
-                  </article>
-                ))}
-              </div>
-            </section>
-
-            <section className="section split">
-              <div>
-                <Heading as="h2" variant="medium">
-                  Roadmap
-                </Heading>
-                <Text as="p" className="muted">
-                  Acompanhe o que está sendo construído até o lançamento.
-                </Text>
-              </div>
-
-              <Timeline>
-                {MILESTONES.map((item) => (
-                  <Timeline.Item key={item.title}>
-                    <Timeline.Badge variant={item.variant}>
-                      {item.done ? <ProjectIcon /> : <RocketIcon />}
-                    </Timeline.Badge>
-                    <Timeline.Body>
-                      <Text as="strong">{item.title}</Text>
-                      <Text as="p" className="muted">
-                        {item.body}
-                      </Text>
-                    </Timeline.Body>
-                  </Timeline.Item>
-                ))}
-              </Timeline>
-            </section>
-          </Stack>
-        </PageLayout.Content>
-
-        <PageLayout.Footer divider="line">
-          <Text as="p" className="footer-copy">
-            &copy; {new Date().getFullYear()} AgroTab. Todos os direitos
-            reservados.
-          </Text>
-        </PageLayout.Footer>
-      </PageLayout>
+                  </Timeline.Body>
+                </Timeline.Item>
+              ))}
+            </Timeline>
+          </section>
+        </Stack>
+      </div>
 
       <style jsx>{`
         .page {
@@ -268,26 +246,11 @@ export default function Home() {
           --br-blue: #002776;
           --br-blue-soft: #e8eefc;
           --br-white: #ffffff;
-          min-height: 100dvh;
-          background: linear-gradient(
-            180deg,
-            var(--br-white) 0%,
-            #f4fbf6 42%,
-            #f7f9ff 100%
-          );
-          color: var(--fgColor-default, #1f2328);
         }
 
-        .page :global(.build-banner) {
-          font-size: 16px;
-        }
-
-        .page :global(.build-banner h2) {
-          font-size: clamp(18px, 2.4vw, 22px);
-          font-weight: 700;
-          line-height: 1.35;
-        }
+        .flag-bar {
           height: 4px;
+          margin: 0 -16px 16px;
           background: linear-gradient(
             90deg,
             var(--br-green) 0%,
@@ -299,32 +262,14 @@ export default function Home() {
           );
         }
 
-        .page :global(.brand-link) {
-          display: inline-flex;
-          align-items: center;
-          line-height: 0;
+        .page :global(.build-banner) {
+          font-size: 16px;
         }
 
-        .brand-avatar {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          overflow: hidden;
-          background: var(--br-white, #ffffff);
-          border: 1px solid var(--borderColor-default, #d0d7de);
-          box-shadow: var(
-            --shadow-resting-small,
-            0 1px 0 rgba(31, 35, 40, 0.04)
-          );
-        }
-
-        .brand-logo {
-          width: 78%;
-          height: 78%;
-          object-fit: contain;
+        .page :global(.build-banner h2) {
+          font-size: clamp(18px, 2.4vw, 22px);
+          font-weight: 700;
+          line-height: 1.35;
         }
 
         .hero {
@@ -332,11 +277,11 @@ export default function Home() {
           flex-direction: column;
           align-items: flex-start;
           gap: 16px;
-          padding: 24px 0 8px;
+          padding: 8px 0;
         }
 
         .page :global(.hero-title) {
-          max-width: 18ch;
+          max-width: 22ch;
           letter-spacing: -0.02em;
         }
 
@@ -365,13 +310,7 @@ export default function Home() {
           color: var(--fgColor-muted, #656d76);
         }
 
-        .feature-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 16px;
-          margin-top: 8px;
-        }
-
+        .feature-grid,
         .pillar-grid {
           display: grid;
           grid-template-columns: 1fr;
@@ -429,12 +368,6 @@ export default function Home() {
           background: var(--br-blue-soft);
         }
 
-        .page :global(.footer-copy) {
-          margin: 0;
-          font-size: 13px;
-          color: var(--fgColor-muted, #656d76);
-        }
-
         @media (min-width: 768px) {
           .pillar-grid {
             grid-template-columns: 1fr 1fr 1fr;
@@ -450,6 +383,6 @@ export default function Home() {
           }
         }
       `}</style>
-    </div>
+    </DefaultLayout>
   );
 }
