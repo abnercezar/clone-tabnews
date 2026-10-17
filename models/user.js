@@ -155,6 +155,10 @@ async function update(username, userInputValues) {
 
   const userWithNewValues = { ...currentUser, ...userInputValues };
 
+  // Segurança: o UPDATE sempre usa o id do registro carregado pelo username
+  // autorizado, nunca um id que tenha vindo no corpo da requisição.
+  userWithNewValues.id = currentUser.id;
+
   const updatedUser = await runUpdateQuery(userWithNewValues);
   return updatedUser;
 

@@ -84,7 +84,6 @@ function filterOutput(user, feature, resource) {
         username: resource.username,
         email: resource.email,
         features: resource.features,
-        password: resource.password,
         created_at: resource.created_at,
         updated_at: resource.updated_at,
       };
