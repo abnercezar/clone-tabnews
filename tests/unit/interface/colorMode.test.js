@@ -1,18 +1,22 @@
 import { readColorMode, writeColorMode } from "interface/colorMode";
 
-const memory = new Map();
+const memory = Object.create(null);
 
 function installWindow() {
   global.window = {
     localStorage: {
       getItem(key) {
-        return memory.has(key) ? memory.get(key) : null;
+        return Object.prototype.hasOwnProperty.call(memory, key)
+          ? memory[key]
+          : null;
       },
       setItem(key, value) {
-        memory.set(key, String(value));
+        memory[key] = String(value);
       },
       clear() {
-        memory.clear();
+        for (const key of Object.keys(memory)) {
+          delete memory[key];
+        }
       },
     },
   };
@@ -20,7 +24,9 @@ function installWindow() {
 
 describe("`interface/colorMode.js`", () => {
   afterEach(() => {
-    memory.clear();
+    for (const key of Object.keys(memory)) {
+      delete memory[key];
+    }
     delete global.window;
   });
 

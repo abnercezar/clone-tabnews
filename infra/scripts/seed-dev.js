@@ -262,16 +262,17 @@ async function ensureContent(client, post, owner) {
 
   let slug = slugify(post.title);
   let suffix = 2;
-  while (true) {
+  let slugTaken = true;
+  while (slugTaken) {
     const clash = await client.query(
       `SELECT 1 FROM contents WHERE owner_id = $1 AND slug = $2 LIMIT 1`,
       [owner.id, slug],
     );
-    if (clash.rowCount === 0) {
-      break;
+    slugTaken = clash.rowCount > 0;
+    if (slugTaken) {
+      slug = `${slugify(post.title)}-${suffix}`;
+      suffix += 1;
     }
-    slug = `${slugify(post.title)}-${suffix}`;
-    suffix += 1;
   }
 
   const result = await client.query(
@@ -330,16 +331,17 @@ async function ensureComment(client, comment, owner, parent) {
   const title = comment.body.slice(0, 80);
   let slug = slugify(title) || `comentario-${Date.now()}`;
   let suffix = 2;
-  while (true) {
+  let slugTaken = true;
+  while (slugTaken) {
     const clash = await client.query(
       `SELECT 1 FROM contents WHERE owner_id = $1 AND slug = $2 LIMIT 1`,
       [owner.id, slug],
     );
-    if (clash.rowCount === 0) {
-      break;
+    slugTaken = clash.rowCount > 0;
+    if (slugTaken) {
+      slug = `${slugify(title)}-${suffix}`;
+      suffix += 1;
     }
-    slug = `${slugify(title)}-${suffix}`;
-    suffix += 1;
   }
 
   const result = await client.query(
@@ -527,9 +529,7 @@ async function seedVotes(client, posts, usersByName) {
       [vote.type, post.id, amount, voter.id],
     );
 
-    console.log(
-      `  + voto ${vote.type} de ${vote.from} em "${vote.postTitle}"`,
-    );
+    console.log(`  + voto ${vote.type} de ${vote.from} em "${vote.postTitle}"`);
   }
 }
 

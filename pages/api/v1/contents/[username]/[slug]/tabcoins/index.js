@@ -5,10 +5,7 @@ import content from "models/content.js";
 import event from "models/event.js";
 import balance from "models/balance.js";
 import authorization from "models/authorization.js";
-import {
-  UnprocessableEntityError,
-  ValidationError,
-} from "infra/errors.js";
+import { UnprocessableEntityError, ValidationError } from "infra/errors.js";
 
 async function postHandler(request, response) {
   const userTryingToPost = request.context.user;
@@ -38,16 +35,12 @@ async function postHandler(request, response) {
     contentFound.id,
   );
 
-  const currentContentTabCoinsBalance = await tabcoinsTransaction(
-    null,
-    5,
-    {
-      userTryingToPost,
-      contentFound,
-      transactionType,
-      clientIp: controller.getClientIp(request),
-    },
-  );
+  const currentContentTabCoinsBalance = await tabcoinsTransaction(null, 5, {
+    userTryingToPost,
+    contentFound,
+    transactionType,
+    clientIp: controller.getClientIp(request),
+  });
 
   const secureOutputValues = authorization.filterOutput(
     userTryingToPost,

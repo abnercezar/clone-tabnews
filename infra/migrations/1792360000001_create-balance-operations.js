@@ -237,7 +237,10 @@ exports.up = (pgm) => {
   `,
   );
 
-  pgm.createIndex("content_tabcoin_operations", ["recipient_id", "balance_type"]);
+  pgm.createIndex("content_tabcoin_operations", [
+    "recipient_id",
+    "balance_type",
+  ]);
   pgm.createIndex("user_tabcoin_operations", ["recipient_id"]);
   pgm.createIndex("user_tabcash_operations", ["recipient_id"]);
   pgm.createIndex("ad_tabcash_operations", ["recipient_id", "balance_type"]);
