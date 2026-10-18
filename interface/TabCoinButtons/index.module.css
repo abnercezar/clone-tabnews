@@ -1,0 +1,40 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 2rem;
+}
+
+.creditButton,
+.debitButton {
+  color: var(--fgColor-muted);
+  line-height: 18px;
+}
+
+.balance {
+  position: relative;
+  width: 100%;
+  text-align: center;
+  font-size: var(--text-body-size-small, 12px);
+  font-weight: 600;
+  margin-block: 0.25rem;
+  color: var(--fgColor-accent, #0969da);
+}
+
+.rewardAnchor {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1px;
+  height: 1px;
+  margin-left: -10px;
+  pointer-events: none;
+}
+
+.error {
+  margin-top: 0.25rem;
+  font-size: var(--text-body-size-small, 12px);
+  color: var(--fgColor-danger, #cf222e);
+  text-align: center;
+  max-width: 12rem;
+}

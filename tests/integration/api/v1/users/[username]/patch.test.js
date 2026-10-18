@@ -224,6 +224,11 @@ describe("`PATCH /api/v1/users/[username]`", () => {
           "read:session",
           "update:user",
           "create:content",
+          "read:content",
+          "update:content",
+          "delete:content",
+          "create:sponsorship",
+          "read:sponsorship",
         ],
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
@@ -240,6 +245,34 @@ describe("`PATCH /api/v1/users/[username]`", () => {
       expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
 
       expect(responseBody.updated_at > responseBody.created_at).toBe(true);
+    });
+
+    test("With the same `username` and `email`", async () => {
+      const createdUser = await orchestrator.createUser();
+      const activatedUser = await orchestrator.activateUser(createdUser);
+      const sessionObject = await orchestrator.createSession(activatedUser);
+
+      const response = await fetch(
+        `${webserver.origin}/api/v1/users/${createdUser.username}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Cookie: `session_id=${sessionObject.token}`,
+          },
+          body: JSON.stringify({
+            username: createdUser.username,
+            email: createdUser.email,
+          }),
+        },
+      );
+
+      expect(response.status).toBe(200);
+
+      const responseBody = await response.json();
+      expect(responseBody.username).toBe(createdUser.username);
+      expect(responseBody.email).toBe(createdUser.email);
+      expect(responseBody.password).toBeUndefined();
     });
 
     test("With unique `email`", async () => {
@@ -276,6 +309,11 @@ describe("`PATCH /api/v1/users/[username]`", () => {
           "read:session",
           "update:user",
           "create:content",
+          "read:content",
+          "update:content",
+          "delete:content",
+          "create:sponsorship",
+          "read:sponsorship",
         ],
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
@@ -333,6 +371,11 @@ describe("`PATCH /api/v1/users/[username]`", () => {
           "read:session",
           "update:user",
           "create:content",
+          "read:content",
+          "update:content",
+          "delete:content",
+          "create:sponsorship",
+          "read:sponsorship",
         ],
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
@@ -529,6 +572,11 @@ describe("`PATCH /api/v1/users/[username]`", () => {
         "read:session",
         "update:user",
         "create:content",
+        "read:content",
+        "update:content",
+        "delete:content",
+        "create:sponsorship",
+        "read:sponsorship",
       ]);
     });
 

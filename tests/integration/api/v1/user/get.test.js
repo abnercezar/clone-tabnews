@@ -64,7 +64,14 @@ describe("`GET /api/v1/user`", () => {
           "read:session",
           "update:user",
           "create:content",
+          "read:content",
+          "update:content",
+          "delete:content",
+          "create:sponsorship",
+          "read:sponsorship",
         ],
+        tabcoins: 0,
+        tabcash: 0,
         created_at: createdUser.created_at.toISOString(),
         updated_at: activatedUser.updated_at.toISOString(),
       });
@@ -181,6 +188,8 @@ describe("`GET /api/v1/user`", () => {
         username: "UserWithHalfExpiredSession",
         email: createdUser.email,
         features: activatedUser.features,
+        tabcoins: 0,
+        tabcash: 0,
         created_at: createdUser.created_at.toISOString(),
         updated_at: activatedUser.updated_at.toISOString(),
       });

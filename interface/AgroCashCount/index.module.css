@@ -1,0 +1,15 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+}
+
+.link {
+  color: inherit;
+  text-decoration: none !important;
+}
+
+.link:hover {
+  text-decoration: none !important;
+}
