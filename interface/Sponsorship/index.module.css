@@ -1,0 +1,31 @@
+.slot {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: var(--base-size-16, 16px);
+}
+
+.link {
+  color: var(--fgColor-success, #1a7f37);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.credit {
+  color: var(--fgColor-muted, #656d76);
+  font-size: var(--text-body-size-small, 12px);
+}
+
+.remove {
+  margin-left: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fgColor-danger, #d1242f);
+  font: inherit;
+  cursor: pointer;
+}
