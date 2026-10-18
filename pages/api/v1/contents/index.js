@@ -3,6 +3,7 @@ import controller from "infra/controller.js";
 import database from "infra/database.js";
 import content from "models/content.js";
 import event from "models/event.js";
+import notification from "models/notification.js";
 import authorization from "models/authorization.js";
 
 const TEN_MINUTES = 10 * 60 * 1000;
@@ -73,6 +74,14 @@ async function postHandler(request, response) {
   // O INSERT não traz o username do autor (sem JOIN); como o autor é o próprio
   // usuário autenticado, anexamos a partir dele para a resposta ficar completa.
   created.newContent.owner_username = userTryingToCreate.username;
+
+  // Best-effort após o commit: falha de SMTP não altera o 201 do comentário.
+  if (created.newContent.parent_id) {
+    await notification.notifyParentContentAuthor({
+      newContent: created.newContent,
+      actorUsername: userTryingToCreate.username,
+    });
+  }
 
   const secureOutputValues = authorization.filterOutput(
     userTryingToCreate,

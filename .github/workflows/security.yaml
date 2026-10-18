@@ -1,0 +1,60 @@
+# Auditoria de dependências + checklist estrutural de segurança.
+# Não substitui revisão humana; falha só em critical de produção (omit=dev).
+name: Security
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - feat/agrotab-mvp
+
+jobs:
+  npm-audit:
+    name: npm audit (production)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+
+      - run: npm ci
+
+      # Relatório completo (não falha o job) para visibilidade no log.
+      - name: Report production vulnerabilities
+        run: npm audit --omit=dev --json > npm-audit-prod.json || true
+
+      - name: Summarize audit
+        run: |
+          node -e "
+          const fs = require('fs');
+          const report = JSON.parse(fs.readFileSync('npm-audit-prod.json', 'utf8'));
+          const meta = report.metadata?.vulnerabilities || {};
+          console.log('Produção — vulnerabilidades:', JSON.stringify(meta));
+          const entries = Object.entries(report.vulnerabilities || {});
+          for (const [name, info] of entries) {
+            if (info.severity === 'critical' || info.severity === 'high') {
+              console.log(info.severity.toUpperCase() + ':', name);
+            }
+          }
+          "
+
+      # Gate: apenas critical em dependências de produção.
+      - name: Fail on critical production vulnerabilities
+        run: npm run security:audit
+
+  checklist:
+    name: Security checklist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+
+      - run: npm ci
+
+      - run: npm run security:checklist

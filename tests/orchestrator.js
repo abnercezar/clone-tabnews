@@ -116,9 +116,13 @@ async function deleteAllEmails() {
   });
 }
 
-async function getLastEmail() {
+async function getEmails() {
   const emailListResponse = await fetch(`${emailHttpUrl}/messages`);
-  const emailListBody = await emailListResponse.json();
+  return emailListResponse.json();
+}
+
+async function getLastEmail() {
+  const emailListBody = await getEmails();
   const lastEmailItem = emailListBody.pop();
 
   if (!lastEmailItem) {
@@ -132,6 +136,14 @@ async function getLastEmail() {
   const emailTextBody = await emailTextResponse.text();
 
   lastEmailItem.text = emailTextBody;
+
+  const emailHtmlResponse = await fetch(
+    `${emailHttpUrl}/messages/${lastEmailItem.id}.html`,
+  );
+  if (emailHtmlResponse.ok) {
+    lastEmailItem.html = await emailHtmlResponse.text();
+  }
+
   return lastEmailItem;
 }
 
@@ -159,6 +171,7 @@ const orchestrator = {
   createContent,
   createBalance,
   deleteAllEmails,
+  getEmails,
   getLastEmail,
   extractUUID,
   activateUser,
