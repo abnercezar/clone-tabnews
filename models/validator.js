@@ -14,6 +14,8 @@ const USERNAME_MAX = 30;
 const EMAIL_MAX = 254;
 const PASSWORD_MIN = 8;
 const PASSWORD_MAX = 72;
+const TITLE_MAX = 256;
+const BODY_MAX = 20000;
 
 function username(value) {
   if (typeof value !== "string" || value.length === 0) {
@@ -77,6 +79,38 @@ function password(value) {
   }
 }
 
+function title(value) {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new ValidationError({
+      message: "O título é obrigatório.",
+      action: "Informe um título para a publicação.",
+    });
+  }
+
+  if (value.length > TITLE_MAX) {
+    throw new ValidationError({
+      message: `O título deve ter no máximo ${TITLE_MAX} caracteres.`,
+      action: "Utilize um título mais curto.",
+    });
+  }
+}
+
+function body(value) {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new ValidationError({
+      message: "O conteúdo é obrigatório.",
+      action: "Escreva o conteúdo da publicação.",
+    });
+  }
+
+  if (value.length > BODY_MAX) {
+    throw new ValidationError({
+      message: `O conteúdo deve ter no máximo ${BODY_MAX} caracteres.`,
+      action: "Reduza o tamanho do conteúdo.",
+    });
+  }
+}
+
 function uuid(value) {
   if (typeof value !== "string" || !UUID_REGEX.test(value)) {
     throw new ValidationError({
@@ -90,6 +124,8 @@ const validator = {
   username,
   email,
   password,
+  title,
+  body,
   uuid,
 };
 

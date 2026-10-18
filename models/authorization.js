@@ -13,6 +13,10 @@ const availableFeatures = [
   "create:session",
   "read:session",
 
+  // CONTENT
+  "create:content",
+  "read:content",
+
   // ACTIVATION_TOKEN
   "read:activation_token",
 
@@ -101,6 +105,27 @@ function filterOutput(user, feature, resource) {
         expires_at: resource.expires_at,
       };
     }
+  }
+
+  if (feature === "read:content") {
+    const filterContent = (content) => ({
+      id: content.id,
+      owner_id: content.owner_id,
+      owner_username: content.owner_username,
+      slug: content.slug,
+      title: content.title,
+      body: content.body,
+      status: content.status,
+      published_at: content.published_at,
+      created_at: content.created_at,
+      updated_at: content.updated_at,
+    });
+
+    if (Array.isArray(resource)) {
+      return resource.map(filterContent);
+    }
+
+    return filterContent(resource);
   }
 
   if (feature === "read:activation_token") {

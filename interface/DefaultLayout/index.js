@@ -31,6 +31,10 @@ export default function DefaultLayout({
         </Header.Item>
 
         <Header.Item>
+          <Header.Link href="/conteudos">Conteúdos</Header.Link>
+        </Header.Item>
+
+        <Header.Item>
           <Header.Link href="/login">Login</Header.Link>
         </Header.Item>
 

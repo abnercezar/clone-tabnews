@@ -47,6 +47,32 @@ describe("`models/validator.js`", () => {
     });
   });
 
+  describe("`.title()`", () => {
+    test("accepts a valid title", () => {
+      expect(() => validator.title("Manejo de pragas no milho")).not.toThrow();
+    });
+
+    test("rejects empty, blank, or too long", () => {
+      expect(() => validator.title("")).toThrow(ValidationError);
+      expect(() => validator.title("   ")).toThrow(ValidationError);
+      expect(() => validator.title(undefined)).toThrow(ValidationError);
+      expect(() => validator.title("a".repeat(257))).toThrow(ValidationError);
+    });
+  });
+
+  describe("`.body()`", () => {
+    test("accepts a valid body", () => {
+      expect(() => validator.body("Conteúdo prático.")).not.toThrow();
+    });
+
+    test("rejects empty, blank, or too long", () => {
+      expect(() => validator.body("")).toThrow(ValidationError);
+      expect(() => validator.body("   ")).toThrow(ValidationError);
+      expect(() => validator.body(undefined)).toThrow(ValidationError);
+      expect(() => validator.body("a".repeat(20001))).toThrow(ValidationError);
+    });
+  });
+
   describe("`.uuid()`", () => {
     test("accepts a valid UUID", () => {
       expect(() =>
