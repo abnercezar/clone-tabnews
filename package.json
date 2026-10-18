@@ -66,7 +66,7 @@
     "vis-network": "^9.1.9"
   },
   "devDependencies": {
-    "@commitlint/cli": "19.8.1",
+    "@commitlint/cli": "21.2.3",
     "@commitlint/config-conventional": "19.8.1",
     "@faker-js/faker": "9.9.0",
     "commitizen": "4.3.1",
