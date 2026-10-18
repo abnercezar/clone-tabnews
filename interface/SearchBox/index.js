@@ -1,16 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/router";
 import {
   ActionList,
   Button,
-  FormControl,
   Heading,
   IconButton,
   Overlay,
-  TextInput,
+  Spinner,
 } from "@primer/react";
 import { SearchIcon, XCircleFillIcon } from "@primer/octicons-react";
 import classes from "./index.module.css";
+
+const searchURL =
+  (process.env.NEXT_PUBLIC_SEARCH_URL || "") +
+  (process.env.NEXT_PUBLIC_SEARCH_ID || "");
+
+const SITE_SEARCH_HOST =
+  process.env.NEXT_PUBLIC_WEBSERVER_HOST || "agrotab.com.br";
 
 export default function useSearchBox() {
   const [isOpen, setIsOpen] = useState(false);
@@ -90,32 +95,30 @@ export default function useSearchBox() {
   }
 
   function SearchBoxOverlay() {
-    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(Boolean(searchURL));
     const inputRef = useRef(null);
-    const [query, setQuery] = useState("");
-
-    useEffect(() => {
-      if (!isOpen) {
-        return;
-      }
-      const timer = window.setTimeout(() => inputRef.current?.focus(), 0);
-      return () => window.clearTimeout(timer);
-    }, []);
+    const suggestionsRef = useRef(null);
+    const [fallbackQuery, setFallbackQuery] = useState("");
 
     function handleClose() {
       setIsOpen(false);
-      setQuery("");
+      setFallbackQuery("");
+      if (searchURL) {
+        clearGoogleBox();
+      }
     }
 
-    function handleSubmit(event) {
+    function handleFallbackSubmit(event) {
       event.preventDefault();
-      const term = query.trim();
+      const term = fallbackQuery.trim();
       handleClose();
-      if (term) {
-        router.push(`/?q=${encodeURIComponent(term)}`);
-      } else {
-        router.push("/");
+      if (!term) {
+        return;
       }
+      const url = `https://www.google.com/search?q=${encodeURIComponent(
+        `site:${SITE_SEARCH_HOST} ${term}`,
+      )}`;
+      window.open(url, "_self");
     }
 
     if (!isOpen) {
@@ -125,6 +128,9 @@ export default function useSearchBox() {
     return (
       <Overlay
         returnFocusRef={returnFocusRef}
+        ignoreClickRefs={
+          suggestionsRef.current ? [suggestionsRef, returnFocusRef] : undefined
+        }
         onEscape={handleClose}
         onClickOutside={handleClose}
         aria-labelledby="search-title"
@@ -133,10 +139,12 @@ export default function useSearchBox() {
         anchorSide="inside-center"
         className={classes.overlay}
       >
-        <div className={classes.scrollArea}>
+        <div
+          className={isLoading ? classes.scrollAreaLoading : classes.scrollArea}
+        >
           <div className={classes.header}>
             <Heading as="h2" id="search-title" className={classes.title}>
-              Pesquisar no AgroTab
+              Pesquisar com o Google
             </Heading>
             <IconButton
               icon={XCircleFillIcon}
@@ -146,23 +154,64 @@ export default function useSearchBox() {
             />
           </div>
 
-          <form className={classes.form} onSubmit={handleSubmit}>
-            <FormControl>
-              <FormControl.Label visuallyHidden>Termo</FormControl.Label>
-              <TextInput
-                ref={inputRef}
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Buscar publicações..."
-                leadingVisual={SearchIcon}
-                block
+          {searchURL ? (
+            <GoogleBox
+              onInputRender={(input) => {
+                setIsLoading(false);
+                input.focus();
+                inputRef.current = input;
+                input.setAttribute("enterkeyhint", "search");
+              }}
+              onSuggestionsRender={(suggestionsBox) => {
+                suggestionsRef.current = suggestionsBox;
+              }}
+            />
+          ) : (
+            <form
+              className={classes.fallbackForm}
+              onSubmit={handleFallbackSubmit}
+            >
+              <input
+                className={classes.fallbackInput}
+                autoFocus
+                value={fallbackQuery}
+                onChange={(event) => setFallbackQuery(event.target.value)}
+                placeholder="Buscar em agrotab.com.br…"
+                aria-label="Termo de pesquisa"
               />
-            </FormControl>
-            <Button type="submit" variant="primary" className={classes.submit}>
-              Pesquisar
-            </Button>
-          </form>
+              <Button type="submit" variant="primary">
+                Pesquisar
+              </Button>
+            </form>
+          )}
+
+          {searchURL && (
+            <div className={classes.spinnerWrapper}>
+              {isLoading && <Spinner size="medium" />}
+            </div>
+          )}
         </div>
+
+        {searchURL && (
+          <style jsx global>{`
+            .gsc-input-box {
+              border-radius: 6px !important;
+            }
+            .gsc-search-button-v2 {
+              border-radius: 6px !important;
+              cursor: pointer;
+              padding: 8px !important;
+              background-color: #21262d !important;
+            }
+            .gsc-input {
+              color-scheme: light !important;
+            }
+            .gssb_c {
+              color: #444444;
+              left: max(calc(5vw + 16px), calc(50vw - 434px)) !important;
+            }
+          `}</style>
+        )}
       </Overlay>
     );
   }
@@ -172,5 +221,110 @@ export default function useSearchBox() {
     SearchBarMenuItem,
     SearchBoxOverlay,
     SearchIconButton,
+  };
+}
+
+function GoogleBox({
+  onInputRender = () => {},
+  onSuggestionsRender = () => {},
+}) {
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = searchURL;
+    document.head.append(script);
+
+    const waitInputBox = waitForElm(".gsc-input-box");
+    const waitSuggestionBox = waitForElm(".gssb_c");
+    const waitAboveResultsBox = waitForElm(".gsc-above-wrapper-area");
+
+    (async () => {
+      const inputBox = await waitInputBox.start();
+      const input = inputBox.querySelector("input");
+      onInputRender(input);
+
+      const suggestionBox = await waitSuggestionBox.start();
+      onSuggestionsRender(suggestionBox);
+    })();
+
+    (async () => {
+      const aboveResultsBox = await waitAboveResultsBox.start();
+      aboveResultsBox.style.display = "block";
+    })();
+
+    return () => {
+      waitInputBox.cancel();
+      waitSuggestionBox.cancel();
+      waitAboveResultsBox.cancel();
+    };
+  }, [onInputRender, onSuggestionsRender]);
+
+  return <div className="gcse-search" data-linktarget="_self" />;
+}
+
+function clearGoogleBox() {
+  Array.from(document.getElementsByTagName("script")).forEach((elm) => {
+    if (elm.src?.includes("google.com/")) {
+      elm.remove();
+    }
+  });
+
+  Array.from(document.getElementsByTagName("link")).forEach((elm) => {
+    if (elm.href?.includes("google.com/")) {
+      elm.remove();
+    }
+  });
+
+  Array.from(document.getElementsByTagName("style")).forEach((elm) => {
+    if (
+      elm.href?.includes("google.com/") ||
+      elm.textContent?.includes(".gsc-refinementsGradient") ||
+      elm.textContent?.includes(".gsc-completion-container")
+    ) {
+      elm.remove();
+    }
+  });
+
+  document.querySelectorAll(".gssb_c").forEach((elm) => elm.remove());
+
+  let elm = document.getElementById("private_ratings");
+
+  while (elm) {
+    elm.parentElement?.remove();
+    elm = document.getElementById("private_ratings");
+  }
+}
+
+function waitForElm(selector) {
+  let observer;
+
+  const start = () => {
+    return new Promise((resolve) => {
+      if (document.querySelector(selector)) {
+        return resolve(document.querySelector(selector));
+      }
+
+      observer = new MutationObserver(() => {
+        if (document.querySelector(selector)) {
+          resolve(document.querySelector(selector));
+          observer.disconnect();
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+    });
+  };
+
+  const cancel = () => {
+    if (observer) {
+      observer.disconnect();
+    }
+  };
+
+  return {
+    cancel,
+    start,
   };
 }

@@ -20,8 +20,6 @@ export default function FeedPage() {
   const router = useRouter();
   const author =
     typeof router.query.usuario === "string" ? router.query.usuario : "";
-  const searchQuery =
-    typeof router.query.q === "string" ? router.query.q.trim() : "";
   const [contents, setContents] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const [page, setPage] = useState(1);
@@ -30,7 +28,7 @@ export default function FeedPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [author, searchQuery]);
+  }, [author]);
 
   useEffect(() => {
     if (!router.isReady) {
@@ -42,8 +40,8 @@ export default function FeedPage() {
         const params = new URLSearchParams({
           page: String(page),
           per_page: String(PER_PAGE),
-          // Home = Relevantes; perfil/busca ficam cronológicos.
-          strategy: author || searchQuery ? "new" : "relevant",
+          // Home = Relevantes; perfil fica cronológico.
+          strategy: author ? "new" : "relevant",
         });
         if (author) {
           params.set("username", author);
@@ -56,24 +54,10 @@ export default function FeedPage() {
           return;
         }
         setErrorMessage(null);
-        let items = await response.json();
-        let itemTotal = Number(response.headers.get("X-Total-Count") || 0);
+        setTotal(Number(response.headers.get("X-Total-Count") || 0));
+        setContents(await response.json());
 
-        if (searchQuery) {
-          const needle = searchQuery.toLowerCase();
-          items = items.filter(
-            (item) =>
-              item.title?.toLowerCase().includes(needle) ||
-              item.body?.toLowerCase().includes(needle) ||
-              item.owner_username?.toLowerCase().includes(needle),
-          );
-          itemTotal = items.length;
-        }
-
-        setTotal(itemTotal);
-        setContents(items);
-
-        if (!author && !searchQuery && page === 1) {
+        if (!author && page === 1) {
           const sponsorshipResponse = await fetch("/api/v1/sponsorships");
           if (sponsorshipResponse.ok) {
             const sponsorships = await sponsorshipResponse.json();
@@ -87,7 +71,7 @@ export default function FeedPage() {
       }
     }
     loadFeed();
-  }, [page, author, searchQuery, router.isReady]);
+  }, [page, author, router.isReady]);
 
   return (
     <DefaultLayout
@@ -102,12 +86,6 @@ export default function FeedPage() {
         </Heading>
       )}
 
-      {searchQuery && (
-        <Heading as="h1" variant="medium">
-          Resultados para “{searchQuery}”
-        </Heading>
-      )}
-
       {errorMessage && <Flash variant="danger">{errorMessage}</Flash>}
 
       {!contents && !errorMessage && <Spinner />}
@@ -118,11 +96,9 @@ export default function FeedPage() {
             Nenhum conteúdo encontrado
           </Heading>
           <Text as="p" className={ui.muted}>
-            {searchQuery
-              ? `Nada encontrado para “${searchQuery}”.`
-              : author
-                ? `${author} ainda não publicou.`
-                : "Ainda não há publicações. Seja o primeiro a publicar!"}
+            {author
+              ? `${author} ainda não publicou.`
+              : "Ainda não há publicações. Seja o primeiro a publicar!"}
           </Text>
           <LinkButton href="/publicar" variant="primary">
             Publicar conteúdo
