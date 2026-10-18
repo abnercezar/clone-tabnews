@@ -59,8 +59,18 @@ async function deleteHandler(request, response) {
   return response.status(200).json(secureOutputValues);
 }
 
+const TEN_MINUTES = 10 * 60 * 1000;
+
 export default createRouter()
   .use(controller.injectAnonymousOrUser)
-  .post(controller.canRequest("create:session"), postHandler)
+  .post(
+    controller.rateLimit({
+      name: "create-session",
+      limit: 30,
+      windowMs: TEN_MINUTES,
+    }),
+    controller.canRequest("create:session"),
+    postHandler,
+  )
   .delete(deleteHandler)
   .handler(controller.errorHandlers);
