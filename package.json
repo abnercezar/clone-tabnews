@@ -27,6 +27,8 @@
     "lint:prettier:check": "prettier --check .",
     "lint:prettier:fix": "prettier --write .",
     "lint:eslint:check": "next lint --dir .",
+    "security:audit": "node infra/scripts/security-audit.mjs",
+    "security:checklist": "node infra/scripts/security-checklist.mjs",
     "prepare": "husky",
     "commit": "cz"
   },

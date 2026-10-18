@@ -1,0 +1,17 @@
+{
+  "$schema_comment": "GHSAs critical de produção aceitos temporariamente. Remova ao corrigir (upgrade major ou mitigação).",
+  "critical": [
+    {
+      "id": "GHSA-p293-qw3h-jr36",
+      "package": "next",
+      "reason": "RCE em servidores Windows; AgroTab roda em Linux/WSL/Vercel. Correção exige Next 15+/16 (major).",
+      "expires": "2026-12-31"
+    },
+    {
+      "id": "GHSA-2xp9-vwfh-vxw4",
+      "package": "next",
+      "reason": "RCE via Image Optimization com AVIF. App não usa next/image com remote AVIF; corrigir no upgrade de Next.",
+      "expires": "2026-12-31"
+    }
+  ]
+}
