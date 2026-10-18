@@ -21,7 +21,17 @@ async function postHandler(request, response) {
   return response.status(201).json(secureOutputValues);
 }
 
+const TEN_MINUTES = 10 * 60 * 1000;
+
 export default createRouter()
   .use(controller.injectAnonymousOrUser)
-  .post(controller.canRequest("create:user"), postHandler)
+  .post(
+    controller.rateLimit({
+      name: "create-user",
+      limit: 20,
+      windowMs: TEN_MINUTES,
+    }),
+    controller.canRequest("create:user"),
+    postHandler,
+  )
   .handler(controller.errorHandlers);

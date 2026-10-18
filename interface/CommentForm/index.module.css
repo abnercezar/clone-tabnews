@@ -1,0 +1,41 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--base-size-16, 16px);
+  width: 100%;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--base-size-8, 8px);
+}
+
+.count,
+.countOver {
+  margin-right: auto;
+  font-size: 12px;
+}
+
+.count {
+  color: var(--fgColor-muted, #656d76);
+}
+
+.countOver {
+  color: var(--fgColor-danger, #d1242f);
+}
+
+.publishWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.rewardAnchor {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}

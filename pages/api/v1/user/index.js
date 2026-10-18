@@ -11,7 +11,9 @@ async function getHandler(request, response) {
   const renewedSessionObject = await session.renew(sessionObject.id);
   controller.setSessionCookie(renewedSessionObject.token, response);
 
-  const userFound = await user.findOneById(sessionObject.user_id);
+  const userFound = await user.findOneById(sessionObject.user_id, {
+    withBalances: true,
+  });
 
   response.setHeader(
     "Cache-Control",

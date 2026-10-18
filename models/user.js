@@ -1,17 +1,26 @@
 import database from "infra/database.js";
 import password from "models/password.js";
+import validator from "models/validator.js";
+import balance from "models/balance.js";
 import { ValidationError, NotFoundError } from "infra/errors.js";
 
 // Busca um usuário pelo id
-async function findOneById(id) {
+async function findOneById(id, options = {}) {
   const userFound = await runSelectQuery(id);
+
+  if (options.withBalances) {
+    const balances = await balance.getUserBalances(userFound.id, options);
+    userFound.tabcoins = balances.tabcoins;
+    userFound.tabcash = balances.tabcash;
+  }
 
   return userFound;
 
   // Executa a consulta no banco de dados para buscar o usuário
   async function runSelectQuery(id) {
-    const results = await database.query({
-      text: `
+    const results = await database.query(
+      {
+        text: `
         SELECT
           *
         FROM
@@ -20,8 +29,10 @@ async function findOneById(id) {
           id = $1
         LIMIT 1
         ;`,
-      values: [id],
-    });
+        values: [id],
+      },
+      options,
+    );
 
     if (results.rowCount === 0) {
       // Lança erro se o id não for encontrado
@@ -103,6 +114,10 @@ async function findOneByEmail(email) {
 
 // Cria um novo usuário no banco de dados
 async function create(userInputValues) {
+  validator.username(userInputValues.username);
+  validator.email(userInputValues.email);
+  validator.password(userInputValues.password);
+
   await validateUniqueUsername(userInputValues.username);
   await validateUniqueEmail(userInputValues.email);
   await hashPasswordInObject(userInputValues);
@@ -142,18 +157,25 @@ async function update(username, userInputValues) {
   const currentUser = await findOneByUsername(username);
 
   if ("username" in userInputValues) {
-    await validateUniqueUsername(userInputValues.username);
+    validator.username(userInputValues.username);
+    await validateUniqueUsername(userInputValues.username, currentUser.id);
   }
 
   if ("email" in userInputValues) {
-    await validateUniqueEmail(userInputValues.email);
+    validator.email(userInputValues.email);
+    await validateUniqueEmail(userInputValues.email, currentUser.id);
   }
 
   if ("password" in userInputValues) {
+    validator.password(userInputValues.password);
     await hashPasswordInObject(userInputValues);
   }
 
   const userWithNewValues = { ...currentUser, ...userInputValues };
+
+  // Segurança: o UPDATE sempre usa o id do registro carregado pelo username
+  // autorizado, nunca um id que tenha vindo no corpo da requisição.
+  userWithNewValues.id = currentUser.id;
 
   const updatedUser = await runUpdateQuery(userWithNewValues);
   return updatedUser;
@@ -186,7 +208,15 @@ async function update(username, userInputValues) {
 }
 
 // Valida se o username já está em uso
-async function validateUniqueUsername(username) {
+async function validateUniqueUsername(username, ignoredUserId) {
+  const values = [username];
+  let excludeCurrentUser = "";
+
+  if (ignoredUserId) {
+    values.push(ignoredUserId);
+    excludeCurrentUser = "AND id <> $2";
+  }
+
   const results = await database.query({
     text: `
       SELECT
@@ -195,8 +225,9 @@ async function validateUniqueUsername(username) {
         users
       WHERE
         LOWER(username) = LOWER($1)
+        ${excludeCurrentUser}
       ;`,
-    values: [username],
+    values,
   });
 
   if (results.rowCount > 0) {
@@ -208,7 +239,15 @@ async function validateUniqueUsername(username) {
 }
 
 // Valida se o email já está em uso
-async function validateUniqueEmail(email) {
+async function validateUniqueEmail(email, ignoredUserId) {
+  const values = [email];
+  let excludeCurrentUser = "";
+
+  if (ignoredUserId) {
+    values.push(ignoredUserId);
+    excludeCurrentUser = "AND id <> $2";
+  }
+
   const results = await database.query({
     text: `
         SELECT
@@ -217,8 +256,9 @@ async function validateUniqueEmail(email) {
           users
         WHERE
           LOWER(email) = LOWER($1)
+          ${excludeCurrentUser}
         ;`,
-    values: [email],
+    values,
   });
 
   if (results.rowCount > 0) {

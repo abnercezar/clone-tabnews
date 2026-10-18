@@ -6,6 +6,8 @@ import migrator from "models/migrator.js";
 import user from "models/user.js";
 import activation from "models/activation.js";
 import session from "models/session.js";
+import content from "models/content.js";
+import balance from "models/balance.js";
 
 const emailHttpUrl = `http://${process.env.EMAIL_HTTP_HOST}:${process.env.EMAIL_HTTP_PORT}`;
 
@@ -81,6 +83,33 @@ async function createSession(user) {
   return await session.create(user.id);
 }
 
+// Cria um conteúdo de teste
+async function createContent(contentObject) {
+  return await content.create({
+    owner_id: contentObject.owner_id,
+    title: contentObject?.title || faker.lorem.sentence(),
+    body: contentObject?.body || faker.lorem.paragraphs(2),
+    parent_id: contentObject?.parent_id,
+    type: contentObject?.type,
+  });
+}
+
+async function createBalance({
+  balanceType,
+  recipientId,
+  amount,
+  originatorType = "orchestrator",
+  originatorId,
+}) {
+  return await balance.create({
+    balanceType,
+    recipientId,
+    amount,
+    originatorType,
+    originatorId: originatorId || recipientId,
+  });
+}
+
 async function deleteAllEmails() {
   await fetch(`${emailHttpUrl}/messages`, {
     method: "DELETE",
@@ -127,6 +156,8 @@ const orchestrator = {
   runPendingMigrations,
   createUser,
   createSession,
+  createContent,
+  createBalance,
   deleteAllEmails,
   getLastEmail,
   extractUUID,

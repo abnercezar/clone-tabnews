@@ -142,6 +142,12 @@ describe("`PATCH /api/v1/activations/[token_id]`", () => {
       "create:session",
       "read:session",
       "update:user",
+      "create:content",
+      "read:content",
+      "update:content",
+      "delete:content",
+      "create:sponsorship",
+      "read:sponsorship",
     ]);
   });
 
@@ -200,6 +206,23 @@ describe("`PATCH /api/v1/activations/[token_id]`", () => {
           'Verifique se o seu usuário possui a feature "read:activation_token".',
         status_code: 403,
       });
+    });
+  });
+
+  describe("Malformed token", () => {
+    test("With a token id that is not a valid UUID", async () => {
+      const response = await fetch(
+        `${webserver.origin}/api/v1/activations/nao-e-uuid`,
+        {
+          method: "PATCH",
+        },
+      );
+
+      expect(response.status).toBe(400);
+
+      const responseBody = await response.json();
+      expect(responseBody.name).toBe("ValidationError");
+      expect(responseBody.status_code).toBe(400);
     });
   });
 });

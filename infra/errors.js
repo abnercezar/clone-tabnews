@@ -134,6 +134,46 @@ export class ForbiddenError extends Error {
   }
 }
 
+export class UnprocessableEntityError extends Error {
+  constructor({ cause, message, action }) {
+    super(message || "Não foi possível processar esta operação.", {
+      cause,
+    });
+    this.name = "UnprocessableEntityError";
+    this.action = action || "Verifique os dados enviados e tente novamente.";
+    this.statusCode = 422;
+  }
+
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      action: this.action,
+      status_code: this.statusCode,
+    };
+  }
+}
+
+export class TooManyRequestsError extends Error {
+  constructor({ cause, message, action }) {
+    super(message || "Muitas tentativas em pouco tempo.", {
+      cause,
+    });
+    this.name = "TooManyRequestsError";
+    this.action = action || "Aguarde alguns minutos e tente novamente.";
+    this.statusCode = 429;
+  }
+
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      action: this.action,
+      status_code: this.statusCode,
+    };
+  }
+}
+
 // Classe de erro para erros internos do servidor
 export class MethodNotAllowedError extends Error {
   constructor() {

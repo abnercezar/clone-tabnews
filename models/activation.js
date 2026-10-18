@@ -124,6 +124,12 @@ async function activateUserByUserId(userId) {
     "create:session",
     "read:session",
     "update:user",
+    "create:content",
+    "read:content",
+    "update:content",
+    "delete:content",
+    "create:sponsorship",
+    "read:sponsorship",
   ]);
   return activatedUser;
 }

@@ -219,11 +219,23 @@ describe("`PATCH /api/v1/users/[username]`", () => {
         id: responseBody.id,
         username: "uniqueUser2",
         email: createdUser.email,
-        features: ["create:session", "read:session", "update:user"],
-        password: responseBody.password,
+        features: [
+          "create:session",
+          "read:session",
+          "update:user",
+          "create:content",
+          "read:content",
+          "update:content",
+          "delete:content",
+          "create:sponsorship",
+          "read:sponsorship",
+        ],
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
+
+      // O hash da senha nunca deve ser devolvido na resposta
+      expect(responseBody.password).toBeUndefined();
 
       // Valida se o ID gerado é um UUID versão 4
       expect(uuidVersion(responseBody.id)).toBe(4);
@@ -233,6 +245,34 @@ describe("`PATCH /api/v1/users/[username]`", () => {
       expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
 
       expect(responseBody.updated_at > responseBody.created_at).toBe(true);
+    });
+
+    test("With the same `username` and `email`", async () => {
+      const createdUser = await orchestrator.createUser();
+      const activatedUser = await orchestrator.activateUser(createdUser);
+      const sessionObject = await orchestrator.createSession(activatedUser);
+
+      const response = await fetch(
+        `${webserver.origin}/api/v1/users/${createdUser.username}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Cookie: `session_id=${sessionObject.token}`,
+          },
+          body: JSON.stringify({
+            username: createdUser.username,
+            email: createdUser.email,
+          }),
+        },
+      );
+
+      expect(response.status).toBe(200);
+
+      const responseBody = await response.json();
+      expect(responseBody.username).toBe(createdUser.username);
+      expect(responseBody.email).toBe(createdUser.email);
+      expect(responseBody.password).toBeUndefined();
     });
 
     test("With unique `email`", async () => {
@@ -264,11 +304,23 @@ describe("`PATCH /api/v1/users/[username]`", () => {
         id: responseBody.id,
         username: createdUser.username,
         email: "uniqueEmail2@gmail.com",
-        features: ["create:session", "read:session", "update:user"],
-        password: responseBody.password,
+        features: [
+          "create:session",
+          "read:session",
+          "update:user",
+          "create:content",
+          "read:content",
+          "update:content",
+          "delete:content",
+          "create:sponsorship",
+          "read:sponsorship",
+        ],
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
+
+      // O hash da senha nunca deve ser devolvido na resposta
+      expect(responseBody.password).toBeUndefined();
 
       // Valida se o ID gerado é um UUID versão 4
       expect(uuidVersion(responseBody.id)).toBe(4);
@@ -314,11 +366,23 @@ describe("`PATCH /api/v1/users/[username]`", () => {
         id: responseBody.id,
         username: createdUser.username,
         email: createdUser.email,
-        features: ["create:session", "read:session", "update:user"],
-        password: responseBody.password,
+        features: [
+          "create:session",
+          "read:session",
+          "update:user",
+          "create:content",
+          "read:content",
+          "update:content",
+          "delete:content",
+          "create:sponsorship",
+          "read:sponsorship",
+        ],
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
+
+      // O hash da senha nunca deve ser devolvido na resposta
+      expect(responseBody.password).toBeUndefined();
 
       // Valida se o ID gerado é um UUID versão 4
       expect(uuidVersion(responseBody.id)).toBe(4);
@@ -386,10 +450,12 @@ describe("`PATCH /api/v1/users/[username]`", () => {
         username: "AlteradoPorPrivilegiado",
         email: defaultUser.email,
         features: defaultUser.features,
-        password: responseBody.password,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
+
+      // O hash da senha nunca deve ser devolvido na resposta
+      expect(responseBody.password).toBeUndefined();
 
       // Valida se o ID gerado é um UUID versão 4
       expect(uuidVersion(responseBody.id)).toBe(4);
@@ -399,6 +465,151 @@ describe("`PATCH /api/v1/users/[username]`", () => {
       expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
 
       expect(responseBody.updated_at > responseBody.created_at).toBe(true);
+    });
+  });
+
+  describe("Security (P0 regression)", () => {
+    test("Does not update another user via `id` in the body", async () => {
+      // Atacante: usuário ativado com sessão válida
+      const attacker = await orchestrator.createUser({
+        username: "attacker",
+        email: "attacker@gmail.com",
+        password: "attackerPassword",
+      });
+      const activatedAttacker = await orchestrator.activateUser(attacker);
+      const attackerSession =
+        await orchestrator.createSession(activatedAttacker);
+
+      // Vítima: outro usuário qualquer
+      const victim = await orchestrator.createUser({
+        username: "victim",
+        email: "victim@gmail.com",
+        password: "victimPassword",
+      });
+
+      // Atacante faz PATCH no próprio username, mas injeta o id da vítima
+      const response = await fetch(
+        `${webserver.origin}/api/v1/users/${attacker.username}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Cookie: `session_id=${attackerSession.token}`,
+          },
+          body: JSON.stringify({
+            id: victim.id,
+            username: "takenOver",
+            email: "takenover@gmail.com",
+            password: "hackedPassword",
+          }),
+        },
+      );
+
+      // Campo não permitido (`id`) deve ser rejeitado com 400
+      expect(response.status).toBe(400);
+
+      const responseBody = await response.json();
+      expect(responseBody).toEqual({
+        name: "ValidationError",
+        message: "Os campos a seguir não são permitidos nesta operação: id.",
+        action: "Envie apenas os campos permitidos: username, email, password.",
+        status_code: 400,
+      });
+
+      // A vítima permanece intacta
+      const victimInDatabase = await user.findOneByUsername("victim");
+      expect(victimInDatabase.username).toBe("victim");
+      expect(victimInDatabase.email).toBe("victim@gmail.com");
+      const victimPasswordUnchanged = await password.compare(
+        "victimPassword",
+        victimInDatabase.password,
+      );
+      expect(victimPasswordUnchanged).toBe(true);
+
+      // O atacante também não teve seu registro alterado
+      const attackerInDatabase = await user.findOneByUsername("attacker");
+      expect(attackerInDatabase.email).toBe("attacker@gmail.com");
+    });
+
+    test("Rejects unknown fields with 400", async () => {
+      const createdUser = await orchestrator.createUser({
+        username: "extraFieldsUser",
+      });
+      const activatedUser = await orchestrator.activateUser(createdUser);
+      const sessionObject = await orchestrator.createSession(activatedUser);
+
+      const response = await fetch(
+        `${webserver.origin}/api/v1/users/${createdUser.username}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Cookie: `session_id=${sessionObject.token}`,
+          },
+          body: JSON.stringify({
+            username: "novoNome",
+            features: ["update:user:others"],
+          }),
+        },
+      );
+
+      expect(response.status).toBe(400);
+
+      const responseBody = await response.json();
+      expect(responseBody).toEqual({
+        name: "ValidationError",
+        message:
+          "Os campos a seguir não são permitidos nesta operação: features.",
+        action: "Envie apenas os campos permitidos: username, email, password.",
+        status_code: 400,
+      });
+
+      // Nenhuma alteração deve ter sido aplicada (nem o username permitido)
+      const userInDatabase = await user.findOneByUsername("extraFieldsUser");
+      expect(userInDatabase.username).toBe("extraFieldsUser");
+      expect(userInDatabase.features).toEqual([
+        "create:session",
+        "read:session",
+        "update:user",
+        "create:content",
+        "read:content",
+        "update:content",
+        "delete:content",
+        "create:sponsorship",
+        "read:sponsorship",
+      ]);
+    });
+
+    test("Legitimate update with only allowed fields still works", async () => {
+      const createdUser = await orchestrator.createUser({
+        username: "legitUser",
+      });
+      const activatedUser = await orchestrator.activateUser(createdUser);
+      const sessionObject = await orchestrator.createSession(activatedUser);
+
+      const response = await fetch(
+        `${webserver.origin}/api/v1/users/${createdUser.username}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Cookie: `session_id=${sessionObject.token}`,
+          },
+          body: JSON.stringify({
+            username: "legitUserRenamed",
+          }),
+        },
+      );
+
+      expect(response.status).toBe(200);
+
+      const responseBody = await response.json();
+      expect(responseBody.username).toBe("legitUserRenamed");
+      expect(responseBody.id).toBe(createdUser.id);
+      expect(responseBody.password).toBeUndefined();
+
+      const userInDatabase = await user.findOneByUsername("legitUserRenamed");
+      expect(userInDatabase.id).toBe(createdUser.id);
     });
   });
 });
