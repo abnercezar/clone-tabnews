@@ -184,11 +184,12 @@ export default function Home() {
 
           <section id="o-que-vem" className="section">
             <Heading as="h2" variant="medium">
-              O que o AgroTab oferece
+              O que vem por aí
             </Heading>
             <Text as="p" className="muted">
               Conteúdo, discussões, cotações e comunidade para o agronegócio
-              brasileiro.
+              brasileiro. O feed de conteúdo já está aberto. Discussões e
+              cotações ainda estão em construção.
             </Text>
 
             <div className="feature-grid">
