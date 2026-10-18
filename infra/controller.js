@@ -99,6 +99,7 @@ function injectAnonymousUser(request) {
       "create:user",
       "read:content",
       "read:sponsorship",
+      "read:status",
     ],
   };
 

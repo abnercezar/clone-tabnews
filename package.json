@@ -60,8 +60,11 @@
     "react-confetti": "^6.1.0",
     "react-dom": "18.3.1",
     "react-rewards": "^2.1.0",
+    "recharts": "^2.15.4",
     "swr": "2.4.1",
-    "uuid": "11.1.1"
+    "uuid": "11.1.1",
+    "vis-data": "^7.1.9",
+    "vis-network": "^9.1.9"
   },
   "devDependencies": {
     "@commitlint/cli": "19.8.1",

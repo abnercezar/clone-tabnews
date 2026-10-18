@@ -1,0 +1,27 @@
+.Wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.Grid {
+  display: grid;
+}
+
+.Truncate {
+  max-width: 170px;
+}
+
+.ContributorsLink {
+  display: inline-block;
+  max-width: 100%;
+}
+
+.ContributorsImage {
+  display: block;
+  max-width: min(100%, 560px);
+  max-height: 96px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
