@@ -1,13 +1,28 @@
 import "@primer/primitives/dist/css/functional/themes/light.css";
+import "@primer/primitives/dist/css/functional/themes/dark.css";
+import "interface/CommentEditor/bytemd-overrides.css";
 
-import { ThemeProvider, BaseStyles } from "@primer/react";
+import { useLayoutEffect } from "react";
+import { BaseStyles, ThemeProvider, useTheme } from "@primer/react";
+import { readColorMode } from "interface/colorMode";
 
 export default function App({ Component, pageProps }) {
   return (
-    <ThemeProvider>
+    <ThemeProvider colorMode="auto" dayScheme="light" nightScheme="dark">
+      <ColorModeRestore />
       <BaseStyles>
         <Component {...pageProps} />
       </BaseStyles>
     </ThemeProvider>
   );
+}
+
+function ColorModeRestore() {
+  const { setColorMode } = useTheme();
+
+  useLayoutEffect(() => {
+    setColorMode(readColorMode());
+  }, [setColorMode]);
+
+  return null;
 }

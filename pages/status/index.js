@@ -1,64 +1,63 @@
 import useSWR from "swr";
+import { Flash, Heading, Stack, Text } from "@primer/react";
+import DefaultLayout from "interface/DefaultLayout";
+import ui from "interface/styles.module.css";
 
 // Função para buscar dados da API
 async function fetchAPI(key) {
   const response = await fetch(key);
-  const responseBody = await response.json();
-  return responseBody;
+
+  if (!response.ok) {
+    throw new Error(`Status ${response.status}`);
+  }
+
+  return response.json();
 }
 
 // Componente principal da página de status
 export default function StatusPage() {
-  return (
-    <>
-      <h1>Status</h1>
-      <UpdatedAt />
-      <DatabaseStatus />
-    </>
-  );
-}
-
-// Componente para exibir a última atualização
-function UpdatedAt() {
-  const { isLoading, data } = useSWR("/api/v1/status", fetchAPI, {
+  const { isLoading, data, error } = useSWR("/api/v1/status", fetchAPI, {
     refreshInterval: 2000,
   });
 
-  let updatedAtText = "Carregando...";
-
-  if (!isLoading && data) {
-    updatedAtText = new Date(data.updated_at).toLocaleString("pt-BR");
-  }
-
-  return <div>Última atualização: {updatedAtText}</div>;
-}
-
-// Componente para exibir o status do banco de dados
-function DatabaseStatus() {
-  const { isLoading, data } = useSWR("/api/v1/status", fetchAPI, {
-    refreshInterval: 2000,
-  });
-
-  let databaseStatusInformation = "Carregando...";
-
-  if (!isLoading && data) {
-    databaseStatusInformation = (
-      <>
-        <div>Versão: {data.dependencies.database.version}</div>
-        <div>
-          Conexões abertas: {data.dependencies.database.opened_connections}
-        </div>
-        <div>
-          Conexões máximas: {data.dependencies.database.max_connections}
-        </div>
-      </>
-    );
-  }
-
   return (
-    <>
-      <h2>Database</h2>
-      <div>{databaseStatusInformation}</div>
-    </>
+    <DefaultLayout metadata={{ title: "Status" }}>
+      <Stack gap="normal">
+        <Heading as="h1">Status</Heading>
+
+        {error && (
+          <Flash variant="danger">
+            Não foi possível consultar o status do sistema.
+          </Flash>
+        )}
+
+        {isLoading && <Text as="p">Carregando...</Text>}
+
+        {data && (
+          <>
+            <Text className={ui.muted}>
+              Última atualização:{" "}
+              {new Date(data.updated_at).toLocaleString("pt-BR")}
+            </Text>
+
+            <Stack gap="condensed">
+              <Heading as="h2" variant="small">
+                Banco de dados
+              </Heading>
+              {data.dependencies.database.version && (
+                <Text>Versão: {data.dependencies.database.version}</Text>
+              )}
+              <Text>
+                Conexões abertas:{" "}
+                {data.dependencies.database.opened_connections}
+              </Text>
+              <Text>
+                Conexões máximas: {data.dependencies.database.max_connections}
+              </Text>
+            </Stack>
+          </>
+        )}
+      </Stack>
+    </DefaultLayout>
   );
 }

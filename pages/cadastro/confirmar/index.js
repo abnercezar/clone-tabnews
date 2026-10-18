@@ -12,7 +12,7 @@ export default function ConfirmRegisterPage() {
       <Banner
         variant="warning"
         title="Falta só uma etapa!"
-        description="Abra o email enviado pelo AgroTab e clique no link para ativar sua conta."
+        description="Abra o email enviado pelo AgroTab e clique no link para ativar sua conta. O link vale por 15 minutos. Se não encontrar o email, confira a caixa de spam."
       />
     </DefaultLayout>
   );

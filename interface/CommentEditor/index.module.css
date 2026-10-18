@@ -1,0 +1,120 @@
+.editor {
+  position: relative;
+  width: 100%;
+}
+
+.editor :global(.bytemd) {
+  display: inline-block;
+  width: 100%;
+  padding: 1px;
+  box-sizing: border-box;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 6px;
+  border-color: var(--borderColor-default, #d0d7de);
+  outline-style: none;
+  outline-offset: -1px;
+  background-color: var(--bgColor-default, #ffffff);
+  color: var(--fgColor-default, #1f2328);
+}
+
+.editor :global(.bytemd:focus-within) {
+  border-color: var(--fgColor-accent, #0969da);
+  outline: 2px solid var(--fgColor-accent, #0969da);
+}
+
+.isInvalid :global(.bytemd) {
+  border-color: var(--borderColor-danger-emphasis, #cf222e);
+}
+
+.isInvalid :global(.bytemd:focus-within) {
+  border-color: var(--borderColor-danger-emphasis, #cf222e);
+  outline: 2px solid var(--borderColor-danger-emphasis, #cf222e);
+}
+
+/* Write-only inicial (TabNews): preview oculto até o usuário escolher um painel. */
+.isWriteOnly :global(.bytemd-body) {
+  display: flex;
+}
+
+.isWriteOnly :global(.bytemd-editor) {
+  flex: 1;
+}
+
+.isWriteOnly :global(.bytemd-sidebar) {
+  flex: none;
+}
+
+.isWriteOnly :global(.bytemd-preview) {
+  display: none;
+}
+
+.editor :global(.bytemd-body) {
+  height: var(--bytemd-body-height, 30vh);
+  min-height: 150px;
+  overflow: auto;
+  resize: vertical;
+  border-radius: 6px;
+  background-color: var(--bgColor-default, #ffffff);
+}
+
+.editor :global(.bytemd-toolbar) {
+  border-bottom: 1px solid var(--borderColor-default, #d0d7de);
+  background-color: var(--bgColor-muted, #f6f8fa);
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  padding: 4px 12px;
+  user-select: none;
+  overflow: hidden;
+}
+
+.editor :global(.bytemd-toolbar-icon) {
+  color: var(--fgColor-default, #1f2328);
+}
+
+.editor :global(.bytemd-toolbar-icon:hover) {
+  background-color: var(--bgColor-neutral-muted, #e6eaef);
+}
+
+/* EditorStyles do TabNews em mode=split: esconde só o 6º (Código fonte / GitHub). */
+.editor
+  :global(.bytemd-toolbar-icon.bytemd-tippy.bytemd-tippy-right:nth-of-type(6)) {
+  display: none;
+}
+
+.editor :global(.bytemd-editor),
+.editor :global(.bytemd-preview),
+.editor :global(.CodeMirror),
+.editor :global(.CodeMirror-scroll) {
+  background-color: var(--bgColor-default, #ffffff);
+  color: var(--fgColor-default, #1f2328);
+}
+
+.editor :global(.bytemd-status) {
+  display: none;
+}
+
+.editor :global(.bytemd-fullscreen.bytemd) {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  border: none;
+  height: 100vh !important;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor :global(.bytemd-fullscreen.bytemd:focus-within) {
+  outline-style: none;
+}
+
+.editor :global(.bytemd-fullscreen .bytemd-body) {
+  flex: 1;
+  resize: none;
+  border-radius: 0;
+}
+
+.editor :global(.bytemd-fullscreen .bytemd-toolbar) {
+  border-radius: 0;
+}

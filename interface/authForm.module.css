@@ -1,0 +1,29 @@
+.heading {
+  margin-bottom: var(--base-size-16, 16px);
+}
+
+.form {
+  width: 100%;
+}
+
+.field {
+  margin-bottom: var(--base-size-16, 16px);
+}
+
+.flash {
+  margin-top: var(--base-size-16, 16px);
+}
+
+.submit {
+  width: 100%;
+  margin-top: var(--base-size-16, 16px);
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: var(--base-size-40, 40px);
+  text-align: center;
+  font-size: var(--text-body-size-medium, 14px);
+}

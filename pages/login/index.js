@@ -3,11 +3,13 @@ import {
   Button,
   FormControl,
   TextInput,
-  Stack,
   Heading,
   Flash,
+  Link,
 } from "@primer/react";
 import DefaultLayout from "interface/DefaultLayout";
+import PasswordInput from "interface/PasswordInput";
+import classes from "interface/authForm.module.css";
 
 export default function LoginPage() {
   return (
@@ -18,10 +20,10 @@ export default function LoginPage() {
         description: "Acesse sua conta no AgroTab.",
       }}
     >
-      <Stack gap="spacious">
-        <Heading as="h1">Login</Heading>
-        <LoginForm />
-      </Stack>
+      <Heading as="h1" className={classes.heading}>
+        Login
+      </Heading>
+      <LoginForm />
     </DefaultLayout>
   );
 }
@@ -52,6 +54,13 @@ function LoginForm() {
         return;
       }
 
+      if (response.status === 403) {
+        setErrorMessage(
+          "Sua conta ainda não foi ativada. Abra o email de ativação enviado pelo AgroTab.",
+        );
+        return;
+      }
+
       const responseBody = await response.json();
       setErrorMessage(
         responseBody.message ||
@@ -59,7 +68,7 @@ function LoginForm() {
       );
     } catch {
       setErrorMessage(
-        "Não foi possível conectar ao servidor. Tente novamente.",
+        "Não foi possível se conectar ao AgroTab. Por favor, verifique sua conexão.",
       );
     } finally {
       setIsSubmitting(false);
@@ -67,47 +76,60 @@ function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Stack gap="normal">
-        {errorMessage && (
-          <Flash variant="danger" role="alert">
-            {errorMessage}
-          </Flash>
-        )}
+    <form className={classes.form} onSubmit={handleSubmit}>
+      <FormControl required className={classes.field}>
+        <FormControl.Label>Seu Email</FormControl.Label>
+        <TextInput
+          type="email"
+          autoComplete="email"
+          placeholder="Digite seu email"
+          autoFocus
+          value={email}
+          onChange={(event) => {
+            setEmail(event.target.value);
+          }}
+          size="large"
+          block
+        />
+      </FormControl>
 
-        <FormControl>
-          <FormControl.Label>Email</FormControl.Label>
-          <TextInput
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(event) => {
-              setEmail(event.target.value);
-            }}
-            block
-          />
-        </FormControl>
-        <FormControl>
-          <FormControl.Label>Senha</FormControl.Label>
-          <TextInput
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(event) => {
-              setPassword(event.target.value);
-            }}
-            block
-          />
-        </FormControl>
+      <FormControl id="password" required className={classes.field}>
+        <FormControl.Label>Senha</FormControl.Label>
+        <PasswordInput
+          id="password"
+          autoComplete="current-password"
+          placeholder="Digite sua senha"
+          value={password}
+          onChange={(event) => {
+            setPassword(event.target.value);
+          }}
+          size="large"
+          block
+        />
+      </FormControl>
 
-        <Stack.Item>
-          <Button type="submit" variant="primary" disabled={isSubmitting}>
-            {isSubmitting ? "Entrando..." : "Entrar"}
-          </Button>
-        </Stack.Item>
-      </Stack>
+      {errorMessage && (
+        <Flash variant="danger" role="alert" className={classes.flash}>
+          {errorMessage}
+        </Flash>
+      )}
+
+      <Button
+        type="submit"
+        variant="primary"
+        size="large"
+        className={classes.submit}
+        disabled={isSubmitting}
+        block
+      >
+        {isSubmitting ? "Entrando..." : "Login"}
+      </Button>
+
+      <div className={classes.links}>
+        <span>
+          Novo no AgroTab? <Link href="/cadastro">Crie sua conta aqui.</Link>
+        </span>
+      </div>
     </form>
   );
 }

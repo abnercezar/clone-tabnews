@@ -1,0 +1,50 @@
+/*
+ * Estilos tippy do ByteMD alinhados ao TabNews (packages/ui Markdown editor.css).
+ * Tippy anexa no body — CSS global importado em pages/_app.js.
+ */
+
+.tippy-box[data-animation="fade"][data-state="hidden"] {
+  opacity: 0;
+}
+
+[data-tippy-root] {
+  max-width: calc(100vw - 10px);
+}
+
+.tippy-box {
+  background-color: var(--tooltip-bgColor, #24292f);
+  color: var(--tooltip-fgColor, #ffffff);
+  position: relative;
+  border-radius: var(--borderRadius-medium, 6px);
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: normal;
+  outline: 0;
+  transition-property: transform, visibility, opacity;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+.tippy-content {
+  position: relative;
+  margin: -8px 0;
+  padding: 5px 9px;
+  z-index: 1;
+}
+
+.tippy-box[data-theme~="light-border"] {
+  background-color: var(--bgColor-default, #ffffff);
+  color: var(--fgColor-default, #1f2328);
+  box-shadow: var(--shadow-floating-small, 0 1px 3px rgba(0, 0, 0, 0.12));
+  background-clip: padding-box;
+  border-radius: 6px;
+}
+
+.tippy-box[data-theme~="light-border"] > .tippy-backdrop {
+  background-color: #fff;
+}
+
+.tippy-arrow {
+  display: none;
+}
