@@ -73,6 +73,32 @@ describe("`models/validator.js`", () => {
     });
   });
 
+  describe("`.externalUrl()`", () => {
+    test("accepts http and https links", () => {
+      expect(() =>
+        validator.externalUrl("https://www.embrapa.br/soja"),
+      ).not.toThrow();
+      expect(() =>
+        validator.externalUrl("  http://exemplo.com/boletim  "),
+      ).not.toThrow();
+    });
+
+    test("rejects empty, too long, or non-http links", () => {
+      expect(() => validator.externalUrl("")).toThrow(ValidationError);
+      expect(() => validator.externalUrl("   ")).toThrow(ValidationError);
+      expect(() => validator.externalUrl(undefined)).toThrow(ValidationError);
+      expect(() => validator.externalUrl("embrapa.br")).toThrow(
+        ValidationError,
+      );
+      expect(() => validator.externalUrl("javascript:alert(1)")).toThrow(
+        ValidationError,
+      );
+      expect(() =>
+        validator.externalUrl(`https://x.com/${"a".repeat(2048)}`),
+      ).toThrow(ValidationError);
+    });
+  });
+
   describe("`.uuid()`", () => {
     test("accepts a valid UUID", () => {
       expect(() =>

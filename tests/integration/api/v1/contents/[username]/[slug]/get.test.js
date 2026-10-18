@@ -43,4 +43,25 @@ describe("`GET /api/v1/contents/[username]/[slug]`", () => {
       expect(responseBody.status_code).toBe(404);
     });
   });
+
+  describe("Activated user", () => {
+    test("Reads a published content while logged in", async () => {
+      const reader = await orchestrator.createUser({ username: "leitorpost" });
+      const activatedReader = await orchestrator.activateUser(reader);
+      const readerSession = await orchestrator.createSession(activatedReader);
+
+      const response = await fetch(
+        `${webserver.origin}/api/v1/contents/autorpost/plantio-direto`,
+        {
+          headers: {
+            Cookie: `session_id=${readerSession.token}`,
+          },
+        },
+      );
+
+      expect(response.status).toBe(200);
+      const responseBody = await response.json();
+      expect(responseBody.title).toBe("Plantio direto");
+    });
+  });
 });

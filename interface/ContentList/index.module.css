@@ -1,0 +1,58 @@
+.list {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: min-content minmax(0, 1fr);
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.item {
+  display: contents;
+}
+
+.item::before {
+  content: counter(list-item) ".";
+  counter-increment: list-item;
+  font-weight: 500;
+  width: min-content;
+  margin-left: auto;
+}
+
+.title {
+  overflow: auto;
+  font-weight: 500;
+  font-size: var(--text-body-size-large, 16px);
+}
+
+.title > a:link {
+  color: var(--fgColor-default, #1f2328);
+}
+
+.title > a:visited {
+  color: var(--fgColor-muted, #656d76);
+}
+
+.titleLink {
+  word-wrap: break-word;
+}
+
+.metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--base-size-4, 4px);
+  font-size: var(--text-body-size-small, 12px);
+  white-space: nowrap;
+  color: var(--fgColor-muted, #656d76);
+}
+
+.author {
+  font-style: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tabcoins {
+  font-weight: 600;
+  color: var(--fgColor-accent, #0969da);
+}

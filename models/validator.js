@@ -111,6 +111,40 @@ function body(value) {
   }
 }
 
+function externalUrl(value) {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new ValidationError({
+      message: "O link é obrigatório.",
+      action: "Informe o endereço da página patrocinada.",
+    });
+  }
+
+  if (value.length > 2048) {
+    throw new ValidationError({
+      message: "O link deve ter no máximo 2048 caracteres.",
+      action: "Utilize um endereço mais curto.",
+    });
+  }
+
+  let parsed;
+
+  try {
+    parsed = new URL(value.trim());
+  } catch {
+    throw new ValidationError({
+      message: "O link informado não é válido.",
+      action: "Informe um endereço que comece com http:// ou https://.",
+    });
+  }
+
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw new ValidationError({
+      message: "O link informado não é válido.",
+      action: "Informe um endereço que comece com http:// ou https://.",
+    });
+  }
+}
+
 function uuid(value) {
   if (typeof value !== "string" || !UUID_REGEX.test(value)) {
     throw new ValidationError({
@@ -126,6 +160,7 @@ const validator = {
   password,
   title,
   body,
+  externalUrl,
   uuid,
 };
 

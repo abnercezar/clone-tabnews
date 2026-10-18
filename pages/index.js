@@ -1,389 +1,159 @@
-import DefaultLayout from "interface/DefaultLayout";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import {
-  Banner,
+  Button,
+  Flash,
   Heading,
-  Label,
-  LabelGroup,
   LinkButton,
+  Spinner,
   Stack,
   Text,
-  Timeline,
 } from "@primer/react";
-import {
-  ArrowRightIcon,
-  BeakerIcon,
-  CommentDiscussionIcon,
-  CpuIcon,
-  GraphIcon,
-  LightBulbIcon,
-  PeopleIcon,
-  ProjectIcon,
-  RocketIcon,
-  RssIcon,
-} from "@primer/octicons-react";
+import DefaultLayout from "interface/DefaultLayout";
+import ContentList from "interface/ContentList";
+import Sponsorship from "interface/Sponsorship";
+import ui from "interface/styles.module.css";
 
-const FEATURES = [
-  {
-    title: "Feed de conteúdo",
-    description:
-      "Curadoria de artigos, pesquisas e casos reais do agronegócio brasileiro.",
-    icon: RssIcon,
-    tone: "green",
-  },
-  {
-    title: "Discussões",
-    description:
-      "Comentários e debates em cima do conteúdo, com quem vive o campo e a agtech.",
-    icon: CommentDiscussionIcon,
-    tone: "blue",
-  },
-  {
-    title: "Cotações",
-    description:
-      "Acompanhamento de mercado para apoiar decisões no dia a dia da fazenda.",
-    icon: GraphIcon,
-    tone: "yellow",
-  },
-  {
-    title: "Comunidade",
-    description:
-      "A troca acontece no feed e nas discussões — sem ser uma rede social à parte.",
-    icon: PeopleIcon,
-    tone: "green",
-  },
-];
+const PER_PAGE = 30;
 
-const PILLARS = [
-  {
-    title: "Tecnologia",
-    description:
-      "Agtech, dados, automação e ferramentas digitais para o campo produzir com mais precisão e menos desperdício.",
-    icon: CpuIcon,
-    tone: "green",
-  },
-  {
-    title: "Inovação",
-    description:
-      "Novos modelos de negócio, práticas e soluções criadas no Brasil para os desafios reais da produção rural.",
-    icon: LightBulbIcon,
-    tone: "yellow",
-  },
-  {
-    title: "Ciência",
-    description:
-      "Pesquisa, evidências e conhecimento técnico traduzidos para quem decide na fazenda, na universidade e na indústria.",
-    icon: BeakerIcon,
-    tone: "blue",
-  },
-];
+export default function FeedPage() {
+  const router = useRouter();
+  const author =
+    typeof router.query.usuario === "string" ? router.query.usuario : "";
+  const searchQuery =
+    typeof router.query.q === "string" ? router.query.q.trim() : "";
+  const [contents, setContents] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [sponsorship, setSponsorship] = useState(null);
 
-const MILESTONES = [
-  {
-    title: "Fundação",
-    body: "Infraestrutura, contas e fluxo de cadastro.",
-    variant: "success",
-    done: true,
-  },
-  {
-    title: "Feed e discussões",
-    body: "Conteúdo curado e conversas sobre tecnologia, inovação e ciência no agro.",
-    variant: "attention",
-    done: false,
-  },
-  {
-    title: "Cotações e ferramentas",
-    body: "Indicadores de mercado e recursos para a gestão rural.",
-    variant: "accent",
-    done: false,
-  },
-];
+  useEffect(() => {
+    setPage(1);
+  }, [author, searchQuery]);
 
-export default function Home() {
+  useEffect(() => {
+    if (!router.isReady) {
+      return;
+    }
+
+    async function loadFeed() {
+      try {
+        const params = new URLSearchParams({
+          page: String(page),
+          per_page: String(PER_PAGE),
+          // Home = Relevantes; perfil/busca ficam cronológicos.
+          strategy: author || searchQuery ? "new" : "relevant",
+        });
+        if (author) {
+          params.set("username", author);
+        }
+
+        const response = await fetch(`/api/v1/contents?${params}`);
+        if (!response.ok) {
+          setErrorMessage("Não foi possível carregar os conteúdos.");
+          setContents([]);
+          return;
+        }
+        setErrorMessage(null);
+        let items = await response.json();
+        let itemTotal = Number(response.headers.get("X-Total-Count") || 0);
+
+        if (searchQuery) {
+          const needle = searchQuery.toLowerCase();
+          items = items.filter(
+            (item) =>
+              item.title?.toLowerCase().includes(needle) ||
+              item.body?.toLowerCase().includes(needle) ||
+              item.owner_username?.toLowerCase().includes(needle),
+          );
+          itemTotal = items.length;
+        }
+
+        setTotal(itemTotal);
+        setContents(items);
+
+        if (!author && !searchQuery && page === 1) {
+          const sponsorshipResponse = await fetch("/api/v1/sponsorships");
+          if (sponsorshipResponse.ok) {
+            const sponsorships = await sponsorshipResponse.json();
+            setSponsorship(sponsorships[0] || null);
+          }
+        } else {
+          setSponsorship(null);
+        }
+      } catch {
+        setErrorMessage("Não foi possível conectar ao servidor.");
+      }
+    }
+    loadFeed();
+  }, [page, author, searchQuery, router.isReady]);
+
   return (
     <DefaultLayout
       metadata={{
         description:
-          "Menos ruído, mais fundamentos: um lugar para inteligência coletiva no agronegócio.",
+          "Conteúdos sobre tecnologia, inovação e ciência no agronegócio brasileiro.",
       }}
     >
-      <div className="page">
-        <div className="flag-bar" aria-hidden />
+      {author && (
+        <Heading as="h1" variant="medium">
+          Publicações de {author}
+        </Heading>
+      )}
 
-        <Stack gap="spacious" paddingBlock="normal">
-          <Banner
-            variant="warning"
-            className="build-banner"
-            title="Aguarde, estamos construindo algo surpreendente"
-            description="Em construção"
-          />
+      {searchQuery && (
+        <Heading as="h1" variant="medium">
+          Resultados para “{searchQuery}”
+        </Heading>
+      )}
 
-          <section className="hero">
-            <LabelGroup>
-              <Label variant="success">AgroTab</Label>
-              <Label variant="attention">Em construção</Label>
-              <Label variant="accent">Brasil</Label>
-            </LabelGroup>
+      {errorMessage && <Flash variant="danger">{errorMessage}</Flash>}
 
-            <Heading as="h1" variant="large" className="hero-title">
-              Menos ruído, mais fundamentos: um lugar para inteligência coletiva
-              no agronegócio.
-            </Heading>
+      {!contents && !errorMessage && <Spinner />}
 
-            <Text as="p" className="hero-lead">
-              Tecnologia, inovação e ciência para o campo crescer — o que a
-              pesquisa e o mercado estão dizendo, do laboratório à lavoura.
-            </Text>
-
-            <Stack
-              direction={{ narrow: "vertical", regular: "horizontal" }}
-              gap="condensed"
-              align="center"
-            >
-              <LinkButton
-                href="/cadastro"
-                variant="primary"
-                size="large"
-                trailingVisual={ArrowRightIcon}
-              >
-                Quero ser avisado no lançamento
-              </LinkButton>
-              <LinkButton href="#o-que-vem" variant="default" size="large">
-                Ver o que está por vir
-              </LinkButton>
-            </Stack>
-          </section>
-
-          <section id="pilares" className="section">
-            <Heading as="h2" variant="medium">
-              Tecnologia, inovação e ciência
-            </Heading>
-            <Text as="p" className="muted">
-              Três frentes que sustentam o AgroTab: o que já existe no campo
-              brasileiro, o que ainda está nascendo e o que a pesquisa comprova.
-            </Text>
-
-            <div className="pillar-grid">
-              {PILLARS.map(({ title, description, icon: Icon, tone }) => (
-                <article
-                  key={title}
-                  className={`feature-card pillar tone-${tone}`}
-                >
-                  <span className={`feature-icon tone-${tone}`}>
-                    <Icon size={20} />
-                  </span>
-                  <Heading as="h3" variant="small">
-                    {title}
-                  </Heading>
-                  <Text as="p" className="muted">
-                    {description}
-                  </Text>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <section id="o-que-vem" className="section">
-            <Heading as="h2" variant="medium">
-              O que vem por aí
-            </Heading>
-            <Text as="p" className="muted">
-              Conteúdo, discussões, cotações e comunidade para o agronegócio
-              brasileiro. O feed de conteúdo já está aberto. Discussões e
-              cotações ainda estão em construção.
-            </Text>
-
-            <div className="feature-grid">
-              {FEATURES.map(({ title, description, icon: Icon, tone }) => (
-                <article key={title} className={`feature-card tone-${tone}`}>
-                  <span className={`feature-icon tone-${tone}`}>
-                    <Icon size={20} />
-                  </span>
-                  <Heading as="h3" variant="small">
-                    {title}
-                  </Heading>
-                  <Text as="p" className="muted">
-                    {description}
-                  </Text>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <section className="section split">
-            <div>
-              <Heading as="h2" variant="medium">
-                Roadmap
-              </Heading>
-              <Text as="p" className="muted">
-                Acompanhe o que está sendo construído até o lançamento.
-              </Text>
-            </div>
-
-            <Timeline>
-              {MILESTONES.map((item) => (
-                <Timeline.Item key={item.title}>
-                  <Timeline.Badge variant={item.variant}>
-                    {item.done ? <ProjectIcon /> : <RocketIcon />}
-                  </Timeline.Badge>
-                  <Timeline.Body>
-                    <Text as="strong">{item.title}</Text>
-                    <Text as="p" className="muted">
-                      {item.body}
-                    </Text>
-                  </Timeline.Body>
-                </Timeline.Item>
-              ))}
-            </Timeline>
-          </section>
+      {contents && contents.length === 0 && (
+        <Stack gap="normal" align="center" className={ui.emptyState}>
+          <Heading as="h2" variant="small">
+            Nenhum conteúdo encontrado
+          </Heading>
+          <Text as="p" className={ui.muted}>
+            {searchQuery
+              ? `Nada encontrado para “${searchQuery}”.`
+              : author
+                ? `${author} ainda não publicou.`
+                : "Ainda não há publicações. Seja o primeiro a publicar!"}
+          </Text>
+          <LinkButton href="/publicar" variant="primary">
+            Publicar conteúdo
+          </LinkButton>
         </Stack>
-      </div>
+      )}
 
-      <style jsx>{`
-        .page {
-          --br-green: #009c3b;
-          --br-green-soft: #e8f8ee;
-          --br-yellow: #ffdf00;
-          --br-yellow-soft: #fff8cc;
-          --br-blue: #002776;
-          --br-blue-soft: #e8eefc;
-          --br-white: #ffffff;
-        }
+      {sponsorship && (
+        <Sponsorship
+          sponsorship={sponsorship}
+          onRemoved={() => setSponsorship(null)}
+        />
+      )}
 
-        .flag-bar {
-          height: 4px;
-          margin: 0 -16px 16px;
-          background: linear-gradient(
-            90deg,
-            var(--br-green) 0%,
-            var(--br-green) 33.3%,
-            var(--br-yellow) 33.3%,
-            var(--br-yellow) 66.6%,
-            var(--br-blue) 66.6%,
-            var(--br-blue) 100%
-          );
-        }
+      {contents && contents.length > 0 && (
+        <ContentList contentList={contents} />
+      )}
 
-        .page :global(.build-banner) {
-          font-size: 16px;
-        }
-
-        .page :global(.build-banner h2) {
-          font-size: clamp(18px, 2.4vw, 22px);
-          font-weight: 700;
-          line-height: 1.35;
-        }
-
-        .hero {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 16px;
-          padding: 8px 0;
-        }
-
-        .page :global(.hero-title) {
-          max-width: 22ch;
-          letter-spacing: -0.02em;
-        }
-
-        .page :global(.hero-lead) {
-          max-width: 62ch;
-          margin: 0;
-          font-size: 18px;
-          line-height: 1.6;
-          color: var(--fgColor-muted, #656d76);
-        }
-
-        .section {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .split {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr);
-          gap: 24px;
-        }
-
-        .page :global(.muted) {
-          margin: 0;
-          color: var(--fgColor-muted, #656d76);
-        }
-
-        .feature-grid,
-        .pillar-grid {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 16px;
-          margin-top: 8px;
-        }
-
-        .feature-card {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          padding: 20px;
-          border: 1px solid var(--borderColor-default, #d0d7de);
-          border-radius: 12px;
-          background: var(--br-white);
-          box-shadow: var(
-            --shadow-resting-small,
-            0 1px 0 rgba(31, 35, 40, 0.04)
-          );
-        }
-
-        .feature-card.tone-green {
-          border-left: 6px solid var(--br-green);
-        }
-
-        .feature-card.tone-yellow {
-          border-left: 6px solid var(--br-yellow);
-        }
-
-        .feature-card.tone-blue {
-          border-left: 6px solid var(--br-blue);
-        }
-
-        .feature-icon {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 36px;
-          height: 36px;
-          border-radius: 8px;
-        }
-
-        .feature-icon.tone-green {
-          color: var(--br-green);
-          background: var(--br-green-soft);
-        }
-
-        .feature-icon.tone-yellow {
-          color: #8a7200;
-          background: var(--br-yellow-soft);
-        }
-
-        .feature-icon.tone-blue {
-          color: var(--br-blue);
-          background: var(--br-blue-soft);
-        }
-
-        @media (min-width: 768px) {
-          .pillar-grid {
-            grid-template-columns: 1fr 1fr 1fr;
-          }
-
-          .feature-grid {
-            grid-template-columns: 1fr 1fr;
-          }
-
-          .split {
-            grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.2fr);
-            align-items: start;
-          }
-        }
-      `}</style>
+      {total > PER_PAGE && (
+        <Stack direction="horizontal" gap="condensed" justify="center">
+          <Button disabled={page <= 1} onClick={() => setPage(page - 1)}>
+            Anteriores
+          </Button>
+          <Button
+            disabled={page * PER_PAGE >= total}
+            onClick={() => setPage(page + 1)}
+          >
+            Próximos
+          </Button>
+        </Stack>
+      )}
     </DefaultLayout>
   );
 }

@@ -55,9 +55,13 @@ describe("`POST /api/v1/contents`", () => {
       expect(responseBody.body).toBe("Resumo prático sobre MIP no milho.");
       expect(responseBody.slug).toBe("manejo-de-pragas-no-milho");
       expect(responseBody.status).toBe("published");
+      expect(responseBody.type).toBe("content");
+      expect(typeof responseBody.tabcoins).toBe("number");
       expect(Date.parse(responseBody.published_at)).not.toBeNaN();
       // A resposta do create inclui o username do autor (usado no redirect do front)
       expect(responseBody.owner_username).toBe(activatedUser.username);
+      expect(responseBody.parent_id).toBeNull();
+      expect(responseBody.first_publication).toBe(true);
       // Nunca deve vazar nada além dos campos esperados
       expect(responseBody.password).toBeUndefined();
     });

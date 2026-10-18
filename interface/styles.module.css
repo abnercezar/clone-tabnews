@@ -1,0 +1,137 @@
+.muted {
+  margin: 0;
+  color: var(--fgColor-muted, #656d76);
+}
+
+.flashText {
+  margin: 0;
+  font-weight: 600;
+}
+
+.flashAction {
+  margin: 4px 0 0;
+}
+
+.emptyState {
+  padding-block: 48px;
+  text-align: center;
+}
+
+.contentMetadata {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-body-size-small, 12px);
+  color: var(--fgColor-muted, #656d76);
+}
+
+.contentMetadataRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--base-size-8, 8px);
+}
+
+.contentOptions {
+  flex-shrink: 0;
+}
+
+.contentWithVotes {
+  display: flex;
+  gap: var(--base-size-16, 16px);
+  align-items: flex-start;
+}
+
+.contentWithVotesBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.commentWithVotes {
+  display: flex;
+  gap: var(--base-size-12, 12px);
+  align-items: flex-start;
+}
+
+.articleTitle {
+  margin: 0;
+  font-size: clamp(1.75rem, 2.5vw, 2rem);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.authorLabel {
+  padding: 0 6px;
+  border-radius: 6px;
+  font-family: var(--fontStack-monospace, monospace);
+  color: var(--fgColor-accent, #0969da);
+  background-color: var(--bgColor-accent-muted, #ddf4ff);
+}
+
+.reply {
+  margin-top: var(--base-size-12, 12px);
+  margin-left: var(--base-size-16, 16px);
+  padding-left: var(--base-size-12, 12px);
+  border-left: 2px solid var(--borderColor-muted, #d0d7de);
+}
+
+.commentTitle {
+  margin: 0;
+  font-weight: 600;
+}
+
+.replyBox {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--base-size-16, 16px);
+}
+
+/* Card externo como no TabNews (pages/[username]/[slug]/index.module.css .ReplyBox) */
+.replyBoxFramed {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--base-size-16, 16px);
+  margin-top: var(--base-size-24, 24px);
+  margin-bottom: var(--base-size-16, 16px);
+  padding: var(--base-size-24, 24px);
+  border: 1px solid var(--borderColor-default, #d0d7de);
+  border-radius: 6px;
+  background-color: var(--bgColor-default, #ffffff);
+  word-wrap: break-word;
+}
+
+.replyActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--base-size-8, 8px);
+}
+
+.linkCopied {
+  color: var(--fgColor-muted, #656d76);
+}
+
+.commentActions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--base-size-8, 8px);
+}
+
+.commentCount {
+  margin-left: auto;
+  color: var(--fgColor-muted, #656d76);
+  font-size: var(--text-body-size-small, 12px);
+  text-align: right;
+}
+
+.contentBody {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 16px;
+  line-height: 1.7;
+}

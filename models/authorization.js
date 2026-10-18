@@ -16,6 +16,12 @@ const availableFeatures = [
   // CONTENT
   "create:content",
   "read:content",
+  "read:content:tabcoins",
+  "update:content",
+  "delete:content",
+  "delete:content:others",
+  "create:sponsorship",
+  "read:sponsorship",
 
   // ACTIVATION_TOKEN
   "read:activation_token",
@@ -72,6 +78,8 @@ function filterOutput(user, feature, resource) {
         username: resource.username,
         email: resource.email,
         features: resource.features,
+        tabcoins: resource.tabcoins,
+        tabcash: resource.tabcash,
         created_at: resource.created_at,
         updated_at: resource.updated_at,
       };
@@ -112,10 +120,15 @@ function filterOutput(user, feature, resource) {
       id: content.id,
       owner_id: content.owner_id,
       owner_username: content.owner_username,
+      parent_id: content.parent_id,
       slug: content.slug,
       title: content.title,
       body: content.body,
       status: content.status,
+      type: content.type || "content",
+      tabcoins: Number(content.tabcoins ?? 0),
+      tabcoins_credit: Number(content.tabcoins_credit ?? 0),
+      tabcoins_debit: Number(content.tabcoins_debit ?? 0),
       published_at: content.published_at,
       created_at: content.created_at,
       updated_at: content.updated_at,
@@ -126,6 +139,32 @@ function filterOutput(user, feature, resource) {
     }
 
     return filterContent(resource);
+  }
+
+  if (feature === "read:content:tabcoins") {
+    return {
+      tabcoins: Number(resource.tabcoins ?? 0),
+      tabcoins_credit: Number(resource.tabcoins_credit ?? 0),
+      tabcoins_debit: Number(resource.tabcoins_debit ?? 0),
+    };
+  }
+
+  if (feature === "read:sponsorship") {
+    const filterSponsorship = (sponsorship) => ({
+      id: sponsorship.id,
+      owner_id: sponsorship.owner_id,
+      owner_username: sponsorship.owner_username,
+      title: sponsorship.title,
+      url: sponsorship.url,
+      status: sponsorship.status,
+      created_at: sponsorship.created_at,
+    });
+
+    if (Array.isArray(resource)) {
+      return resource.map(filterSponsorship);
+    }
+
+    return filterSponsorship(resource);
   }
 
   if (feature === "read:activation_token") {
