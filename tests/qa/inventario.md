@@ -3,7 +3,7 @@
 Mantido pelo agente QA Human Tester. Só entra rota que existe no código.
 Última revisão do inventário: 2026-10-18. A coluna "Última execução" registra a suíte Jest, não uma passagem manual posterior.
 
-Funcionalidades ausentes (não testar, não marcar como aprovadas): editar publicação, responder comentário, voto, TabCoins, TabCash, perfil público, busca, filtros, recuperação de senha, notificações, painel de moderação, patrocínio e pagamento. `/perfil` edita a própria conta. O tema (claro, escuro, automático) fica só no navegador.
+Funcionalidades ausentes (não testar, não marcar como aprovadas): editar publicação, perfil público, filtros avançados, recuperação de senha, preferências de notificação (opt-out), painel de moderação e pagamento. Comentário/resposta disparam e-mail best-effort ao autor do pai (`docs/email-notifications.md`); não há fila/worker. `/perfil` edita a própria conta. O tema (claro, escuro, automático) fica só no navegador.
 
 ## Rotas de tela
 

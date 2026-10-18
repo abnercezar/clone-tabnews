@@ -41,6 +41,15 @@ Automatizado no CI: `npm run security:checklist` + `npm run security:audit`
 - [ ] Planejar upgrade de Next (15/16) e nodemailer major para limpar high/critical.
 - [ ] Confirmar em produção: sem `next/image` remota com AVIF não confiável; deploy Linux (não Windows self-host).
 
+## Notificações sociais (e-mail)
+
+- [x] Destinatário só do banco (`owner_id` do `parent_id`); nunca do body.
+- [x] Sem auto-notificação; só o pai direto (não fan-out da thread).
+- [x] HTML do e-mail com escape de conteúdo do usuário.
+- [x] Falha de SMTP não impede o `201` do comentário (após COMMIT).
+- [ ] Preferências de opt-out (ainda não existem).
+- [ ] Outbox/cron se retry automático for necessário.
+
 ## Operação
 
 - [ ] Segredos só em env (Vercel); nunca commitados.

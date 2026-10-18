@@ -261,7 +261,7 @@ function CommentItem({ comment: initialComment, user, router, isLoadingUser }) {
   }, [comment.owner_username, comment.slug]);
 
   return (
-    <article className={ui.commentWithVotes}>
+    <article id={`comentario-${comment.id}`} className={ui.commentWithVotes}>
       <TabCoinButtons
         content={comment}
         onBalanceChange={(nextComment) =>
@@ -304,7 +304,11 @@ function CommentItem({ comment: initialComment, user, router, isLoadingUser }) {
         {replies.map((reply) => {
           const replyParts = splitComment(reply.body);
           return (
-            <article key={reply.id} className={ui.reply}>
+            <article
+              key={reply.id}
+              id={`comentario-${reply.id}`}
+              className={ui.reply}
+            >
               <Stack gap="condensed">
                 <div className={ui.contentMetadata}>
                   <span className={ui.authorLabel}>{reply.owner_username}</span>

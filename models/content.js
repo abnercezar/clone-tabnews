@@ -539,6 +539,7 @@ async function findOneByUsernameAndSlug(username, slug) {
 const content = {
   create,
   findPublished,
+  findPublishedById,
   findOneByUsernameAndSlug,
   findChildren,
   countPublishedRootByOwner,
