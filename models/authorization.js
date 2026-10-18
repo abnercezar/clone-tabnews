@@ -189,23 +189,43 @@ function filterOutput(user, feature, resource) {
   }
 
   if (feature === "read:status") {
+    // Público como no TabNews: health completo (DB + webserver).
+    // `read:status:all` mantém o espelho legado em `database` no topo.
+    const database = resource.dependencies?.database || {};
+    const webserver = resource.dependencies?.webserver || {};
+
     const output = {
       updated_at: resource.updated_at,
       dependencies: {
         database: {
-          max_connections: resource.dependencies.database.max_connections,
-          opened_connections: resource.dependencies.database.opened_connections,
+          status: database.status,
+          max_connections: database.max_connections,
+          opened_connections: database.opened_connections,
+          latency: database.latency,
+          version: database.version,
+        },
+        webserver: {
+          status: webserver.status,
+          provider: webserver.provider,
+          environment: webserver.environment,
+          aws_region: webserver.aws_region,
+          vercel_region: webserver.vercel_region,
+          timezone: webserver.timezone,
+          last_commit_author: webserver.last_commit_author,
+          last_commit_message: webserver.last_commit_message,
+          last_commit_message_sha: webserver.last_commit_message_sha,
+          version: webserver.version,
         },
       },
     };
 
     if (can(user, "read:status:all")) {
-      output.dependencies.database.version =
-        resource.dependencies.database.version;
       output.database = {
-        version: resource.dependencies.database.version,
-        max_connections: resource.dependencies.database.max_connections,
-        opened_connections: resource.dependencies.database.opened_connections,
+        version: database.version,
+        max_connections: database.max_connections,
+        opened_connections: database.opened_connections,
+        status: database.status,
+        latency: database.latency,
       };
     }
 
