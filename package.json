@@ -63,7 +63,6 @@
     "recharts": "^2.15.4",
     "swr": "2.4.1",
     "uuid": "11.1.1",
-    "vis-data": "^7.1.9",
     "vis-network": "^9.1.9"
   },
   "devDependencies": {
