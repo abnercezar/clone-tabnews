@@ -159,5 +159,25 @@ describe("`POST /api/v1/sessions`", () => {
         sameSite: "Lax",
       });
     });
+
+    test("Without `email` and `password`", async () => {
+      const response = await fetch(`${webserver.origin}/api/v1/sessions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({}),
+      });
+
+      expect(response.status).toBe(400);
+
+      const responseBody = await response.json();
+      expect(responseBody).toEqual({
+        name: "ValidationError",
+        message: "Email e senha são obrigatórios.",
+        action: "Preencha email e senha para fazer login.",
+        status_code: 400,
+      });
+    });
   });
 });

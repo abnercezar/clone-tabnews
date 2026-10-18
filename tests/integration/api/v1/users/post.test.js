@@ -135,6 +135,57 @@ describe("`POST /api/v1/users`", () => {
         status_code: 400,
       });
     });
+
+    test("With invalid `username`", async () => {
+      const response = await fetch(`${webserver.origin}/api/v1/users`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: "ab",
+          email: "usernamecurto@gmail.com",
+          password: "senha123",
+        }),
+      });
+
+      expect(response.status).toBe(400);
+      const responseBody = await response.json();
+      expect(responseBody.name).toBe("ValidationError");
+      expect(responseBody.status_code).toBe(400);
+    });
+
+    test("With invalid `email`", async () => {
+      const response = await fetch(`${webserver.origin}/api/v1/users`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: "emailinvalido",
+          email: "nao-e-email",
+          password: "senha123",
+        }),
+      });
+
+      expect(response.status).toBe(400);
+      const responseBody = await response.json();
+      expect(responseBody.name).toBe("ValidationError");
+      expect(responseBody.status_code).toBe(400);
+    });
+
+    test("With too short `password`", async () => {
+      const response = await fetch(`${webserver.origin}/api/v1/users`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: "senhacurta",
+          email: "senhacurta@gmail.com",
+          password: "curta7",
+        }),
+      });
+
+      expect(response.status).toBe(400);
+      const responseBody = await response.json();
+      expect(responseBody.name).toBe("ValidationError");
+      expect(responseBody.status_code).toBe(400);
+    });
   });
 
   describe("Default user", () => {

@@ -4,10 +4,17 @@ import authentication from "models/authentication.js";
 import authorization from "models/authorization.js";
 import session from "models/session.js";
 
-import { ForbiddenError } from "infra/errors";
+import { ForbiddenError, ValidationError } from "infra/errors";
 
 async function postHandler(request, response) {
-  const userInputValues = request.body;
+  const userInputValues = request.body ?? {};
+
+  if (!userInputValues.email || !userInputValues.password) {
+    throw new ValidationError({
+      message: "Email e senha são obrigatórios.",
+      action: "Preencha email e senha para fazer login.",
+    });
+  }
 
   // Autentica o usuário
   const authenticatedUser = await authentication.getUser(

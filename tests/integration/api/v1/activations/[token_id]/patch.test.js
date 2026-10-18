@@ -202,4 +202,21 @@ describe("`PATCH /api/v1/activations/[token_id]`", () => {
       });
     });
   });
+
+  describe("Malformed token", () => {
+    test("With a token id that is not a valid UUID", async () => {
+      const response = await fetch(
+        `${webserver.origin}/api/v1/activations/nao-e-uuid`,
+        {
+          method: "PATCH",
+        },
+      );
+
+      expect(response.status).toBe(400);
+
+      const responseBody = await response.json();
+      expect(responseBody.name).toBe("ValidationError");
+      expect(responseBody.status_code).toBe(400);
+    });
+  });
 });

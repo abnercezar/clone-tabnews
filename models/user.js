@@ -1,5 +1,6 @@
 import database from "infra/database.js";
 import password from "models/password.js";
+import validator from "models/validator.js";
 import { ValidationError, NotFoundError } from "infra/errors.js";
 
 // Busca um usuário pelo id
@@ -103,6 +104,10 @@ async function findOneByEmail(email) {
 
 // Cria um novo usuário no banco de dados
 async function create(userInputValues) {
+  validator.username(userInputValues.username);
+  validator.email(userInputValues.email);
+  validator.password(userInputValues.password);
+
   await validateUniqueUsername(userInputValues.username);
   await validateUniqueEmail(userInputValues.email);
   await hashPasswordInObject(userInputValues);
@@ -142,14 +147,17 @@ async function update(username, userInputValues) {
   const currentUser = await findOneByUsername(username);
 
   if ("username" in userInputValues) {
+    validator.username(userInputValues.username);
     await validateUniqueUsername(userInputValues.username);
   }
 
   if ("email" in userInputValues) {
+    validator.email(userInputValues.email);
     await validateUniqueEmail(userInputValues.email);
   }
 
   if ("password" in userInputValues) {
+    validator.password(userInputValues.password);
     await hashPasswordInObject(userInputValues);
   }
 
