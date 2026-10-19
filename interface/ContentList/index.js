@@ -69,7 +69,7 @@ export default function ContentList({ contentList, pagination }) {
 }
 
 function ContentListItem({ content }) {
-  const href = `/conteudos/${content.owner_username}/${content.slug}`;
+  const href = `/${content.owner_username}/${content.slug}`;
   const isComment = Boolean(content.parent_id);
   const isAd = content.type === "ad";
 

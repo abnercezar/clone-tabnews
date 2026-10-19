@@ -21,6 +21,7 @@ const BODY_MAX = 20000;
 const RESERVED_USERNAMES = new Set([
   "api",
   "cadastro",
+  "contato",
   "conteudos",
   "faq",
   "login",
@@ -29,6 +30,7 @@ const RESERVED_USERNAMES = new Set([
   "perfil",
   "publicar",
   "recentes",
+  "rss",
   "sobre",
   "status",
 ]);

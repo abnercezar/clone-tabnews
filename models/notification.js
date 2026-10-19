@@ -90,7 +90,7 @@ function isValidRecipientEmail(value) {
 }
 
 function buildConversationUrl({ rootUsername, rootSlug, commentId }) {
-  const path = `/conteudos/${encodeURIComponent(rootUsername)}/${encodeURIComponent(rootSlug)}`;
+  const path = `/${encodeURIComponent(rootUsername)}/${encodeURIComponent(rootSlug)}`;
   const hash = commentId ? `#comentario-${commentId}` : "#comentarios";
   return `${webserver.origin}${path}${hash}`;
 }

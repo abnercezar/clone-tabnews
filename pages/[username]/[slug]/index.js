@@ -417,7 +417,7 @@ function ShareButton({ username, slug, title }) {
   const [isCopied, setIsCopied] = useState(false);
 
   async function handleShare() {
-    const url = `${window.location.origin}/conteudos/${username}/${slug}`;
+    const url = `${window.location.origin}/${username}/${slug}`;
     const shareTitle = title || "AgroTab";
 
     try {

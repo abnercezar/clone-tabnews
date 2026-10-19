@@ -290,11 +290,12 @@ function SiteFooter({ maxWidth }) {
           <Text>&copy; {new Date().getFullYear()} AgroTab</Text>
         </div>
         <div className={styles.footerLinks}>
-          <Link href="mailto:contato@agrotab.com.br">Contato</Link>
+          <Link href="/contato">Contato</Link>
           <Link href="/sobre">Sobre</Link>
           <Link href="/faq">FAQ</Link>
           <Link href="/termos-de-uso">Termos de Uso</Link>
           <Link href="/status">Status</Link>
+          <Link href="/recentes/rss">RSS</Link>
         </div>
       </div>
     </footer>

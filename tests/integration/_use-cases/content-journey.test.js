@@ -37,6 +37,18 @@ describe("Use case: publish, read, comment and delete", () => {
     expect(response.headers.get("location")).toBe("/");
   });
 
+  test("`/conteudos/:username/:slug` redirects permanently to `/:username/:slug`", async () => {
+    const response = await fetch(
+      `${webserver.origin}/conteudos/jornadaautor/plantacao-de-cafe`,
+      { redirect: "manual" },
+    );
+
+    expect(response.status).toBe(308);
+    expect(response.headers.get("location")).toBe(
+      "/jornadaautor/plantacao-de-cafe",
+    );
+  });
+
   test("Activated author publishes and the post stays in the feed", async () => {
     const createdUser = await orchestrator.createUser({
       username: "jornadaautor",
