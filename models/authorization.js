@@ -352,7 +352,8 @@ function filterOutput(user, feature, resource) {
     }
 
     const events = (resource.events || []).map((firewallEvent) => {
-      const { originator_ip: _originatorIp, ...safeEvent } = firewallEvent;
+      const safeEvent = { ...firewallEvent };
+      delete safeEvent.originator_ip;
       return safeEvent;
     });
 

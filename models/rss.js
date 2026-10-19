@@ -15,7 +15,7 @@ function escapeXml(text) {
 
 function stripMarkdown(text, { maxLength = 190 } = {}) {
   const plain = String(text || "")
-    .replace(/[#*_`>~\[\]()!]/g, " ")
+    .replace(/[#*_`>~[\]()!]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 

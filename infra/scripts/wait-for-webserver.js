@@ -1,5 +1,4 @@
-const webserverOrigin =
-  process.env.WEBSERVER_ORIGIN || "http://localhost:3000";
+const webserverOrigin = process.env.WEBSERVER_ORIGIN || "http://localhost:3000";
 const statusUrl = `${webserverOrigin}/api/v1/status`;
 const emailHttpUrl = `http://${process.env.EMAIL_HTTP_HOST || "localhost"}:${process.env.EMAIL_HTTP_PORT || "1080"}`;
 

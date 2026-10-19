@@ -85,7 +85,10 @@ LIMIT $4
 ;
 `;
 
-async function getByContentId(contentId, { transaction, database: db = database } = {}) {
+async function getByContentId(
+  contentId,
+  { transaction, database: db = database } = {},
+) {
   const result = await db.query(
     {
       text: byContentIdQuery,

@@ -5,7 +5,7 @@ import classes from "./index.module.css";
 
 function excerpt(text, maxLength = 255) {
   const plain = String(text || "")
-    .replace(/[#*_`>~\[\]()!]/g, " ")
+    .replace(/[#*_`>~[\]()!]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 

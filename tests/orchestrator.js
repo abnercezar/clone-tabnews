@@ -142,7 +142,10 @@ async function createPrestige(
       title: faker.lorem.words(3),
       body: faker.lorem.paragraphs(1),
     });
-    await backdateContent(created.id, new Date(threeDaysAgo.getTime() + i * 10));
+    await backdateContent(
+      created.id,
+      new Date(threeDaysAgo.getTime() + i * 10),
+    );
     rootContents.push(created);
   }
 
