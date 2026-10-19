@@ -24,7 +24,7 @@
 | T4 — Rate limiting + anti-enumeração               | P1                  | ⛔ decisão de mecanismo + UX                   | T2                      |
 | T6 — Base de conteúdo (posts+feed+ler)             | **P0/P1** (produto) | ✅ (revisado + ajustes aplicados)              | T1, T2                  |
 | T7 — Comentários                                   | P1                  | ⛔ aprovação de escopo                         | T6                      |
-| T8 — Recuperação de senha                          | P1                  | ⛔ aprovação de escopo                         | T2                      |
+| T8 — Recuperação de senha                          | P1                  | ✅ (fluxo TabNews: e-mail + token 15 min)      | T2                      |
 | T5 — pg.Pool + UUID→400                            | P2                  | ⛔ aprovação (infra) — análise pronta: Opção B | análise do architect ✅ |
 | T9 — Votos / busca                                 | P2                  | ⛔ validar com volume de conteúdo              | T6                      |
 | T10 — Cotações/indicadores                         | P3                  | ⛔ **não construir agora** — validar interesse | —                       |

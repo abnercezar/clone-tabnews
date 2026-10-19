@@ -148,6 +148,7 @@ describe("`PATCH /api/v1/activations/[token_id]`", () => {
       "delete:content",
       "create:sponsorship",
       "read:sponsorship",
+      "read:recovery_token",
     ]);
   });
 

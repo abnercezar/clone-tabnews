@@ -130,6 +130,7 @@ async function activateUserByUserId(userId) {
     "delete:content",
     "create:sponsorship",
     "read:sponsorship",
+    "read:recovery_token",
   ]);
   return activatedUser;
 }
