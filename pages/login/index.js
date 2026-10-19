@@ -54,14 +54,20 @@ function LoginForm() {
         return;
       }
 
+      const responseBody = await response.json().catch(() => ({}));
+
       if (response.status === 403) {
+        const parts = [responseBody.message, responseBody.action].filter(
+          Boolean,
+        );
         setErrorMessage(
-          "Sua conta ainda não foi ativada. Abra o email de ativação enviado pelo AgroTab.",
+          parts.length > 0
+            ? parts.join(" ")
+            : "O seu usuário ainda não está ativado. Verifique seu e-mail.",
         );
         return;
       }
 
-      const responseBody = await response.json();
       setErrorMessage(
         responseBody.message ||
           "Não foi possível fazer login. Tente novamente.",

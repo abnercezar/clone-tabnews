@@ -95,7 +95,7 @@ function PublishForm() {
         if (responseBody.first_publication) {
           params.set("primeira", "1");
         }
-        location.href = `/conteudos/${responseBody.owner_username ?? ""}/${responseBody.slug}?${params}`;
+        location.href = `/${responseBody.owner_username ?? ""}/${responseBody.slug}?${params}`;
         return;
       }
 

@@ -179,5 +179,43 @@ describe("`POST /api/v1/sessions`", () => {
         status_code: 400,
       });
     });
+
+    test("With correct credentials but inactive user resends activation email", async () => {
+      await orchestrator.deleteAllEmails();
+
+      const createdUser = await orchestrator.createUser({
+        email: "inativo.login@agrotab.local",
+        password: "senhacorreta",
+      });
+
+      const response = await fetch(`${webserver.origin}/api/v1/sessions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: createdUser.email,
+          password: "senhacorreta",
+        }),
+      });
+
+      expect(response.status).toBe(403);
+
+      const responseBody = await response.json();
+      expect(responseBody).toEqual({
+        name: "ForbiddenError",
+        message: "O seu usuário ainda não está ativado.",
+        action:
+          "Verifique seu e-mail, pois acabamos de enviar um novo convite de ativação.",
+        status_code: 403,
+      });
+
+      const lastEmail = await orchestrator.getLastEmail();
+      expect(lastEmail).not.toBeNull();
+      expect(lastEmail.recipients[0]).toBe(`<${createdUser.email}>`);
+      expect(lastEmail.subject).toBe("Ative seu cadastro Agrotab");
+      expect(lastEmail.text).toContain("/cadastro/ativar/");
+      expect(orchestrator.extractUUID(lastEmail.text)).toBeTruthy();
+    });
   });
 });

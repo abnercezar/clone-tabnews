@@ -69,7 +69,7 @@ describe("Content interaction e-mail notifications", () => {
     expect(lastEmail.text).toContain("Manejo de pragas na soja");
     expect(lastEmail.text).toContain("Qual cultivar você está usando");
     expect(lastEmail.text).toContain(
-      `/conteudos/${author.username}/${post.slug}#comentario-${comment.id}`,
+      `/${author.username}/${post.slug}#comentario-${comment.id}`,
     );
     expect(lastEmail.text).not.toContain(commenter.email);
     expect(lastEmail.html).toContain("Ver comentário");
@@ -159,7 +159,7 @@ describe("Content interaction e-mail notifications", () => {
     expect(lastEmail.text).toContain("quemResponde");
     expect(lastEmail.text).toContain("Irrigacao no algodao");
     expect(lastEmail.text).toContain(
-      `/conteudos/donoPost/${post.slug}#comentario-${reply.id}`,
+      `/donoPost/${post.slug}#comentario-${reply.id}`,
     );
     expect(lastEmail.recipients.join("")).not.toContain("dono.post@");
   });

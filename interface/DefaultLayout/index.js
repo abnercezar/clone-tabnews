@@ -19,6 +19,7 @@ import {
   MoonIcon,
   PersonIcon,
   PlusIcon,
+  ShieldLockIcon,
   SignOutIcon,
   SunIcon,
   ThreeBarsIcon,
@@ -131,7 +132,7 @@ function SiteHeader() {
 
 function UserMenu({ user }) {
   const [isOpenMenu, setIsOpenMenu] = useState(false);
-  const profileHref = `/?usuario=${encodeURIComponent(user.username)}`;
+  const profileHref = `/${encodeURIComponent(user.username)}`;
 
   async function handleLogout() {
     try {
@@ -205,6 +206,14 @@ function UserMenu({ user }) {
                 </ActionList.LeadingVisual>
                 Editar perfil
               </ActionList.LinkItem>
+              {user.features?.includes("read:user:list") && (
+                <ActionList.LinkItem href="/moderacao/usuarios/1">
+                  <ActionList.LeadingVisual>
+                    <ShieldLockIcon />
+                  </ActionList.LeadingVisual>
+                  Moderação
+                </ActionList.LinkItem>
+              )}
               <ActionList.Divider />
               <ActionList.Item
                 onSelect={(event) => {
@@ -281,9 +290,12 @@ function SiteFooter({ maxWidth }) {
           <Text>&copy; {new Date().getFullYear()} AgroTab</Text>
         </div>
         <div className={styles.footerLinks}>
-          <Link href="mailto:contato@agrotab.com.br">Contato</Link>
+          <Link href="/contato">Contato</Link>
           <Link href="/sobre">Sobre</Link>
+          <Link href="/faq">FAQ</Link>
+          <Link href="/termos-de-uso">Termos de Uso</Link>
           <Link href="/status">Status</Link>
+          <Link href="/recentes/rss">RSS</Link>
         </div>
       </div>
     </footer>

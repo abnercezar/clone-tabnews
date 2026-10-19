@@ -105,6 +105,42 @@ describe("`models/authorization.js`", () => {
       });
     });
 
+    test("read:user includes balances when present", () => {
+      const createdUser = {
+        features: ["read:user"],
+      };
+
+      const resource = {
+        id: 1,
+        username: "resource",
+        features: ["read:user"],
+        tabcoins: 12,
+        tabcash: 3,
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+        email: "resource@resource.com",
+        password: "resource",
+      };
+
+      const result = authorization.filterOutput(
+        createdUser,
+        "read:user",
+        resource,
+      );
+
+      expect(result).toEqual({
+        id: 1,
+        username: "resource",
+        features: ["read:user"],
+        tabcoins: 12,
+        tabcash: 3,
+        created_at: "2026-01-01T00:00:00.000Z",
+        updated_at: "2026-01-01T00:00:00.000Z",
+      });
+      expect(result.password).toBeUndefined();
+      expect(result.email).toBeUndefined();
+    });
+
     test("read:user:self never leaks password", () => {
       const createdUser = {
         id: "user-1",

@@ -119,9 +119,10 @@ async function expireById(sessionId) {
   }
 }
 
-async function expireAllFromUserId(userId) {
-  const results = await database.query({
-    text: `
+async function expireAllFromUserId(userId, options = {}) {
+  const results = await database.query(
+    {
+      text: `
       UPDATE
         sessions
       SET
@@ -133,8 +134,10 @@ async function expireAllFromUserId(userId) {
       RETURNING
         *
     ;`,
-    values: [userId],
-  });
+      values: [userId],
+    },
+    options,
+  );
 
   return results.rows;
 }

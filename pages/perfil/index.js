@@ -80,7 +80,15 @@ function ProfileForm({ user, mutate }) {
       setUsername(responseBody.username);
       setEmail(responseBody.email);
       setPassword("");
-      setSuccessMessage("Perfil atualizado.");
+
+      const emailPendingConfirmation =
+        email.trim().toLowerCase() !== responseBody.email.toLowerCase();
+
+      setSuccessMessage(
+        emailPendingConfirmation
+          ? "Perfil atualizado. Enviamos um link de confirmação para o novo e-mail."
+          : "Perfil atualizado.",
+      );
       await mutate();
     } catch {
       setErrorMessage(

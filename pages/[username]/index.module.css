@@ -1,0 +1,62 @@
+.mainFlash {
+  width: 100%;
+  margin-bottom: var(--base-size-24, 24px);
+}
+
+.header {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--base-size-8, 8px);
+  margin-bottom: var(--base-size-16, 16px);
+  align-items: center;
+}
+
+.title {
+  word-break: break-word;
+  margin: 0;
+}
+
+.featuresGroup {
+  display: flex;
+  align-self: center;
+}
+
+.optionsButton {
+  margin-left: auto;
+  padding-inline: var(--base-size-4, 4px);
+  align-self: center;
+}
+
+.statsRow {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  word-break: break-word;
+  flex-wrap: wrap;
+  gap: var(--base-size-8, 8px);
+  margin-bottom: var(--base-size-16, 16px);
+}
+
+.statsGroup {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--base-size-8, 8px);
+}
+
+.pastTimeWrapper {
+  margin-left: var(--base-size-4, 4px);
+  color: var(--fgColor-muted, #656d76);
+  font-size: var(--text-body-size-small, 12px);
+}
+
+.contentsHeading {
+  margin: 0 0 var(--base-size-16, 16px);
+}
+
+.emptyState {
+  padding-block: 48px;
+  text-align: center;
+}

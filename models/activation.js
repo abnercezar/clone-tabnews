@@ -3,111 +3,93 @@ import database from "infra/database.js";
 import webserver from "infra/webserver.js";
 import { ForbiddenError, NotFoundError } from "infra/errors.js";
 import user from "models/user.js";
-import authorization from "./authorization.js";
+import authorization from "models/authorization.js";
 
 const EXPIRATION_IN_MILLISECONDS = 60 * 15 * 1000; // 15 minutes
 
-async function findOneValidById(tokenId) {
-  const activationTokenObject = await runSelectQuery(tokenId);
+async function findOneById(tokenId) {
+  const results = await database.query({
+    text: `
+      SELECT
+        *
+      FROM
+        user_activation_tokens
+      WHERE
+        id = $1
+      LIMIT
+        1
+    ;`,
+    values: [tokenId],
+  });
 
-  return activationTokenObject;
-
-  async function runSelectQuery(tokenId) {
-    // Try to find any token with this id first to distinguish
-    // between nonexistent token and expired/used token.
-    const resultsById = await database.query({
-      text: `
-        SELECT
-          *
-        FROM
-          user_activation_tokens
-        WHERE
-          id = $1
-        LIMIT 1
-      ;`,
-      values: [tokenId],
+  if (results.rows.length === 0) {
+    throw new NotFoundError({
+      message:
+        "O token de ativação informado não foi encontrado ou é inválido.",
+      action: "Faça login novamente para receber um novo token por e-mail.",
     });
-
-    if (resultsById.rows.length === 0) {
-      throw new NotFoundError({
-        message:
-          "O token de ativação informado não foi encontrado ou é inválido.",
-        action: "Faça um novo cadastro",
-      });
-    }
-
-    const results = await database.query({
-      text: `
-        SELECT
-          *
-        FROM
-          user_activation_tokens
-        WHERE
-          id = $1
-          AND expires_at > NOW()
-          AND used_at IS NULL
-        LIMIT 1
-      ;`,
-      values: [tokenId],
-    });
-
-    if (results.rows.length === 0) {
-      throw new NotFoundError({
-        message:
-          "O token de ativação informado não foi encontrado no sistema ou expirou.",
-        action: "Faça um novo cadastro",
-      });
-    }
-
-    return results.rows[0];
   }
+
+  return results.rows[0];
+}
+
+async function findOneValidById(tokenId) {
+  const tokenById = await findOneById(tokenId);
+
+  if (tokenById.used_at) {
+    throw new NotFoundError({
+      message:
+        "O token de ativação informado não foi encontrado no sistema ou expirou.",
+      action: "Faça login novamente para receber um novo token por e-mail.",
+    });
+  }
+
+  if (new Date(tokenById.expires_at).getTime() <= Date.now()) {
+    throw new NotFoundError({
+      message:
+        "O token de ativação informado não foi encontrado no sistema ou expirou.",
+      action: "Faça login novamente para receber um novo token por e-mail.",
+    });
+  }
+
+  return tokenById;
 }
 
 async function create(userId) {
   const expiresAt = new Date(Date.now() + EXPIRATION_IN_MILLISECONDS);
 
-  const newToken = await runInsertQuery(userId, expiresAt);
-  return newToken;
+  const results = await database.query({
+    text: `
+      INSERT INTO
+        user_activation_tokens (user_id, expires_at)
+      VALUES
+        ($1, $2)
+      RETURNING
+        *
+    ;`,
+    values: [userId, expiresAt],
+  });
 
-  async function runInsertQuery(userId, expiresAt) {
-    const results = await database.query({
-      text: `
-        INSERT INTO
-          user_activation_tokens (user_id, expires_at)
-        VALUES
-          ($1, $2)
-        RETURNING
-          *
-      `,
-      values: [userId, expiresAt],
-    });
-
-    return results.rows[0];
-  }
+  return results.rows[0];
 }
 
 async function markTokenAsUsed(activationTokenId) {
-  const usedActivationToken = await runUpdateQuery(activationTokenId);
-  return usedActivationToken;
+  const results = await database.query({
+    text: `
+      UPDATE
+        user_activation_tokens
+      SET
+        used_at = timezone('utc', now()),
+        updated_at = timezone('utc', now())
+      WHERE
+        id = $1
+      RETURNING
+        *
+    ;`,
+    values: [activationTokenId],
+  });
 
-  async function runUpdateQuery(activationTokenId) {
-    const results = await database.query({
-      text: `
-        UPDATE
-          user_activation_tokens
-        SET
-            used_at = timezone('utc', now()),
-          updated_at = timezone('utc', now())
-        WHERE
-          id = $1
-          RETURNING
-          *
-      `,
-      values: [activationTokenId],
-    });
-
-    return results.rows[0];
-  }
+  return results.rows[0];
 }
 
 async function activateUserByUserId(userId) {
@@ -120,27 +102,15 @@ async function activateUserByUserId(userId) {
     });
   }
 
-  const activatedUser = await user.setFeatures(userId, [
-    "create:session",
-    "read:session",
-    "update:user",
-    "create:content",
-    "read:content",
-    "update:content",
-    "delete:content",
-    "create:sponsorship",
-    "read:sponsorship",
-    "read:recovery_token",
-  ]);
-  return activatedUser;
+  return await user.setFeatures(userId, authorization.defaultActivatedFeatures);
 }
 
-async function sendEmailToUser(user, activationToken) {
+async function sendEmailToUser(userObject, activationToken) {
   await email.send({
     from: "Agrotab <contato@agrotab.com.br>",
-    to: user.email,
+    to: userObject.email,
     subject: "Ative seu cadastro Agrotab",
-    text: `${user.username}, clique no link abaixo para ativar seu cadastro no Agrotab:
+    text: `${userObject.username}, clique no link abaixo para ativar seu cadastro no Agrotab:
 
 ${webserver.origin}/cadastro/ativar/${activationToken.id}
 
@@ -149,15 +119,42 @@ Equipe Agrotab`,
   });
 }
 
+async function createAndSendActivationEmail(userObject) {
+  const activationToken = await create(userObject.id);
+  await sendEmailToUser(userObject, activationToken);
+  return activationToken;
+}
+
+async function activateUserUsingTokenId(tokenId) {
+  const tokenById = await findOneById(tokenId);
+
+  // Idempotente como no TabNews: link já usado continua 200.
+  if (tokenById.used_at) {
+    return tokenById;
+  }
+
+  if (new Date(tokenById.expires_at).getTime() <= Date.now()) {
+    throw new NotFoundError({
+      message:
+        "O token de ativação informado não foi encontrado no sistema ou expirou.",
+      action: "Faça login novamente para receber um novo token por e-mail.",
+    });
+  }
+
+  await activateUserByUserId(tokenById.user_id);
+  return await markTokenAsUsed(tokenId);
+}
+
 const activation = {
   create,
   sendEmailToUser,
+  createAndSendActivationEmail,
+  findOneById,
   findOneValidById,
   markTokenAsUsed,
   activateUserByUserId,
+  activateUserUsingTokenId,
+  EXPIRATION_IN_MILLISECONDS,
 };
-
-// export the expiration constant so tests can reference it
-activation.EXPIRATION_IN_MILLISECONDS = EXPIRATION_IN_MILLISECONDS;
 
 export default activation;

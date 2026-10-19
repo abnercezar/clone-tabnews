@@ -88,6 +88,7 @@ async function injectAuthenticatedUser(request) {
   request.context = {
     ...request.context,
     user: userObject,
+    clientIp: getClientIp(request),
   };
 }
 
@@ -96,6 +97,7 @@ function injectAnonymousUser(request) {
     features: [
       "read:activation_token",
       "read:recovery_token",
+      "read:email_confirmation_token",
       "create:session",
       "create:user",
       "read:content",
@@ -107,6 +109,7 @@ function injectAnonymousUser(request) {
   request.context = {
     ...request.context,
     user: anonymousUserObject,
+    clientIp: getClientIp(request),
   };
 }
 

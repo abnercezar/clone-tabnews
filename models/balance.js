@@ -22,6 +22,37 @@ const sqlFunctionMap = {
   default: "get_content_current_tabcoins",
 };
 
+async function findAllByOriginatorId(originatorId, options = {}) {
+  const where = Array.isArray(originatorId)
+    ? "WHERE originator_id = ANY($1)"
+    : "WHERE originator_id = $1";
+  const results = await database.query(
+    {
+      text: `
+      SELECT * FROM (
+        SELECT id, recipient_id, amount, originator_type, originator_id,
+          'user:tabcoin' AS balance_type
+        FROM user_tabcoin_operations
+        ${where}
+      UNION ALL
+        SELECT id, recipient_id, amount, originator_type, originator_id,
+          'user:tabcash' AS balance_type
+        FROM user_tabcash_operations
+        ${where}
+      UNION ALL
+        SELECT id, recipient_id, amount, originator_type, originator_id,
+          CONCAT('content:tabcoin:', balance_type) AS balance_type
+        FROM content_tabcoin_operations
+        ${where}
+      ) AS all_operations;
+    `,
+      values: [originatorId],
+    },
+    options,
+  );
+  return results.rows;
+}
+
 async function create(
   { balanceType, recipientId, amount, originatorType, originatorId },
   options = {},
@@ -168,11 +199,28 @@ async function rateContent(
   };
 }
 
+// Reverte uma operação inserindo o amount invertido (ledger append-only).
+// Gap vs TabNews: findAllByOriginatorId não inclui ad_tabcash_operations
+// (paridade com TN; ads usam originator próprio e raramente entram no nuke).
+async function undo(balanceOperation, options = {}) {
+  const invertedBalanceOperation = {
+    balanceType: balanceOperation.balance_type,
+    recipientId: balanceOperation.recipient_id,
+    amount: balanceOperation.amount * -1,
+    originatorType: "event",
+    originatorId: options.event.id,
+  };
+
+  return await create(invertedBalanceOperation, options);
+}
+
 const balance = {
+  findAllByOriginatorId,
   create,
   getUserBalances,
   getContentTabcoinsCreditDebit,
   rateContent,
+  undo,
 };
 
 export default balance;

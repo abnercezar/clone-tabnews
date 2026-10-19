@@ -47,15 +47,22 @@ async function findOneById(id, options = {}) {
 }
 
 // Busca um usuário pelo username
-async function findOneByUsername(username) {
+async function findOneByUsername(username, options = {}) {
   const userFound = await runSelectQuery(username);
+
+  if (options.withBalances) {
+    const balances = await balance.getUserBalances(userFound.id, options);
+    userFound.tabcoins = balances.tabcoins;
+    userFound.tabcash = balances.tabcash;
+  }
 
   return userFound;
 
   // Executa a consulta no banco de dados para buscar o usuário
   async function runSelectQuery(username) {
-    const results = await database.query({
-      text: `
+    const results = await database.query(
+      {
+        text: `
         SELECT
           *
         FROM
@@ -64,8 +71,10 @@ async function findOneByUsername(username) {
           LOWER(username) = LOWER($1)
         LIMIT 1
         ;`,
-      values: [username],
-    });
+        values: [username],
+      },
+      options,
+    );
 
     if (results.rowCount === 0) {
       // Lança erro se o usuário não for encontrado
@@ -148,41 +157,66 @@ async function create(userInputValues) {
   }
 
   function injectDefaultFeaturesInObject(userInputValues) {
-    userInputValues.features = ["read:activation_token", "read:recovery_token"];
+    userInputValues.features = [
+      "read:activation_token",
+      "read:recovery_token",
+      "read:email_confirmation_token",
+    ];
   }
 }
 
 // Valida se o user é válido
-async function update(username, userInputValues) {
-  const currentUser = await findOneByUsername(username);
+async function update(username, userInputValues, options = {}) {
+  const currentUser = await findOneByUsername(username, options);
+  const valuesToApply = { ...userInputValues };
 
-  if ("username" in userInputValues) {
-    validator.username(userInputValues.username);
-    await validateUniqueUsername(userInputValues.username, currentUser.id);
+  if ("username" in valuesToApply) {
+    validator.username(valuesToApply.username);
+    await validateUniqueUsername(valuesToApply.username, currentUser.id);
   }
 
-  if ("email" in userInputValues) {
-    validator.email(userInputValues.email);
-    await validateUniqueEmail(userInputValues.email, currentUser.id);
+  let pendingEmailConfirmation = null;
+
+  if ("email" in valuesToApply) {
+    validator.email(valuesToApply.email);
+
+    const emailChanged =
+      valuesToApply.email.toLowerCase() !== currentUser.email.toLowerCase();
+
+    if (emailChanged) {
+      await validateUniqueEmail(valuesToApply.email, currentUser.id);
+
+      if (!options.skipEmailConfirmation) {
+        // A rota dispara o e-mail; evita dependência circular user ↔ email-confirmation.
+        pendingEmailConfirmation = valuesToApply.email;
+        delete valuesToApply.email;
+      }
+    }
   }
 
-  if ("password" in userInputValues) {
-    validator.password(userInputValues.password);
-    await hashPasswordInObject(userInputValues);
+  if ("password" in valuesToApply) {
+    validator.password(valuesToApply.password);
+    await hashPasswordInObject(valuesToApply);
   }
 
-  const userWithNewValues = { ...currentUser, ...userInputValues };
+  const userWithNewValues = { ...currentUser, ...valuesToApply };
 
   // Segurança: o UPDATE sempre usa o id do registro carregado pelo username
   // autorizado, nunca um id que tenha vindo no corpo da requisição.
   userWithNewValues.id = currentUser.id;
 
-  const updatedUser = await runUpdateQuery(userWithNewValues);
+  const updatedUser = await runUpdateQuery(userWithNewValues, options);
+
+  if (pendingEmailConfirmation) {
+    updatedUser.pending_email_confirmation = pendingEmailConfirmation;
+  }
+
   return updatedUser;
 
-  async function runUpdateQuery(userWithNewValues) {
-    const results = await database.query({
-      text: `
+  async function runUpdateQuery(userWithNewValues, options = {}) {
+    const results = await database.query(
+      {
+        text: `
       UPDATE
       users
       SET
@@ -195,13 +229,15 @@ async function update(username, userInputValues) {
         RETURNING
           *
       `,
-      values: [
-        userWithNewValues.id,
-        userWithNewValues.username,
-        userWithNewValues.email,
-        userWithNewValues.password,
-      ],
-    });
+        values: [
+          userWithNewValues.id,
+          userWithNewValues.username,
+          userWithNewValues.email,
+          userWithNewValues.password,
+        ],
+      },
+      options,
+    );
 
     return results.rows[0];
   }
@@ -275,12 +311,9 @@ async function hashPasswordInObject(userInputValues) {
   userInputValues.password = hashedPassword;
 }
 
-async function setFeatures(userId, features) {
-  const updatedUser = await runUpdateQuery(userId, features);
-  return updatedUser;
-
-  async function runUpdateQuery(userId, features) {
-    const results = await database.query({
+async function setFeatures(userId, features, options = {}) {
+  const results = await database.query(
+    {
       text: `
         UPDATE
           users
@@ -293,34 +326,164 @@ async function setFeatures(userId, features) {
           *
       `,
       values: [userId, features],
-    });
+    },
+    options,
+  );
 
-    return results.rows[0];
-  }
+  return results.rows[0];
 }
 
-async function addFeatures(userId, features) {
-  const updatedUser = await runUpdateQuery(userId, features);
-  return updatedUser;
+async function addFeatures(userId, features, options = {}) {
+  const ids = Array.isArray(userId) ? userId : [userId];
+  const updatedAtSql = options.ignoreUpdatedAt
+    ? ""
+    : "updated_at = timezone('utc', now()),";
 
-  async function runUpdateQuery(userId, features) {
-    const results = await database.query({
+  const results = await database.query(
+    {
       text: `
         UPDATE
           users
         SET
-          features = array_cat(features, $2),
-          updated_at = timezone('utc', now())
+          ${updatedAtSql}
+          features = array_cat(features, $2)
         WHERE
-          id = $1
+          id = ANY($1)
         RETURNING
           *
       `,
-      values: [userId, features],
-    });
+      values: [ids, features],
+    },
+    options,
+  );
 
-    return results.rows[0];
+  let rows = results.rows;
+
+  if (options.withBalances) {
+    rows = await Promise.all(
+      rows.map(async (row) => {
+        const balances = await balance.getUserBalances(row.id, options);
+        return {
+          ...row,
+          tabcoins: balances.tabcoins,
+          tabcash: balances.tabcash,
+        };
+      }),
+    );
   }
+
+  return Array.isArray(userId) ? rows : rows[0];
+}
+
+async function findAllByIds(ids, options = {}) {
+  if (!ids?.length) {
+    return [];
+  }
+
+  const results = await database.query(
+    {
+      text: `
+        SELECT
+          users.*
+          ${
+            options.withBalances
+              ? `,
+          COALESCE(get_user_current_tabcoins(users.id), 0) AS tabcoins,
+          COALESCE(get_user_current_tabcash(users.id), 0) AS tabcash`
+              : ""
+          }
+        FROM
+          users
+        WHERE
+          id = ANY($1)
+        ORDER BY
+          created_at ASC
+      ;`,
+      values: [ids],
+    },
+    options,
+  );
+
+  return results.rows;
+}
+
+// Requisições concorrentes bloqueiam no row lock e reavaliam o WHERE após o
+// commit do vencedor, então só uma atualiza a linha e recompensa o usuário.
+async function updateRewardedAtIfStale(userId, options = {}) {
+  if (!userId) {
+    throw new ValidationError({
+      message: 'É necessário informar o "id" do usuário.',
+      action: "Informe um id válido para atualizar a recompensa diária.",
+    });
+  }
+
+  const results = await database.query(
+    {
+      text: `
+        UPDATE
+          users
+        SET
+          rewarded_at = timezone('utc', now())
+        WHERE
+          id = $1
+          AND rewarded_at < date_trunc('day', now() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC'
+        RETURNING
+          id
+      ;`,
+      values: [userId],
+    },
+    options,
+  );
+
+  return results.rowCount > 0;
+}
+
+async function findAllWithPagination({ page = 1, perPage = 30 } = {}) {
+  const safePage = Math.max(1, Number(page) || 1);
+  const safePerPage = Math.min(100, Math.max(1, Number(perPage) || 30));
+  const offset = (safePage - 1) * safePerPage;
+
+  const countResults = await database.query({
+    text: `
+      SELECT
+        COUNT(*)::INTEGER AS total
+      FROM
+        users
+    ;`,
+  });
+
+  const results = await database.query({
+    text: `
+      SELECT
+        users.*,
+        COALESCE(get_user_current_tabcoins(users.id), 0) AS tabcoins,
+        COALESCE(get_user_current_tabcash(users.id), 0) AS tabcash
+      FROM
+        users
+      ORDER BY
+        users.created_at DESC
+      LIMIT
+        $1
+      OFFSET
+        $2
+    ;`,
+    values: [safePerPage, offset],
+  });
+
+  const totalRows = countResults.rows[0].total;
+  const lastPage = Math.max(1, Math.ceil(totalRows / safePerPage));
+
+  return {
+    rows: results.rows,
+    pagination: {
+      currentPage: safePage,
+      perPage: safePerPage,
+      totalRows,
+      lastPage,
+      previousPage: safePage > 1 ? safePage - 1 : null,
+      nextPage: safePage < lastPage ? safePage + 1 : null,
+    },
+  };
 }
 
 // Exporta as funções do modelo de usuário
@@ -329,9 +492,12 @@ const user = {
   findOneById,
   findOneByUsername,
   findOneByEmail,
+  findAllByIds,
+  findAllWithPagination,
   update,
   setFeatures,
   addFeatures,
+  updateRewardedAtIfStale,
 };
 
 export default user;

@@ -2,6 +2,7 @@ import { createRouter } from "next-connect";
 import controller from "infra/controller.js";
 import authentication from "models/authentication.js";
 import authorization from "models/authorization.js";
+import activation from "models/activation.js";
 import session from "models/session.js";
 
 import { ForbiddenError, ValidationError } from "infra/errors";
@@ -23,6 +24,17 @@ async function postHandler(request, response) {
   );
 
   if (!authorization.can(authenticatedUser, "create:session")) {
+    // Paridade TabNews: login com senha correta reenvia o e-mail de ativação.
+    if (authorization.can(authenticatedUser, "read:activation_token")) {
+      await activation.createAndSendActivationEmail(authenticatedUser);
+
+      throw new ForbiddenError({
+        message: "O seu usuário ainda não está ativado.",
+        action:
+          "Verifique seu e-mail, pois acabamos de enviar um novo convite de ativação.",
+      });
+    }
+
     throw new ForbiddenError({
       message: "Você não possui permissão para fazer login.",
       action: "Contate o suporte caso você acredite que isso seja um erro.",

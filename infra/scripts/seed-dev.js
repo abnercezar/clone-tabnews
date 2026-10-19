@@ -34,9 +34,32 @@ const ACTIVATED_FEATURES = [
   "delete:content",
   "create:sponsorship",
   "read:sponsorship",
+  "read:recovery_token",
+];
+
+const ADMIN_FEATURES = [
+  ...ACTIVATED_FEATURES,
+  "update:user:others",
+  "delete:content:others",
+  "update:content:others",
+  "create:migration",
+  "read:migration",
+  "read:status:all",
+  "read:user:list",
+  "ban:user",
+  "read:firewall",
+  "review:firewall",
 ];
 
 const USERS = [
+  {
+    username: "admin",
+    email: "admin@agrotab.local",
+    tabcoins: 100,
+    tabcash: 500,
+    daysAgo: 60,
+    features: ADMIN_FEATURES,
+  },
   {
     username: "produtorsoja",
     email: "produtorsoja@agrotab.local",
@@ -329,9 +352,11 @@ async function findUser(client, username) {
 }
 
 async function ensureUser(client, userSeed, passwordHash) {
-  const features = userSeed.nuked
-    ? [...ACTIVATED_FEATURES, "nuked"]
-    : ACTIVATED_FEATURES;
+  const features = userSeed.features
+    ? userSeed.features
+    : userSeed.nuked
+      ? [...ACTIVATED_FEATURES, "nuked"]
+      : ACTIVATED_FEATURES;
   const existing = await findUser(client, userSeed.username);
   if (existing) {
     if (userSeed.daysAgo != null) {

@@ -24,7 +24,7 @@ describe("`models/notification.js`", () => {
     });
 
     expect(url).toBe(
-      `${webserver.origin}/conteudos/produtor/manejo-de-solo#comentario-11111111-1111-4111-8111-111111111111`,
+      `${webserver.origin}/produtor/manejo-de-solo#comentario-11111111-1111-4111-8111-111111111111`,
     );
   });
 });

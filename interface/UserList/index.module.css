@@ -1,0 +1,52 @@
+.list {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: min-content minmax(0, 1fr);
+  padding: 0;
+  margin: 0;
+}
+
+.item {
+  display: contents;
+}
+
+.item::before {
+  content: counter(list-item) ".";
+  counter-increment: list-item;
+  font-weight: 600;
+  width: min-content;
+  margin-left: auto;
+}
+
+.username {
+  word-break: break-word;
+}
+
+.link {
+  font-weight: 500;
+}
+
+.link:link {
+  color: var(--fgColor-default, #1f2328);
+}
+
+.link:visited {
+  color: var(--fgColor-muted, #656d76);
+}
+
+.nukedLabel {
+  margin-left: 0.25rem;
+}
+
+.metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  font-size: var(--text-body-size-small, 12px);
+  white-space: nowrap;
+  color: var(--fgColor-muted, #656d76);
+}
+
+.actions {
+  margin-top: 0.25rem;
+}
