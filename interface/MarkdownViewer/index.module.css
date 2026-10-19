@@ -1,0 +1,40 @@
+.viewer {
+  font-size: 16px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  color: var(--fgColor-default, #1f2328);
+}
+
+.viewer :global(.markdown-body) {
+  background: transparent;
+}
+
+.viewer :global(.markdown-body > :first-child) {
+  margin-top: 0;
+}
+
+.viewer :global(.markdown-body > :last-child) {
+  margin-bottom: 0;
+}
+
+/* Imagens externas via Markdown `![alt](url)` — como no TabNews. */
+.viewer :global(.markdown-body img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  display: block;
+  margin: 1rem 0;
+}
+
+.viewer :global(.markdown-body a) {
+  color: var(--fgColor-accent, #0969da);
+}
+
+.viewer :global(.markdown-body pre) {
+  overflow-x: auto;
+}
+
+.viewer :global(.markdown-body table) {
+  display: block;
+  overflow-x: auto;
+}

@@ -76,11 +76,6 @@
   border-left: 2px solid var(--borderColor-muted, #d0d7de);
 }
 
-.commentTitle {
-  margin: 0;
-  font-weight: 600;
-}
-
 .replyBox {
   display: flex;
   flex-direction: column;
@@ -130,7 +125,6 @@
 
 .contentBody {
   margin: 0;
-  white-space: pre-wrap;
   overflow-wrap: anywhere;
   font-size: 16px;
   line-height: 1.7;

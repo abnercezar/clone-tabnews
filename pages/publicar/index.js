@@ -1,4 +1,5 @@
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import {
   Banner,
   Button,
@@ -6,14 +7,20 @@ import {
   FormControl,
   LinkButton,
   TextInput,
-  Textarea,
   Spinner,
   Stack,
   Heading,
   Flash,
+  Text,
 } from "@primer/react";
 import DefaultLayout from "interface/DefaultLayout";
 import useUser from "interface/useUser";
+
+const CommentEditor = dynamic(() => import("interface/CommentEditor"), {
+  ssr: false,
+});
+
+const MAX_BODY_LENGTH = 20000;
 
 export default function PublishPage() {
   const { user, isLoading } = useUser();
@@ -70,10 +77,19 @@ function PublishForm() {
   const [isAd, setIsAd] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isTooLong = body.length > MAX_BODY_LENGTH;
 
   async function handleSubmit(event) {
     event.preventDefault();
     setErrorMessage(null);
+
+    if (isTooLong) {
+      setErrorMessage(
+        `O conteúdo ultrapassa o limite de ${MAX_BODY_LENGTH} caracteres.`,
+      );
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -134,14 +150,28 @@ function PublishForm() {
         </FormControl>
         <FormControl required>
           <FormControl.Label>Conteúdo</FormControl.Label>
-          <Textarea
+          <CommentEditor
             value={body}
-            maxLength={20000}
-            onChange={(event) => setBody(event.target.value)}
-            rows={12}
-            block
+            onChange={setBody}
+            initialHeight="45vh"
+            isInvalid={isTooLong}
+            autofocus={false}
           />
+          <FormControl.Caption>
+            Markdown no estilo TabNews. Para imagens hospedadas em outro lugar
+            use ![descrição](https://url-da-imagem).
+          </FormControl.Caption>
         </FormControl>
+
+        <Text
+          sx={{
+            color: isTooLong ? "danger.fg" : "fg.muted",
+            fontSize: 0,
+          }}
+          aria-live="polite"
+        >
+          {body.length}/{MAX_BODY_LENGTH}
+        </Text>
 
         <FormControl>
           <FormControl.Label htmlFor="is-ad">
@@ -159,7 +189,13 @@ function PublishForm() {
         </FormControl>
 
         <Stack.Item>
-          <Button type="submit" variant="primary" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={
+              isSubmitting || isTooLong || !title.trim() || !body.trim()
+            }
+          >
             {isSubmitting ? "Publicando..." : "Publicar"}
           </Button>
         </Stack.Item>
