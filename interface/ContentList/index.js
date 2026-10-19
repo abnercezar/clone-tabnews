@@ -5,7 +5,7 @@ import classes from "./index.module.css";
 
 function excerpt(text, maxLength = 255) {
   const plain = String(text || "")
-    .replace(/[#*_`>~[\]()!]/g, " ")
+    .replace(/[#*_`>~()!\u005B\u005D]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 
@@ -28,7 +28,7 @@ export default function ContentList({ contentList, pagination }) {
         start={listNumberStart}
         key={pagination ? `content-list-${listNumberStart}` : "content-list"}
       >
-        {contentList.map((content) => (
+        {(contentList || []).map((content) => (
           <ContentListItem key={content.id} content={content} />
         ))}
       </ol>

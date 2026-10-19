@@ -193,7 +193,7 @@ function updateData(network, data, config) {
 
   let totalVotes = 0;
 
-  const filteredEdges = data.edges.filter((edge) => {
+  const filteredEdges = (data.edges || []).filter((edge) => {
     if (
       (edge.type === "network" && config.network) ||
       (edge.value >= config.edgeVotesMin && totalVotes < config.maxVotes)
@@ -207,7 +207,7 @@ function updateData(network, data, config) {
     return false;
   });
 
-  data.nodes.forEach((node) => {
+  (data.nodes || []).forEach((node) => {
     if (
       !linkedNodes.has(node.id) ||
       (node.group === "users" && node.votes < config.userVotesMin) ||
@@ -256,7 +256,7 @@ function updateData(network, data, config) {
 }
 
 function applyEdgeStyles(data) {
-  data.edges.forEach((edge) => {
+  (data.edges || []).forEach((edge) => {
     edge.color =
       edge.type === "network"
         ? "cyan"
@@ -268,7 +268,7 @@ function applyEdgeStyles(data) {
       edge.arrows = "to";
     }
   });
-  data.nodes.forEach((node) => {
+  (data.nodes || []).forEach((node) => {
     if (node.group === "nuked" && node.username) {
       node.label = node.username;
     }
