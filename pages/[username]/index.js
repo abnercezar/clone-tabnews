@@ -130,9 +130,13 @@ export default function UserProfilePage() {
     loadContents();
   }, [router.isReady, usernameParam, page, notFound]);
 
+  const usernameReady = router.isReady && isValidUsername(usernameParam);
+  const showNotFound =
+    notFound || (router.isReady && !isValidUsername(usernameParam));
+
   if (
     !router.isReady ||
-    (isValidUsername(usernameParam) && !userFound && !notFound && !errorMessage)
+    (usernameReady && !userFound && !notFound && !errorMessage)
   ) {
     return (
       <DefaultLayout metadata={{ title: "Perfil" }}>
@@ -141,7 +145,7 @@ export default function UserProfilePage() {
     );
   }
 
-  if (notFound) {
+  if (showNotFound) {
     return (
       <DefaultLayout
         metadata={{
@@ -168,6 +172,14 @@ export default function UserProfilePage() {
     return (
       <DefaultLayout metadata={{ title: "Perfil" }}>
         <Flash variant="danger">{errorMessage}</Flash>
+      </DefaultLayout>
+    );
+  }
+
+  if (!userFound) {
+    return (
+      <DefaultLayout metadata={{ title: "Perfil" }}>
+        <Spinner />
       </DefaultLayout>
     );
   }
