@@ -34,7 +34,8 @@ Temas adjacentes (produtividade, empreendedorismo rural, educação no campo) ta
 
 - **Revise a escrita:** gramática e digitação claras facilitam a leitura.
 - **Formate com Markdown:** títulos, listas, trechos destacados e links de referência.
-- **Use fontes e imagens quando fizer sentido:** credibilidade e contexto importam no agro.
+- **Inclua imagens** hospedadas em outro lugar com \`![descrição](https://url-da-imagem)\` (como no TabNews).
+- **Use fontes** quando fizer sentido: credibilidade e contexto importam no agro.
 - **Confirme os fatos:** se for opinião, deixe isso explícito.`,
   },
   {

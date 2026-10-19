@@ -1,27 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Editor } from "@bytemd/react";
-import breaks from "@bytemd/plugin-breaks";
-import gemoji from "@bytemd/plugin-gemoji";
-import gfm from "@bytemd/plugin-gfm";
-import gfmLocale from "@bytemd/plugin-gfm/locales/pt_BR.json";
-import highlightSsr from "@bytemd/plugin-highlight-ssr";
-import math from "@bytemd/plugin-math";
-import mathLocale from "@bytemd/plugin-math/locales/pt_BR.json";
-import mermaid from "@bytemd/plugin-mermaid";
-import mermaidLocale from "@bytemd/plugin-mermaid/locales/pt_BR.json";
 import locale from "bytemd/locales/pt_BR.json";
+import { markdownPlugins } from "interface/markdownPlugins";
 import "bytemd/dist/index.css";
 import "katex/dist/katex.css";
+import "highlight.js/styles/github.css";
 import styles from "./index.module.css";
-
-const plugins = [
-  gfm({ locale: gfmLocale }),
-  highlightSsr(),
-  math({ locale: mathLocale }),
-  breaks(),
-  gemoji(),
-  mermaid({ locale: mermaidLocale }),
-];
 
 export default function CommentEditor({
   value,
@@ -29,6 +13,7 @@ export default function CommentEditor({
   mode = "split",
   initialHeight = "30vh",
   isInvalid = false,
+  autofocus = true,
 }) {
   const editorRef = useRef(null);
   const [isWriteOnly, setIsWriteOnly] = useState(mode === "split");
@@ -70,13 +55,13 @@ export default function CommentEditor({
     >
       <Editor
         value={value}
-        plugins={plugins}
+        plugins={markdownPlugins}
         locale={locale}
         mode={mode}
         placeholder=""
         onChange={onChange}
         editorConfig={{
-          autofocus: true,
+          autofocus,
           autocapitalize: "sentences",
           inputStyle: "contenteditable",
           spellcheck: true,

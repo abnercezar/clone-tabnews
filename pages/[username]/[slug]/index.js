@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import {
   ActionList,
@@ -29,6 +30,10 @@ import useUser from "interface/useUser";
 import { formatReadingTime } from "interface/readingTime";
 import { splitComment } from "interface/commentText";
 import ui from "interface/styles.module.css";
+
+const MarkdownViewer = dynamic(() => import("interface/MarkdownViewer"), {
+  ssr: false,
+});
 
 export default function ContentPage() {
   const router = useRouter();
@@ -162,9 +167,9 @@ export default function ContentPage() {
                 <Heading as="h1" className={ui.articleTitle}>
                   {content.title}
                 </Heading>
-                <Text as="p" className={ui.contentBody}>
-                  {content.body}
-                </Text>
+                <div className={ui.contentBody}>
+                  <MarkdownViewer value={content.body} rich />
+                </div>
               </Stack>
             </div>
           </article>
@@ -274,12 +279,9 @@ function CommentItem({ comment: initialComment, user, router, isLoadingUser }) {
           <span>·</span>
           <PastTime date={comment.published_at} />
         </div>
-        <Text className={ui.commentTitle}>{parts.title}</Text>
-        {parts.body && (
-          <Text as="p" className={ui.contentBody}>
-            {parts.body}
-          </Text>
-        )}
+        <div className={ui.contentBody}>
+          <MarkdownViewer value={comment.body} rich />
+        </div>
         <ReplyBox
           isOpen={isReplying}
           onOpen={() => setIsReplying(true)}
@@ -302,7 +304,6 @@ function CommentItem({ comment: initialComment, user, router, isLoadingUser }) {
           )}
         </ReplyBox>
         {replies.map((reply) => {
-          const replyParts = splitComment(reply.body);
           return (
             <article
               key={reply.id}
@@ -315,12 +316,9 @@ function CommentItem({ comment: initialComment, user, router, isLoadingUser }) {
                   <span>·</span>
                   <PastTime date={reply.published_at} />
                 </div>
-                <Text className={ui.commentTitle}>{replyParts.title}</Text>
-                {replyParts.body && (
-                  <Text as="p" className={ui.contentBody}>
-                    {replyParts.body}
-                  </Text>
-                )}
+                <div className={ui.contentBody}>
+                  <MarkdownViewer value={reply.body} rich />
+                </div>
               </Stack>
             </article>
           );
