@@ -186,8 +186,126 @@ Equipe AgroTab`;
   return { subject, text, html };
 }
 
+/**
+ * Avisa o usuário que a conta foi desativada pelo firewall de abuso.
+ * Best-effort: erros de SMTP não propagam.
+ */
+async function sendUserDisabled({ eventId, user: targetUser }) {
+  try {
+    if (!isValidRecipientEmail(targetUser?.email)) {
+      return { sent: false, reason: "invalid_email" };
+    }
+
+    const subject = "Sua conta foi desativada";
+    const text = `${targetUser.username},
+
+Identificamos a criação de muitos usuários em um curto período, então a sua conta foi desativada.
+
+Identificador do evento: ${eventId}
+
+Se acredita que isso foi um engano, contate o suporte do AgroTab.
+
+Atenciosamente,
+Equipe AgroTab`;
+
+    const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"></head>
+<body style="font-family: system-ui, sans-serif; line-height: 1.5; color: #1f2328; max-width: 560px; margin: 0 auto; padding: 24px;">
+  <p>Olá, <strong>${escapeHtml(targetUser.username)}</strong>,</p>
+  <p>Identificamos a criação de muitos usuários em um curto período, então a sua conta foi desativada.</p>
+  <p>Identificador do evento: <code>${escapeHtml(eventId)}</code></p>
+  <p style="font-size: 12px; color: #656d76;">AgroTab — comunidade do agronegócio brasileiro</p>
+</body>
+</html>`;
+
+    await email.send({
+      from: FROM,
+      to: targetUser.email,
+      subject,
+      text,
+      html,
+    });
+
+    return { sent: true };
+  } catch (error) {
+    console.error("[notification] falha ao enviar e-mail de firewall (user)", {
+      name: error?.name,
+      message: error?.message,
+      eventId,
+      userId: targetUser?.id,
+    });
+    return { sent: false, reason: "send_failed" };
+  }
+}
+
+/**
+ * Avisa autores (exceto o originador) que conteúdos foram removidos pelo firewall.
+ * Best-effort: erros de SMTP não propagam.
+ */
+async function sendContentDeletedToUser({ contents, eventId, userId }) {
+  try {
+    const recipient = await user.findOneById(userId);
+    if (!isValidRecipientEmail(recipient?.email)) {
+      return { sent: false, reason: "invalid_email" };
+    }
+
+    const titles = (contents || [])
+      .map((row) => row.title || "(comentário)")
+      .slice(0, 10);
+    const listText = titles.map((title) => `- ${title}`).join("\n");
+
+    const subject = "Conteúdo removido pelo AgroTab";
+    const text = `${recipient.username},
+
+Identificamos atividade abusiva em um curto período e removemos publicações recentes relacionadas.
+
+${listText}
+
+Identificador do evento: ${eventId}
+
+Atenciosamente,
+Equipe AgroTab`;
+
+    const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"></head>
+<body style="font-family: system-ui, sans-serif; line-height: 1.5; color: #1f2328; max-width: 560px; margin: 0 auto; padding: 24px;">
+  <p>Olá, <strong>${escapeHtml(recipient.username)}</strong>,</p>
+  <p>Identificamos atividade abusiva em um curto período e removemos publicações recentes relacionadas.</p>
+  <ul>${titles.map((title) => `<li>${escapeHtml(title)}</li>`).join("")}</ul>
+  <p>Identificador do evento: <code>${escapeHtml(eventId)}</code></p>
+  <p style="font-size: 12px; color: #656d76;">AgroTab — comunidade do agronegócio brasileiro</p>
+</body>
+</html>`;
+
+    await email.send({
+      from: FROM,
+      to: recipient.email,
+      subject,
+      text,
+      html,
+    });
+
+    return { sent: true };
+  } catch (error) {
+    console.error(
+      "[notification] falha ao enviar e-mail de firewall (content)",
+      {
+        name: error?.name,
+        message: error?.message,
+        eventId,
+        userId,
+      },
+    );
+    return { sent: false, reason: "send_failed" };
+  }
+}
+
 const notification = {
   notifyParentContentAuthor,
+  sendUserDisabled,
+  sendContentDeletedToUser,
   // Exportados para testes unitários
   truncateSnippet,
   escapeHtml,

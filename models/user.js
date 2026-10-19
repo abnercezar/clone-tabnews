@@ -334,25 +334,77 @@ async function setFeatures(userId, features, options = {}) {
 }
 
 async function addFeatures(userId, features, options = {}) {
+  const ids = Array.isArray(userId) ? userId : [userId];
+  const updatedAtSql = options.ignoreUpdatedAt
+    ? ""
+    : "updated_at = timezone('utc', now()),";
+
   const results = await database.query(
     {
       text: `
         UPDATE
           users
         SET
-          features = array_cat(features, $2),
-          updated_at = timezone('utc', now())
+          ${updatedAtSql}
+          features = array_cat(features, $2)
         WHERE
-          id = $1
+          id = ANY($1)
         RETURNING
           *
       `,
-      values: [userId, features],
+      values: [ids, features],
     },
     options,
   );
 
-  return results.rows[0];
+  let rows = results.rows;
+
+  if (options.withBalances) {
+    rows = await Promise.all(
+      rows.map(async (row) => {
+        const balances = await balance.getUserBalances(row.id, options);
+        return {
+          ...row,
+          tabcoins: balances.tabcoins,
+          tabcash: balances.tabcash,
+        };
+      }),
+    );
+  }
+
+  return Array.isArray(userId) ? rows : rows[0];
+}
+
+async function findAllByIds(ids, options = {}) {
+  if (!ids?.length) {
+    return [];
+  }
+
+  const results = await database.query(
+    {
+      text: `
+        SELECT
+          users.*
+          ${
+            options.withBalances
+              ? `,
+          COALESCE(get_user_current_tabcoins(users.id), 0) AS tabcoins,
+          COALESCE(get_user_current_tabcash(users.id), 0) AS tabcash`
+              : ""
+          }
+        FROM
+          users
+        WHERE
+          id = ANY($1)
+        ORDER BY
+          created_at ASC
+      ;`,
+      values: [ids],
+    },
+    options,
+  );
+
+  return results.rows;
 }
 
 // Requisições concorrentes bloqueiam no row lock e reavaliam o WHERE após o
@@ -440,6 +492,7 @@ const user = {
   findOneById,
   findOneByUsername,
   findOneByEmail,
+  findAllByIds,
   findAllWithPagination,
   update,
   setFeatures,

@@ -43,6 +43,10 @@ const availableFeatures = [
   // STATUS
   "read:status",
   "read:status:all",
+
+  // FIREWALL
+  "read:firewall",
+  "review:firewall",
 ];
 
 // Conta ativada (paridade TabNews + features agro já usadas no AgroTab).
@@ -71,6 +75,8 @@ const adminFeatures = [
   "read:status:all",
   "read:user:list",
   "ban:user",
+  "read:firewall",
+  "review:firewall",
 ];
 
 function can(user, feature, resource) {
@@ -316,6 +322,44 @@ function filterOutput(user, feature, resource) {
     }
 
     return output;
+  }
+
+  if (feature === "read:firewall") {
+    if (!can(user, feature)) {
+      return undefined;
+    }
+
+    const filterFirewallUser = (listedUser) => ({
+      id: listedUser.id,
+      username: listedUser.username,
+      features: listedUser.features,
+      tabcoins: Number(listedUser.tabcoins ?? 0),
+      tabcash: Number(listedUser.tabcash ?? 0),
+      created_at: listedUser.created_at,
+      updated_at: listedUser.updated_at,
+    });
+
+    const affected = {
+      users: (resource.affected?.users || []).map(filterFirewallUser),
+    };
+
+    if (resource.affected?.contents?.length) {
+      affected.contents = filterOutput(
+        user,
+        "read:content",
+        resource.affected.contents,
+      );
+    }
+
+    const events = (resource.events || []).map((firewallEvent) => {
+      const { originator_ip: _originatorIp, ...safeEvent } = firewallEvent;
+      return safeEvent;
+    });
+
+    return {
+      affected,
+      events,
+    };
   }
 }
 

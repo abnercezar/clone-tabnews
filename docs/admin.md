@@ -20,6 +20,7 @@ Admin (estilo seed do TabNews) inclui ainda:
 - `read:status:all`
 - `read:user:list` (painel `/moderacao/usuarios`)
 - `ban:user` (nuke permanente via `DELETE /api/v1/users/[username]`)
+- `read:firewall` / `review:firewall` (eventos de abuso e revisão)
 
 ### Promover em desenvolvimento
 

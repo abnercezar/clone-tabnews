@@ -47,6 +47,8 @@ const ADMIN_FEATURES = [
   "read:status:all",
   "read:user:list",
   "ban:user",
+  "read:firewall",
+  "review:firewall",
 ];
 
 const USERS = [

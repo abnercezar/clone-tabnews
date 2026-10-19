@@ -88,6 +88,7 @@ async function injectAuthenticatedUser(request) {
   request.context = {
     ...request.context,
     user: userObject,
+    clientIp: getClientIp(request),
   };
 }
 
@@ -108,6 +109,7 @@ function injectAnonymousUser(request) {
   request.context = {
     ...request.context,
     user: anonymousUserObject,
+    clientIp: getClientIp(request),
   };
 }
 

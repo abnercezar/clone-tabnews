@@ -4,6 +4,8 @@ import { ValidationError } from "infra/errors.js";
 import user from "models/user.js";
 import activation from "models/activation.js";
 import authorization from "models/authorization";
+import event from "models/event.js";
+import firewall from "models/firewall";
 
 async function getHandler(request, response) {
   const userTryingToList = request.context.user;
@@ -29,6 +31,15 @@ async function postHandler(request, response) {
   const userTryingToPost = request.context.user;
   const userInputValues = request.body;
   const newUser = await user.create(userInputValues);
+
+  await event.create({
+    type: "create:user",
+    originatorUserId: userTryingToPost.id || newUser.id,
+    originatorIp: request.context.clientIp,
+    metadata: {
+      id: newUser.id,
+    },
+  });
 
   await activation.createAndSendActivationEmail(newUser);
 
@@ -70,6 +81,7 @@ export default createRouter()
       windowMs: TEN_MINUTES,
     }),
     controller.canRequest("create:user"),
+    firewall.canRequest("create:user"),
     postHandler,
   )
   .handler(controller.errorHandlers);

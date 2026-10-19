@@ -286,6 +286,13 @@ async function addFeaturesToUser(userObject, features) {
   return updatedUser;
 }
 
+async function getLastEvent() {
+  const results = await database.query(
+    "SELECT * FROM events ORDER BY created_at DESC LIMIT 1;",
+  );
+  return results.rows[0];
+}
+
 // Exporta funções utilitárias para os testes
 const orchestrator = {
   waitForAllServices,
@@ -300,6 +307,7 @@ const orchestrator = {
   deleteAllEmails,
   getEmails,
   getLastEmail,
+  getLastEvent,
   extractUUID,
   activateUser,
   addFeaturesToUser,

@@ -3,6 +3,7 @@ import controller from "infra/controller.js";
 import database from "infra/database.js";
 import content from "models/content.js";
 import event from "models/event.js";
+import firewall from "models/firewall";
 import notification from "models/notification.js";
 import authorization from "models/authorization.js";
 
@@ -50,10 +51,13 @@ async function postHandler(request, response) {
 
     await event.create(
       {
-        type: "create:content",
+        type: newContent.parent_id
+          ? "create:content:text_child"
+          : "create:content:text_root",
         originatorUserId: userTryingToCreate.id,
-        originatorIp: controller.getClientIp(request),
+        originatorIp: request.context.clientIp,
         metadata: {
+          id: newContent.id,
           content_id: newContent.id,
           parent_id: newContent.parent_id,
         },
@@ -95,6 +99,22 @@ async function postHandler(request, response) {
   return response.status(201).json(secureOutputValues);
 }
 
+function firewallValidationHandler(request, response, next) {
+  if (!request.body?.parent_id) {
+    return firewall.canRequest("create:content:text_root")(
+      request,
+      response,
+      next,
+    );
+  }
+
+  return firewall.canRequest("create:content:text_child")(
+    request,
+    response,
+    next,
+  );
+}
+
 export default createRouter()
   .use(controller.injectAnonymousOrUser)
   .get(controller.canRequest("read:content"), getHandler)
@@ -105,6 +125,7 @@ export default createRouter()
       windowMs: TEN_MINUTES,
     }),
     controller.canRequest("create:content"),
+    firewallValidationHandler,
     postHandler,
   )
   .handler(controller.errorHandlers);

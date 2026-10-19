@@ -78,7 +78,9 @@ describe("Comments", () => {
       ;`,
       values: [comment.id],
     });
-    expect(events.rows.map((row) => row.type)).toEqual(["create:content"]);
+    expect(events.rows.map((row) => row.type)).toEqual([
+      "create:content:text_child",
+    ]);
   });
 
   test("Replies to a comment and rejects a reply to that reply", async () => {

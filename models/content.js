@@ -741,6 +741,120 @@ async function findOneByUsernameAndSlug(username, slug) {
   return results.rows[0];
 }
 
+async function findAllByIds(ids, options = {}) {
+  if (!ids?.length) {
+    return [];
+  }
+
+  const results = await database.query(
+    {
+      text: `
+        SELECT
+          contents.*,
+          users.username AS owner_username,
+          tabcoins_count.total_balance AS tabcoins,
+          tabcoins_count.total_credit AS tabcoins_credit,
+          tabcoins_count.total_debit AS tabcoins_debit
+        FROM
+          contents
+        INNER JOIN
+          users ON contents.owner_id = users.id
+        CROSS JOIN LATERAL
+          get_content_balance_credit_debit(contents.id) AS tabcoins_count
+        WHERE
+          contents.id = ANY($1)
+        ORDER BY
+          contents.created_at ASC
+      ;`,
+      values: [ids],
+    },
+    options,
+  );
+
+  return results.rows;
+}
+
+async function confirmFirewallStatus(contentIds, options = {}) {
+  if (!contentIds?.length) {
+    return [];
+  }
+
+  const results = await database.query(
+    {
+      text: `
+        WITH updated_contents AS (
+          UPDATE contents
+          SET
+            status = 'deleted',
+            updated_at = timezone('utc', now())
+          WHERE
+            id = ANY($1)
+            AND status = 'firewall'
+          RETURNING
+            *
+        )
+        SELECT
+          updated_contents.*,
+          users.username AS owner_username,
+          tabcoins_count.total_balance AS tabcoins,
+          tabcoins_count.total_credit AS tabcoins_credit,
+          tabcoins_count.total_debit AS tabcoins_debit
+        FROM
+          updated_contents
+        INNER JOIN
+          users ON updated_contents.owner_id = users.id
+        CROSS JOIN LATERAL
+          get_content_balance_credit_debit(updated_contents.id) AS tabcoins_count
+      ;`,
+      values: [contentIds],
+    },
+    options,
+  );
+
+  return results.rows;
+}
+
+async function undoFirewallStatus(contentIds, options = {}) {
+  if (!contentIds?.length) {
+    return [];
+  }
+
+  // AgroTab não tem deleted_at: conteúdos no firewall voltavam de published.
+  const results = await database.query(
+    {
+      text: `
+        WITH updated_contents AS (
+          UPDATE contents
+          SET
+            status = 'published',
+            updated_at = timezone('utc', now())
+          WHERE
+            id = ANY($1)
+            AND status = 'firewall'
+          RETURNING
+            *
+        )
+        SELECT
+          updated_contents.*,
+          users.username AS owner_username,
+          tabcoins_count.total_balance AS tabcoins,
+          tabcoins_count.total_credit AS tabcoins_credit,
+          tabcoins_count.total_debit AS tabcoins_debit
+        FROM
+          updated_contents
+        INNER JOIN
+          users ON updated_contents.owner_id = users.id
+        CROSS JOIN LATERAL
+          get_content_balance_credit_debit(updated_contents.id) AS tabcoins_count
+      ;`,
+      values: [contentIds],
+    },
+    options,
+  );
+
+  return results.rows;
+}
+
 const content = {
   create,
   findPublished,
@@ -749,6 +863,9 @@ const content = {
   findChildren,
   findLatestPublishedByOwnerId,
   countPublishedRootByOwner,
+  findAllByIds,
+  confirmFirewallStatus,
+  undoFirewallStatus,
   remove,
   creditOrDebitTabCoins,
 };
