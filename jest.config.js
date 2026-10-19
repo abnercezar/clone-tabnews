@@ -1,7 +1,10 @@
 const dotenv = require("dotenv");
 
+// override: true — se o shell tiver POSTGRES_PORT/EMAIL_* de outra sessão
+// (ex.: auditoria em 5433/1081), o .env.development precisa ganhar.
 dotenv.config({
   path: ".env.development",
+  override: true,
 });
 
 // Firewall dispara com 2 cadastros/publicações no mesmo IP em 5s (estilo TN).
