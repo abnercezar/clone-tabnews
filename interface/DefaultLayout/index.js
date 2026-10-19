@@ -19,6 +19,7 @@ import {
   MoonIcon,
   PersonIcon,
   PlusIcon,
+  ShieldLockIcon,
   SignOutIcon,
   SunIcon,
   ThreeBarsIcon,
@@ -205,6 +206,14 @@ function UserMenu({ user }) {
                 </ActionList.LeadingVisual>
                 Editar perfil
               </ActionList.LinkItem>
+              {user.features?.includes("read:user:list") && (
+                <ActionList.LinkItem href="/moderacao/usuarios/1">
+                  <ActionList.LeadingVisual>
+                    <ShieldLockIcon />
+                  </ActionList.LeadingVisual>
+                  Moderação
+                </ActionList.LinkItem>
+              )}
               <ActionList.Divider />
               <ActionList.Item
                 onSelect={(event) => {

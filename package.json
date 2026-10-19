@@ -19,6 +19,7 @@
     "services:wait:database": "node infra/scripts/wait-for-postgres.js",
     "curso:lessons": "node infra/scripts/fetch-curso-lessons.mjs",
     "seed:dev": "node infra/scripts/seed-dev.js",
+    "admin:promote": "node infra/scripts/promote-admin.js",
     "migrations:create": "node-pg-migrate -m infra/migrations create",
     "migrations:up": "node-pg-migrate -m infra/migrations --envPath .env.development up",
     "migrations:up:dry": "node-pg-migrate -m infra/migrations --envPath .env.development --dry-run up",

@@ -6,8 +6,11 @@ const availableFeatures = [
   "read:user",
   "read:user:self",
   "read:user:updated",
+  "read:user:list",
   "update:user",
   "update:user:others",
+  "ban:user",
+  "nuked",
 
   // SESSION
   "create:session",
@@ -20,6 +23,7 @@ const availableFeatures = [
   "update:content",
   "delete:content",
   "delete:content:others",
+  "update:content:others",
   "create:sponsorship",
   "read:sponsorship",
 
@@ -36,6 +40,33 @@ const availableFeatures = [
   // STATUS
   "read:status",
   "read:status:all",
+];
+
+// Conta ativada (paridade TabNews + features agro já usadas no AgroTab).
+const defaultActivatedFeatures = [
+  "create:session",
+  "read:session",
+  "update:user",
+  "create:content",
+  "read:content",
+  "update:content",
+  "delete:content",
+  "create:sponsorship",
+  "read:sponsorship",
+  "read:recovery_token",
+];
+
+// Privilegiado / admin (estilo seed admin do TabNews, adaptado ao AgroTab).
+const adminFeatures = [
+  ...defaultActivatedFeatures,
+  "update:user:others",
+  "delete:content:others",
+  "update:content:others",
+  "create:migration",
+  "read:migration",
+  "read:status:all",
+  "read:user:list",
+  "ban:user",
 ];
 
 function can(user, feature, resource) {
@@ -72,6 +103,24 @@ function filterOutput(user, feature, resource) {
       created_at: resource.created_at,
       updated_at: resource.updated_at,
     };
+  }
+
+  if (feature === "read:user:list") {
+    const filterListedUser = (listedUser) => ({
+      id: listedUser.id,
+      username: listedUser.username,
+      features: listedUser.features,
+      tabcoins: Number(listedUser.tabcoins ?? 0),
+      tabcash: Number(listedUser.tabcash ?? 0),
+      created_at: listedUser.created_at,
+      updated_at: listedUser.updated_at,
+    });
+
+    if (Array.isArray(resource)) {
+      return resource.map(filterListedUser);
+    }
+
+    return filterListedUser(resource);
   }
 
   if (feature === "read:user:self") {
@@ -275,6 +324,9 @@ function validateResource(resource) {
 const authorization = {
   can,
   filterOutput,
+  availableFeatures,
+  defaultActivatedFeatures,
+  adminFeatures,
 };
 
 export default authorization;

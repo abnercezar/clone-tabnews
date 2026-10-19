@@ -10,13 +10,8 @@ async function patchHandler(request, response) {
   // Rejeita um token malformado com 400 em vez de deixar o Postgres gerar 500.
   validator.uuid(activationTokenId);
 
-  const validActivationToken =
-    await activation.findOneValidById(activationTokenId);
-
-  await activation.activateUserByUserId(validActivationToken.user_id);
-
   const usedActivationToken =
-    await activation.markTokenAsUsed(activationTokenId);
+    await activation.activateUserUsingTokenId(activationTokenId);
 
   const secureOutputValues = authorization.filterOutput(
     request.context.user,

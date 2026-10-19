@@ -28,7 +28,7 @@ describe("`PATCH /api/v1/activations/[token_id]`", () => {
         name: "NotFoundError",
         message:
           "O token de ativação informado não foi encontrado ou é inválido.",
-        action: "Faça um novo cadastro",
+        action: "Faça login novamente para receber um novo token por e-mail.",
         status_code: 404,
       });
     });
@@ -58,7 +58,7 @@ describe("`PATCH /api/v1/activations/[token_id]`", () => {
         name: "NotFoundError",
         message:
           "O token de ativação informado não foi encontrado no sistema ou expirou.",
-        action: "Faça um novo cadastro",
+        action: "Faça login novamente para receber um novo token por e-mail.",
         status_code: 404,
       });
     });
@@ -84,17 +84,12 @@ describe("`PATCH /api/v1/activations/[token_id]`", () => {
       },
     );
 
-    expect(response2.status).toBe(404);
+    // Idempotente como no TabNews: segundo clique no mesmo link continua 200.
+    expect(response2.status).toBe(200);
 
     const response2Body = await response2.json();
-
-    expect(response2Body).toEqual({
-      name: "NotFoundError",
-      message:
-        "O token de ativação informado não foi encontrado no sistema ou expirou.",
-      action: "Faça um novo cadastro",
-      status_code: 404,
-    });
+    expect(response2Body.id).toBe(activationToken.id);
+    expect(response2Body.used_at).toBeTruthy();
   });
 
   test("With valid `token`", async () => {

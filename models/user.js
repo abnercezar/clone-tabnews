@@ -275,12 +275,9 @@ async function hashPasswordInObject(userInputValues) {
   userInputValues.password = hashedPassword;
 }
 
-async function setFeatures(userId, features) {
-  const updatedUser = await runUpdateQuery(userId, features);
-  return updatedUser;
-
-  async function runUpdateQuery(userId, features) {
-    const results = await database.query({
+async function setFeatures(userId, features, options = {}) {
+  const results = await database.query(
+    {
       text: `
         UPDATE
           users
@@ -293,18 +290,16 @@ async function setFeatures(userId, features) {
           *
       `,
       values: [userId, features],
-    });
+    },
+    options,
+  );
 
-    return results.rows[0];
-  }
+  return results.rows[0];
 }
 
-async function addFeatures(userId, features) {
-  const updatedUser = await runUpdateQuery(userId, features);
-  return updatedUser;
-
-  async function runUpdateQuery(userId, features) {
-    const results = await database.query({
+async function addFeatures(userId, features, options = {}) {
+  const results = await database.query(
+    {
       text: `
         UPDATE
           users
@@ -317,10 +312,59 @@ async function addFeatures(userId, features) {
           *
       `,
       values: [userId, features],
-    });
+    },
+    options,
+  );
 
-    return results.rows[0];
-  }
+  return results.rows[0];
+}
+
+async function findAllWithPagination({ page = 1, perPage = 30 } = {}) {
+  const safePage = Math.max(1, Number(page) || 1);
+  const safePerPage = Math.min(100, Math.max(1, Number(perPage) || 30));
+  const offset = (safePage - 1) * safePerPage;
+
+  const countResults = await database.query({
+    text: `
+      SELECT
+        COUNT(*)::INTEGER AS total
+      FROM
+        users
+    ;`,
+  });
+
+  const results = await database.query({
+    text: `
+      SELECT
+        users.*,
+        COALESCE(get_user_current_tabcoins(users.id), 0) AS tabcoins,
+        COALESCE(get_user_current_tabcash(users.id), 0) AS tabcash
+      FROM
+        users
+      ORDER BY
+        users.created_at DESC
+      LIMIT
+        $1
+      OFFSET
+        $2
+    ;`,
+    values: [safePerPage, offset],
+  });
+
+  const totalRows = countResults.rows[0].total;
+  const lastPage = Math.max(1, Math.ceil(totalRows / safePerPage));
+
+  return {
+    rows: results.rows,
+    pagination: {
+      currentPage: safePage,
+      perPage: safePerPage,
+      totalRows,
+      lastPage,
+      previousPage: safePage > 1 ? safePage - 1 : null,
+      nextPage: safePage < lastPage ? safePage + 1 : null,
+    },
+  };
 }
 
 // Exporta as funções do modelo de usuário
@@ -329,6 +373,7 @@ const user = {
   findOneById,
   findOneByUsername,
   findOneByEmail,
+  findAllWithPagination,
   update,
   setFeatures,
   addFeatures,
