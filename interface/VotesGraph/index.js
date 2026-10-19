@@ -193,7 +193,7 @@ function updateData(network, data, config) {
 
   let totalVotes = 0;
 
-  const filteredEdges = data.edges.filter((edge) => {
+  const filteredEdges = (data.edges || []).filter((edge) => {
     if (
       (edge.type === "network" && config.network) ||
       (edge.value >= config.edgeVotesMin && totalVotes < config.maxVotes)
