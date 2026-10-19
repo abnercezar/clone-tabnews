@@ -69,6 +69,7 @@ describe("`GET /api/v1/user`", () => {
           "delete:content",
           "create:sponsorship",
           "read:sponsorship",
+          "read:recovery_token",
         ],
         tabcoins: 0,
         tabcash: 0,

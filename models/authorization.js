@@ -26,6 +26,9 @@ const availableFeatures = [
   // ACTIVATION_TOKEN
   "read:activation_token",
 
+  // RECOVERY_TOKEN
+  "read:recovery_token",
+
   // MIGRATION
   "create:migration",
   "read:migration",
@@ -175,6 +178,16 @@ function filterOutput(user, feature, resource) {
       updated_at: resource.updated_at,
       expires_at: resource.expires_at,
       used_at: resource.used_at,
+    };
+  }
+
+  if (feature === "read:recovery_token") {
+    // Anti-enumeração: nunca expor id / user_id do token de recuperação.
+    return {
+      used_at: resource.used_at,
+      expires_at: resource.expires_at,
+      created_at: resource.created_at,
+      updated_at: resource.updated_at,
     };
   }
 

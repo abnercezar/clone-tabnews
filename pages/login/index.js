@@ -129,6 +129,10 @@ function LoginForm() {
         <span>
           Novo no AgroTab? <Link href="/cadastro">Crie sua conta aqui.</Link>
         </span>
+        <span>
+          Esqueceu sua senha?{" "}
+          <Link href="/cadastro/recuperar">Clique aqui.</Link>
+        </span>
       </div>
     </form>
   );

@@ -58,7 +58,7 @@ for (const rel of apiFiles) {
     /res\.status\([^)]*\)\.json\(/.test(source) ||
     /response\.status\([^)]*\)\.json\(/.test(source);
   const mutatesOrReadsDomain =
-    /models\/(user|content|session|sponsorship|activation|balance)/.test(
+    /models\/(user|content|session|sponsorship|activation|balance|recovery)/.test(
       source,
     );
   if (returnsJson && mutatesOrReadsDomain) {

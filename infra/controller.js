@@ -95,6 +95,7 @@ function injectAnonymousUser(request) {
   const anonymousUserObject = {
     features: [
       "read:activation_token",
+      "read:recovery_token",
       "create:session",
       "create:user",
       "read:content",

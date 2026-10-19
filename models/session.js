@@ -119,12 +119,33 @@ async function expireById(sessionId) {
   }
 }
 
+async function expireAllFromUserId(userId) {
+  const results = await database.query({
+    text: `
+      UPDATE
+        sessions
+      SET
+        expires_at = expires_at - interval '1 year',
+        updated_at = NOW()
+      WHERE
+        user_id = $1
+        AND expires_at > NOW()
+      RETURNING
+        *
+    ;`,
+    values: [userId],
+  });
+
+  return results.rows;
+}
+
 // Exporta o módulo de sessão
 const session = {
   create,
   findOneValidByToken,
   renew,
   expireById,
+  expireAllFromUserId,
   EXPIRATION_IN_MILLISECONDS,
 };
 
