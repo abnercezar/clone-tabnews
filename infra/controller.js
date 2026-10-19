@@ -96,6 +96,7 @@ function injectAnonymousUser(request) {
     features: [
       "read:activation_token",
       "read:recovery_token",
+      "read:email_confirmation_token",
       "create:session",
       "create:user",
       "read:content",

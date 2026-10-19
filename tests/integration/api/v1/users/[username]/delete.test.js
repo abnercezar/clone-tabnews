@@ -74,7 +74,7 @@ describe("DELETE /api/v1/users/[username]", () => {
       expect(responseBody.name).toBe("ValidationError");
     });
 
-    test("Nukes user, expires sessions and soft-deletes contents", async () => {
+    test("Nukes user, expires sessions, soft-deletes contents and undoes ratings", async () => {
       const moderator = await orchestrator.createUser({
         username: "modnuke",
         activate: true,
@@ -92,6 +92,56 @@ describe("DELETE /api/v1/users/[username]", () => {
         title: "Conteúdo a ser removido",
         body: "Corpo do conteúdo banido.",
       });
+
+      const contentAuthor = await orchestrator.createUser({
+        username: "autorvotado",
+        activate: true,
+      });
+      const ratedContent = await orchestrator.createContent({
+        owner_id: contentAuthor.id,
+        title: "Conteúdo votado pelo nuked",
+        body: "Conteudo relevante sobre manejo integrado de pragas no milho safrinha brasileiro.",
+      });
+
+      // Originator distinto do userId para o grant inicial não ser
+      // desfeito pelo undoAllRatingOperations (originator_id = userId).
+      await orchestrator.createBalance({
+        balanceType: "user:tabcoin",
+        recipientId: targetUser.id,
+        amount: 10,
+        originatorId: moderator.id,
+      });
+
+      const voteSession = await orchestrator.createSession(targetUser);
+      const voteResponse = await fetch(
+        `${webserver.origin}/api/v1/contents/${contentAuthor.username}/${ratedContent.slug}/tabcoins`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            cookie: `session_id=${voteSession.token}`,
+          },
+          body: JSON.stringify({ transaction_type: "credit" }),
+        },
+      );
+      expect(voteResponse.status).toBe(201);
+
+      const balancesBeforeNuke = await database.query({
+        text: `
+          SELECT
+            get_user_current_tabcoins($1) AS author_tabcoins,
+            get_content_current_tabcoins($2) AS content_tabcoins,
+            get_user_current_tabcoins($3) AS voter_tabcoins,
+            get_user_current_tabcash($3) AS voter_tabcash
+        ;`,
+        values: [contentAuthor.id, ratedContent.id, targetUser.id],
+      });
+      // Prestígio inicial de autor sem histórico = 0; conteúdo recebe +1;
+      // o voto adiciona +1 ao autor e ao conteúdo.
+      expect(Number(balancesBeforeNuke.rows[0].author_tabcoins)).toBe(1);
+      expect(Number(balancesBeforeNuke.rows[0].content_tabcoins)).toBe(2);
+      expect(Number(balancesBeforeNuke.rows[0].voter_tabcoins)).toBe(8);
+      expect(Number(balancesBeforeNuke.rows[0].voter_tabcash)).toBe(1);
 
       const response = await fetch(
         `${webserver.origin}/api/v1/users/${targetUser.username}`,
@@ -138,6 +188,22 @@ describe("DELETE /api/v1/users/[username]", () => {
         values: [publishedContent.id],
       });
       expect(contents.rows[0].status).toBe("deleted");
+
+      const balancesAfterNuke = await database.query({
+        text: `
+          SELECT
+            get_user_current_tabcoins($1) AS author_tabcoins,
+            get_content_current_tabcoins($2) AS content_tabcoins,
+            get_user_current_tabcoins($3) AS voter_tabcoins,
+            get_user_current_tabcash($3) AS voter_tabcash
+        ;`,
+        values: [contentAuthor.id, ratedContent.id, targetUser.id],
+      });
+      // Undo do voto remove o +1 do rating; o +1 inicial do conteúdo permanece.
+      expect(Number(balancesAfterNuke.rows[0].author_tabcoins)).toBe(0);
+      expect(Number(balancesAfterNuke.rows[0].content_tabcoins)).toBe(1);
+      expect(Number(balancesAfterNuke.rows[0].voter_tabcoins)).toBe(10);
+      expect(Number(balancesAfterNuke.rows[0].voter_tabcash)).toBe(0);
 
       const events = await database.query({
         text: `

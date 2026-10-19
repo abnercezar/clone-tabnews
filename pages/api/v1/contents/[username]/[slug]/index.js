@@ -39,11 +39,7 @@ async function deleteHandler(request, response) {
   }
 
   const removedContent = await database.withTransaction(async (transaction) => {
-    const deletedContent = await content.remove(contentFound.id, {
-      transaction,
-    });
-
-    await event.create(
+    const currentEvent = await event.create(
       {
         type: "delete:content",
         originatorUserId: userTryingToDelete.id,
@@ -54,6 +50,11 @@ async function deleteHandler(request, response) {
       },
       { transaction },
     );
+
+    const deletedContent = await content.remove(contentFound, {
+      transaction,
+      eventId: currentEvent.id,
+    });
 
     return deletedContent;
   });

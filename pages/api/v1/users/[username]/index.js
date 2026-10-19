@@ -4,6 +4,7 @@ import database from "infra/database.js";
 import user from "models/user.js";
 import ban from "models/ban.js";
 import event from "models/event.js";
+import emailConfirmation from "models/email-confirmation.js";
 import authorization from "models/authorization.js";
 import {
   ForbiddenError,
@@ -40,7 +41,9 @@ function pickAllowedUpdateFields(inputValues) {
 async function getHandler(request, response) {
   const userTryingToGet = request.context.user;
   const username = request.query.username;
-  const userFound = await user.findOneByUsername(username);
+  const userFound = await user.findOneByUsername(username, {
+    withBalances: true,
+  });
 
   const secureOutputValues = authorization.filterOutput(
     userTryingToGet,
@@ -68,6 +71,14 @@ async function patchHandler(request, response) {
   const userInputValues = pickAllowedUpdateFields(request.body);
 
   const updatedUser = await user.update(username, userInputValues);
+
+  if (updatedUser.pending_email_confirmation) {
+    await emailConfirmation.createAndSendEmail(
+      updatedUser,
+      updatedUser.pending_email_confirmation,
+    );
+    delete updatedUser.pending_email_confirmation;
+  }
 
   const secureOutputValues = authorization.filterOutput(
     userTryingToPatch,
@@ -114,7 +125,7 @@ async function deleteHandler(request, response) {
   }
 
   const nukedUser = await database.withTransaction(async (transaction) => {
-    await event.create(
+    const currentEvent = await event.create(
       {
         type: "ban:user",
         originatorUserId: userTryingToDelete.id,
@@ -127,7 +138,10 @@ async function deleteHandler(request, response) {
       { transaction },
     );
 
-    return await ban.nuke(targetUser.id, { transaction });
+    return await ban.nuke(targetUser.id, {
+      event: currentEvent,
+      transaction,
+    });
   });
 
   const secureOutputValues = authorization.filterOutput(

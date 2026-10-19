@@ -1,7 +1,9 @@
 import database from "infra/database.js";
 import validator from "models/validator.js";
 import balance from "models/balance.js";
+import prestige from "models/prestige.js";
 import {
+  ForbiddenError,
   NotFoundError,
   UnprocessableEntityError,
   ValidationError,
@@ -120,7 +122,7 @@ async function create(contentInputValues, options = {}) {
     options,
   );
 
-  await creditOrDebitTabCoins(newContent, options);
+  await creditOrDebitTabCoins(null, newContent, options);
   await updateTabCashBalance(newContent, options);
 
   const tabcoinsCount = await balance.getContentTabcoinsCreditDebit(
@@ -160,45 +162,123 @@ async function create(contentInputValues, options = {}) {
   }
 }
 
-// Crédito padrão como no TabNews: +1 TabCoin no conteúdo e +1 no autor
-// quando o texto tem valor concreto mínimo.
-async function creditOrDebitTabCoins(newContent, options = {}) {
-  if (newContent.type !== "content") {
+// Crédito/débito de TabCoins no estilo TabNews:
+// - ao publicar: prestígio do autor define o ganho do usuário; conteúdo recebe +1 inicial
+// - ao excluir: reverte os ganhos do autor ligados àquele conteúdo
+async function creditOrDebitTabCoins(oldContent, newContent, options = {}) {
+  let contentEarnings = 0;
+  let userEarnings = 0;
+
+  if (
+    oldContent &&
+    ((!oldContent.published_at && newContent.status !== "published") ||
+      ["deleted", "firewall"].includes(oldContent.status))
+  ) {
     return;
   }
 
-  if (newContent.body.split(/[a-z]{5,}/i, 6).length < 6) {
+  // Debita se o conteúdo já foi publicado e agora deixa de estar.
+  // 1) tabcoins > 0 → reverte todo o ganho do autor neste conteúdo
+  // 2) tabcoins <= 0 → reverte só o crédito inicial de criação
+  if (oldContent?.published_at && newContent.status !== "published") {
+    const userEarningsByContent = await prestige.getByContentId(oldContent.id, {
+      transaction: options.transaction,
+    });
+
+    let amountToDebit;
+
+    if (oldContent.tabcoins > 0) {
+      amountToDebit = -userEarningsByContent.totalTabcoins;
+    } else {
+      amountToDebit = -userEarningsByContent.initialTabcoins;
+    }
+
+    if (!amountToDebit) return;
+
+    await balance.create(
+      {
+        balanceType: "user:tabcoin",
+        recipientId: newContent.owner_id,
+        amount: amountToDebit,
+        originatorType: options.eventId ? "event" : "content",
+        originatorId: options.eventId ? options.eventId : newContent.id,
+      },
+      {
+        transaction: options.transaction,
+      },
+    );
     return;
   }
 
-  if (newContent.parent_id) {
-    const parent = await findPublishedById(newContent.parent_id, options);
-    if (parent.owner_id === newContent.owner_id) {
+  if (
+    (!oldContent && newContent.published_at) ||
+    (oldContent &&
+      !oldContent.published_at &&
+      newContent.status === "published")
+  ) {
+    contentEarnings = 1;
+    userEarnings = await prestige.getByUserId(newContent.owner_id, {
+      isRoot: !newContent.parent_id,
+      transaction: options.transaction,
+    });
+
+    if (userEarnings < 0) {
+      throw new ForbiddenError({
+        message:
+          "Não é possível publicar porque há outras publicações mal avaliadas que ainda não foram excluídas.",
+        action:
+          "Exclua seus conteúdos mais recentes que estiverem classificados como não relevantes.",
+      });
+    }
+
+    // AgroTab: anúncios não recebem TabCoin inicial no conteúdo (só TabCash via budget).
+    // Gap vs TN, que ainda aplica contentEarnings=1 em ads.
+    if (newContent.type !== "content") {
+      userEarnings = 0;
+      contentEarnings = 0;
+    }
+
+    if (newContent.body.split(/[a-z]{5,}/i, 6).length < 6) {
       return;
+    }
+
+    if (newContent.parent_id) {
+      const parent = await findPublishedById(newContent.parent_id, options);
+      if (parent.owner_id === newContent.owner_id) {
+        return;
+      }
     }
   }
 
-  await balance.create(
-    {
-      balanceType: "user:tabcoin",
-      recipientId: newContent.owner_id,
-      amount: 1,
-      originatorType: "content",
-      originatorId: newContent.id,
-    },
-    options,
-  );
+  if (userEarnings > 0) {
+    await balance.create(
+      {
+        balanceType: "user:tabcoin",
+        recipientId: newContent.owner_id,
+        amount: userEarnings,
+        originatorType: options.eventId ? "event" : "content",
+        originatorId: options.eventId ? options.eventId : newContent.id,
+      },
+      {
+        transaction: options.transaction,
+      },
+    );
+  }
 
-  await balance.create(
-    {
-      balanceType: "content:tabcoin:initial",
-      recipientId: newContent.id,
-      amount: 1,
-      originatorType: "user",
-      originatorId: newContent.owner_id,
-    },
-    options,
-  );
+  if (contentEarnings > 0) {
+    await balance.create(
+      {
+        balanceType: "content:tabcoin:initial",
+        recipientId: newContent.id,
+        amount: contentEarnings,
+        originatorType: "user",
+        originatorId: newContent.owner_id,
+      },
+      {
+        transaction: options.transaction,
+      },
+    );
+  }
 }
 
 async function updateTabCashBalance(newContent, options = {}) {
@@ -282,19 +362,82 @@ function parseStrategy(strategy) {
   });
 }
 
-// Lista o feed: publicações (sem comentários).
+function parseContentType(type) {
+  if (type === undefined || type === null || type === "") {
+    return null;
+  }
+
+  if (type === "content" || type === "ad") {
+    return type;
+  }
+
+  throw new ValidationError({
+    message: "O tipo de conteúdo informado não é válido.",
+    action: 'Use "content" ou "ad".',
+  });
+}
+
+function parseWithChildren(withChildren) {
+  if (
+    withChildren === undefined ||
+    withChildren === null ||
+    withChildren === ""
+  ) {
+    return false;
+  }
+
+  if (
+    withChildren === true ||
+    withChildren === "true" ||
+    withChildren === "1"
+  ) {
+    return true;
+  }
+
+  if (
+    withChildren === false ||
+    withChildren === "false" ||
+    withChildren === "0"
+  ) {
+    return false;
+  }
+
+  throw new ValidationError({
+    message: "O filtro de comentários informado não é válido.",
+    action: 'Use "true" ou "false" em with_children.',
+  });
+}
+
+// Lista o feed.
 // strategy=new → mais recentes; strategy=relevant → score por AgroCoins + decadência temporal.
-async function findPublished({ page, perPage, username, strategy } = {}) {
+// withChildren=true → só comentários (parent_id NOT NULL); padrão → só raiz.
+// type=content|ad → filtra o tipo (útil para classificados).
+async function findPublished({
+  page,
+  perPage,
+  username,
+  strategy,
+  withChildren,
+  type,
+} = {}) {
   const currentPage = parsePage(page, DEFAULT_PAGE, 10000);
   const currentPerPage = parsePage(perPage, DEFAULT_PER_PAGE, MAX_PER_PAGE);
   const currentStrategy = parseStrategy(strategy);
   const author = username ? username : null;
+  const childrenOnly = parseWithChildren(withChildren);
+  const contentType = parseContentType(type);
   // No feed de Relevantes (sem filtro de autor), anúncios ficam de fora — como no TabNews.
-  const excludeAds = currentStrategy === "relevant" && !author;
+  // Se o cliente pediu type explicitamente, o filtro de tipo prevalece.
+  const excludeAds =
+    currentStrategy === "relevant" && !author && contentType === null;
 
   if (author) {
     validator.username(author);
   }
+
+  const parentClause = childrenOnly
+    ? "contents.parent_id IS NOT NULL"
+    : "contents.parent_id IS NULL";
 
   const countResults = await database.query({
     text: `
@@ -306,11 +449,12 @@ async function findPublished({ page, perPage, username, strategy } = {}) {
         users ON contents.owner_id = users.id
       WHERE
         contents.status = 'published'
-        AND contents.parent_id IS NULL
+        AND ${parentClause}
         AND ($1::varchar IS NULL OR LOWER(users.username) = LOWER($1))
         AND ($2::boolean IS FALSE OR contents.type IS DISTINCT FROM 'ad')
+        AND ($3::varchar IS NULL OR contents.type = $3)
     ;`,
-    values: [author, excludeAds],
+    values: [author, excludeAds, contentType],
   });
 
   const orderByClause =
@@ -365,9 +509,10 @@ async function findPublished({ page, perPage, username, strategy } = {}) {
         get_content_balance_credit_debit(contents.id) AS tabcoins_count
       WHERE
         contents.status = 'published'
-        AND contents.parent_id IS NULL
+        AND ${parentClause}
         AND ($3::varchar IS NULL OR LOWER(users.username) = LOWER($3))
         AND ($4::boolean IS FALSE OR contents.type IS DISTINCT FROM 'ad')
+        AND ($5::varchar IS NULL OR contents.type = $5)
       ${orderByClause}
       LIMIT
         $1
@@ -379,6 +524,7 @@ async function findPublished({ page, perPage, username, strategy } = {}) {
       (currentPage - 1) * currentPerPage,
       author,
       excludeAds,
+      contentType,
     ],
   });
 
@@ -470,8 +616,41 @@ async function countPublishedRootByOwner(ownerId, options = {}) {
   return results.rows[0].count;
 }
 
-// Marca como excluído. A linha permanece para a trilha de auditoria.
-async function remove(contentId, options = {}) {
+async function findLatestPublishedByOwnerId(ownerId, options = {}) {
+  const results = await database.query(
+    {
+      text: `
+        SELECT
+          *
+        FROM
+          contents
+        WHERE
+          owner_id = $1
+          AND status = 'published'
+          AND type = 'content'
+        ORDER BY
+          published_at DESC,
+          id DESC
+        LIMIT 1
+      ;`,
+      values: [ownerId],
+    },
+    options,
+  );
+
+  return results.rows[0] || null;
+}
+
+// Marca como excluído e reverte TabCoins do autor (paridade TabNews).
+// Aceita o objeto do conteúdo (com tabcoins) ou só o id.
+async function remove(contentOrId, options = {}) {
+  const contentId =
+    typeof contentOrId === "string" ? contentOrId : contentOrId.id;
+  const tabcoins =
+    typeof contentOrId === "object" && contentOrId.tabcoins !== undefined
+      ? Number(contentOrId.tabcoins)
+      : undefined;
+
   const results = await database.query(
     {
       text: `
@@ -498,7 +677,33 @@ async function remove(contentId, options = {}) {
     });
   }
 
-  return results.rows[0];
+  const deletedContent = results.rows[0];
+
+  let contentTabcoins = tabcoins;
+  if (contentTabcoins === undefined) {
+    const tabcoinsCount = await balance.getContentTabcoinsCreditDebit(
+      { recipientId: contentId },
+      options,
+    );
+    contentTabcoins = tabcoinsCount.tabcoins;
+  }
+
+  await creditOrDebitTabCoins(
+    {
+      id: deletedContent.id,
+      owner_id: deletedContent.owner_id,
+      published_at: deletedContent.published_at,
+      tabcoins: contentTabcoins,
+      status: "published",
+    },
+    {
+      ...deletedContent,
+      status: "deleted",
+    },
+    options,
+  );
+
+  return deletedContent;
 }
 
 // Busca um conteúdo publicado pelo username do autor e pelo slug.
@@ -542,8 +747,10 @@ const content = {
   findPublishedById,
   findOneByUsernameAndSlug,
   findChildren,
+  findLatestPublishedByOwnerId,
   countPublishedRootByOwner,
   remove,
+  creditOrDebitTabCoins,
 };
 
 export default content;

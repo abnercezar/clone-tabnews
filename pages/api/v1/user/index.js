@@ -3,6 +3,7 @@ import controller from "infra/controller.js";
 import user from "models/user.js";
 import session from "models/session";
 import authorization from "models/authorization";
+import reward from "models/reward.js";
 
 async function getHandler(request, response) {
   const sessionToken = request.cookies.session_id;
@@ -14,6 +15,11 @@ async function getHandler(request, response) {
   const userFound = await user.findOneById(sessionObject.user_id, {
     withBalances: true,
   });
+
+  request.context.user = userFound;
+  request.context.clientIp = controller.getClientIp(request);
+
+  userFound.tabcoins += await reward(request);
 
   response.setHeader(
     "Cache-Control",

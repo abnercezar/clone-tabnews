@@ -125,4 +125,69 @@ describe("`GET /api/v1/contents`", () => {
       expect(responseBody.name).toBe("ValidationError");
     });
   });
+
+  describe("Typed filters", () => {
+    test("Lists recent comments with with_children=true", async () => {
+      const author = await orchestrator.createUser({
+        username: "autorcomentarios",
+      });
+      await orchestrator.activateUser(author);
+
+      const root = await orchestrator.createContent({
+        owner_id: author.id,
+        title: "Post com comentário",
+        body: "Corpo do post para receber comentário.",
+      });
+
+      await orchestrator.createContent({
+        owner_id: author.id,
+        parent_id: root.id,
+        body: "Comentário recente sobre o manejo.",
+      });
+
+      const roots = await fetch(`${webserver.origin}/api/v1/contents`);
+      const rootsBody = await roots.json();
+      expect(rootsBody.every((item) => item.parent_id === null)).toBe(true);
+
+      const comments = await fetch(
+        `${webserver.origin}/api/v1/contents?with_children=true&strategy=new`,
+      );
+      expect(comments.status).toBe(200);
+      const commentsBody = await comments.json();
+      expect(commentsBody.length).toBeGreaterThanOrEqual(1);
+      expect(commentsBody.every((item) => item.parent_id !== null)).toBe(true);
+      expect(
+        commentsBody.some((item) => item.body.includes("Comentário recente")),
+      ).toBe(true);
+    });
+
+    test("Filters sponsored ads with type=ad", async () => {
+      const author = await orchestrator.createUser({
+        username: "autorclassificados",
+        activate: true,
+      });
+
+      await orchestrator.createBalance({
+        balanceType: "user:tabcash",
+        recipientId: author.id,
+        amount: 200,
+      });
+
+      await orchestrator.createContent({
+        owner_id: author.id,
+        title: "Anúncio de insumos",
+        body: "Texto longo o bastante para passar nas validações do conteúdo patrocinado agro.",
+        type: "ad",
+      });
+
+      const ads = await fetch(
+        `${webserver.origin}/api/v1/contents?type=ad&strategy=new`,
+      );
+      expect(ads.status).toBe(200);
+      const adsBody = await ads.json();
+      expect(adsBody.length).toBeGreaterThanOrEqual(1);
+      expect(adsBody.every((item) => item.type === "ad")).toBe(true);
+      expect(adsBody.every((item) => item.parent_id === null)).toBe(true);
+    });
+  });
 });

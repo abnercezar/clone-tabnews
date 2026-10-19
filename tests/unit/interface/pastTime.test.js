@@ -1,4 +1,4 @@
-import { formatPastTime } from "interface/PastTime";
+import { formatPastDuration, formatPastTime } from "interface/PastTime";
 
 const now = new Date("2026-10-18T15:00:00.000Z").getTime();
 
@@ -20,6 +20,10 @@ describe("`interface/PastTime`", () => {
     expect(formatPastTime(ago(60 * 60 * 24 * 365 * 4), now)).toBe(
       "4 anos atrás",
     );
+  });
+
+  test("Formats duration without the 'atrás' suffix", () => {
+    expect(formatPastDuration(ago(60 * 60 * 24 * 10), now)).toBe("10 dias");
   });
 
   test("Does not describe a future date as negative", () => {

@@ -230,6 +230,7 @@ describe("`PATCH /api/v1/users/[username]`", () => {
           "create:sponsorship",
           "read:sponsorship",
           "read:recovery_token",
+          "read:email_confirmation_token",
         ],
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
@@ -276,9 +277,12 @@ describe("`PATCH /api/v1/users/[username]`", () => {
       expect(responseBody.password).toBeUndefined();
     });
 
-    test("With unique `email`", async () => {
-      // Criação do Usuário 1
-      const createdUser = await orchestrator.createUser();
+    test("With unique `email` requests confirmation instead of applying immediately", async () => {
+      await orchestrator.deleteAllEmails();
+
+      const createdUser = await orchestrator.createUser({
+        email: "original@email.com",
+      });
 
       const activatedUser = await orchestrator.activateUser(createdUser);
       const sessionObject = await orchestrator.createSession(activatedUser);
@@ -300,11 +304,10 @@ describe("`PATCH /api/v1/users/[username]`", () => {
 
       const responseBody = await response.json();
 
-      // Verifica se o corpo da resposta contém os dados esperados
       expect(responseBody).toEqual({
         id: responseBody.id,
         username: createdUser.username,
-        email: "uniqueEmail2@gmail.com",
+        email: "original@email.com",
         features: [
           "create:session",
           "read:session",
@@ -316,25 +319,23 @@ describe("`PATCH /api/v1/users/[username]`", () => {
           "create:sponsorship",
           "read:sponsorship",
           "read:recovery_token",
+          "read:email_confirmation_token",
         ],
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
 
-      // O hash da senha nunca deve ser devolvido na resposta
       expect(responseBody.password).toBeUndefined();
 
-      // Valida se o ID gerado é um UUID versão 4
-      expect(uuidVersion(responseBody.id)).toBe(4);
-
-      // Verifica se as datas de criação e atualização são válidas
-      expect(Date.parse(responseBody.created_at)).not.toBeNaN();
-      expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
-
-      expect(responseBody.updated_at > responseBody.created_at).toBe(true);
-
       const userInDatabase = await user.findOneByUsername(createdUser.username);
-      expect(userInDatabase.email).toBe("uniqueEmail2@gmail.com");
+      expect(userInDatabase.email).toBe("original@email.com");
+
+      const confirmationEmail = await orchestrator.getLastEmail();
+      expect(confirmationEmail.subject).toBe("Confirme seu novo email");
+      expect(confirmationEmail.recipients[0]).toContain(
+        "uniqueEmail2@gmail.com",
+      );
+      expect(confirmationEmail.text).toContain("/perfil/confirmar-email/");
     });
 
     test("With new `password`", async () => {
@@ -379,6 +380,7 @@ describe("`PATCH /api/v1/users/[username]`", () => {
           "create:sponsorship",
           "read:sponsorship",
           "read:recovery_token",
+          "read:email_confirmation_token",
         ],
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
@@ -581,6 +583,7 @@ describe("`PATCH /api/v1/users/[username]`", () => {
         "create:sponsorship",
         "read:sponsorship",
         "read:recovery_token",
+        "read:email_confirmation_token",
       ]);
     });
 

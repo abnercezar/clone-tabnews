@@ -17,6 +17,22 @@ const PASSWORD_MAX = 72;
 const TITLE_MAX = 256;
 const BODY_MAX = 20000;
 
+// Nomes que colidem com páginas estáticas em `pages/` (perfil público `/{username}`).
+const RESERVED_USERNAMES = new Set([
+  "api",
+  "cadastro",
+  "conteudos",
+  "faq",
+  "login",
+  "moderacao",
+  "patrocinar",
+  "perfil",
+  "publicar",
+  "recentes",
+  "sobre",
+  "status",
+]);
+
 function username(value) {
   if (typeof value !== "string" || value.length === 0) {
     throw new ValidationError({
@@ -36,6 +52,13 @@ function username(value) {
     throw new ValidationError({
       message: "O username deve conter apenas letras e números.",
       action: "Remova espaços e caracteres especiais do username.",
+    });
+  }
+
+  if (RESERVED_USERNAMES.has(value.toLowerCase())) {
+    throw new ValidationError({
+      message: "Este nome de usuário não está disponível para uso.",
+      action: "Escolha outro username.",
     });
   }
 }

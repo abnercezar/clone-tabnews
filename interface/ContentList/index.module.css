@@ -37,6 +37,16 @@
   word-wrap: break-word;
 }
 
+.commentLink {
+  word-wrap: break-word;
+  font-weight: 400;
+}
+
+.sponsored {
+  font-weight: 600;
+  color: var(--fgColor-attention, #9a6700);
+}
+
 .metadata {
   display: flex;
   flex-wrap: wrap;
@@ -50,6 +60,15 @@
   font-style: normal;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.author a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.author a:hover {
+  text-decoration: underline;
 }
 
 .tabcoins {

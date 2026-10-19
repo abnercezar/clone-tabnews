@@ -144,6 +144,7 @@ describe("`PATCH /api/v1/activations/[token_id]`", () => {
       "create:sponsorship",
       "read:sponsorship",
       "read:recovery_token",
+      "read:email_confirmation_token",
     ]);
   });
 

@@ -33,6 +33,9 @@ const availableFeatures = [
   // RECOVERY_TOKEN
   "read:recovery_token",
 
+  // EMAIL_CONFIRMATION_TOKEN
+  "read:email_confirmation_token",
+
   // MIGRATION
   "create:migration",
   "read:migration",
@@ -54,6 +57,7 @@ const defaultActivatedFeatures = [
   "create:sponsorship",
   "read:sponsorship",
   "read:recovery_token",
+  "read:email_confirmation_token",
 ];
 
 // Privilegiado / admin (estilo seed admin do TabNews, adaptado ao AgroTab).
@@ -96,13 +100,23 @@ function filterOutput(user, feature, resource) {
   validateResource(resource);
 
   if (feature === "read:user") {
-    return {
+    const filteredUser = {
       id: resource.id,
       username: resource.username,
       features: resource.features,
       created_at: resource.created_at,
       updated_at: resource.updated_at,
     };
+
+    // Saldos só entram quando o model carregou `withBalances` (perfil público).
+    if (resource.tabcoins !== undefined) {
+      filteredUser.tabcoins = Number(resource.tabcoins);
+    }
+    if (resource.tabcash !== undefined) {
+      filteredUser.tabcash = Number(resource.tabcash);
+    }
+
+    return filteredUser;
   }
 
   if (feature === "read:user:list") {
@@ -233,6 +247,16 @@ function filterOutput(user, feature, resource) {
   if (feature === "read:recovery_token") {
     // Anti-enumeração: nunca expor id / user_id do token de recuperação.
     return {
+      used_at: resource.used_at,
+      expires_at: resource.expires_at,
+      created_at: resource.created_at,
+      updated_at: resource.updated_at,
+    };
+  }
+
+  if (feature === "read:email_confirmation_token") {
+    return {
+      id: resource.id,
       used_at: resource.used_at,
       expires_at: resource.expires_at,
       created_at: resource.created_at,

@@ -132,7 +132,7 @@ function SiteHeader() {
 
 function UserMenu({ user }) {
   const [isOpenMenu, setIsOpenMenu] = useState(false);
-  const profileHref = `/?usuario=${encodeURIComponent(user.username)}`;
+  const profileHref = `/${encodeURIComponent(user.username)}`;
 
   async function handleLogout() {
     try {
@@ -292,6 +292,8 @@ function SiteFooter({ maxWidth }) {
         <div className={styles.footerLinks}>
           <Link href="mailto:contato@agrotab.com.br">Contato</Link>
           <Link href="/sobre">Sobre</Link>
+          <Link href="/faq">FAQ</Link>
+          <Link href="/termos-de-uso">Termos de Uso</Link>
           <Link href="/status">Status</Link>
         </div>
       </div>

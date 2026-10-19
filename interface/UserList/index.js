@@ -138,7 +138,7 @@ function UserListItem({ user, onUserNuked }) {
         <div className={classes.username}>
           <Link
             className={classes.link}
-            href={`/?usuario=${encodeURIComponent(user.username)}`}
+            href={`/${encodeURIComponent(user.username)}`}
           >
             {user.username}
             {user.features?.includes("nuked") && (

@@ -3,7 +3,7 @@ import setCookieParser from "set-cookie-parser";
 import webserver from "infra/webserver.js";
 import orchestrator from "tests/orchestrator.js";
 import session from "models/session.js";
-// import database from "infra/database";
+import user from "models/user.js";
 
 // Configurações iniciais antes de todos os testes
 beforeAll(async () => {
@@ -70,6 +70,7 @@ describe("`GET /api/v1/user`", () => {
           "create:sponsorship",
           "read:sponsorship",
           "read:recovery_token",
+          "read:email_confirmation_token",
         ],
         tabcoins: 0,
         tabcash: 0,
@@ -157,6 +158,73 @@ describe("`GET /api/v1/user`", () => {
         message: "Usuário não possui sessão ativa.",
         action: "Verifique se este usuário está logado e tente novamente.",
         status_code: 401,
+      });
+    });
+
+    describe("Daily reward", () => {
+      test("Rewards the user once a day when prestige allows", async () => {
+        const createdUser = await orchestrator.createUser({
+          username: "UserWithDailyReward",
+          activate: true,
+        });
+        await orchestrator.createPrestige(createdUser.id);
+        const sessionObject = await orchestrator.createSession(createdUser);
+
+        const preResponse = await fetch(`${webserver.origin}/api/v1/user`, {
+          headers: { Cookie: `session_id=${sessionObject.token}` },
+        });
+        expect(preResponse.status).toBe(200);
+        const preBody = await preResponse.json();
+        expect(preBody.tabcoins).toBe(0);
+
+        await orchestrator.updateRewardedAt(
+          createdUser.id,
+          new Date(Date.now() - 1000 - 1000 * 60 * 60 * 24),
+        );
+
+        const rewardResponse = await fetch(`${webserver.origin}/api/v1/user`, {
+          headers: { Cookie: `session_id=${sessionObject.token}` },
+        });
+        expect(rewardResponse.status).toBe(200);
+        const rewardBody = await rewardResponse.json();
+        expect(rewardBody.tabcoins).toBeGreaterThan(0);
+
+        const postResponse = await fetch(`${webserver.origin}/api/v1/user`, {
+          headers: { Cookie: `session_id=${sessionObject.token}` },
+        });
+        expect(postResponse.status).toBe(200);
+        const postBody = await postResponse.json();
+        expect(postBody.tabcoins).toBe(rewardBody.tabcoins);
+
+        const userInDatabase = await user.findOneById(createdUser.id);
+        expect(userInDatabase.rewarded_at.getTime()).toBeGreaterThanOrEqual(
+          new Date().setUTCHours(0, 0, 0, 0),
+        );
+      });
+
+      test("Marks rewarded_at even when prestige yields zero TabCoins", async () => {
+        const createdUser = await orchestrator.createUser({
+          username: "UserWithoutPrestigeReward",
+          activate: true,
+        });
+        const sessionObject = await orchestrator.createSession(createdUser);
+
+        await orchestrator.updateRewardedAt(
+          createdUser.id,
+          new Date(Date.now() - 1000 * 60 * 60 * 36),
+        );
+
+        const response = await fetch(`${webserver.origin}/api/v1/user`, {
+          headers: { Cookie: `session_id=${sessionObject.token}` },
+        });
+        expect(response.status).toBe(200);
+        const body = await response.json();
+        expect(body.tabcoins).toBe(0);
+
+        const userInDatabase = await user.findOneById(createdUser.id);
+        expect(userInDatabase.rewarded_at.getTime()).toBeGreaterThanOrEqual(
+          new Date().setUTCHours(0, 0, 0, 0),
+        );
       });
     });
 

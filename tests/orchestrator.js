@@ -110,6 +110,131 @@ async function createBalance({
   });
 }
 
+// Monta um histórico de conteúdos com TabCoins para calibrar o prestígio
+// (espelha o helper do TabNews; sem fake timers — backdate via SQL).
+async function createPrestige(
+  userId,
+  {
+    rootPrestigeNumerator = 1,
+    rootPrestigeDenominator = 4,
+    childPrestigeNumerator = 0,
+    childPrestigeDenominator = 1,
+  } = {},
+) {
+  if (
+    rootPrestigeDenominator < 0 ||
+    childPrestigeDenominator < 0 ||
+    rootPrestigeDenominator > 20 ||
+    childPrestigeDenominator > 20
+  ) {
+    throw new Error(
+      "rootPrestigeDenominator and childPrestigeDenominator must be between 0 and 20",
+    );
+  }
+
+  const threeDaysAgo = new Date(Date.now() - 1000 * 60 * 60 * 24 * 3);
+  const rootContents = [];
+  const childContents = [];
+
+  for (let i = 0; i < rootPrestigeDenominator; i++) {
+    const created = await createContent({
+      owner_id: userId,
+      title: faker.lorem.words(3),
+      body: faker.lorem.paragraphs(1),
+    });
+    await backdateContent(created.id, new Date(threeDaysAgo.getTime() + i * 10));
+    rootContents.push(created);
+  }
+
+  let parentId = rootContents[0]?.id;
+
+  if (childPrestigeDenominator && !parentId) {
+    const parent = await createContent({
+      owner_id: userId,
+      title: faker.lorem.words(3),
+      body: faker.lorem.paragraphs(1),
+    });
+    await backdateContent(parent.id, threeDaysAgo);
+    parentId = parent.id;
+  }
+
+  for (let i = 0; i < childPrestigeDenominator; i++) {
+    // Mesmo dono do pai: creditOrDebit não gera TabCoins (paridade TN).
+    const created = await createContent({
+      parent_id: parentId,
+      owner_id: userId,
+      body: faker.lorem.paragraphs(1),
+    });
+    await backdateContent(
+      created.id,
+      new Date(threeDaysAgo.getTime() + (rootPrestigeDenominator + i) * 10),
+    );
+    childContents.push(created);
+  }
+
+  if (rootContents.length) {
+    await createBalance({
+      balanceType:
+        rootPrestigeNumerator > 0
+          ? "content:tabcoin:credit"
+          : "content:tabcoin:debit",
+      recipientId: rootContents[0].id,
+      amount: rootPrestigeNumerator,
+      originatorType: "orchestrator",
+      originatorId: rootContents[0].id,
+    });
+  }
+
+  if (childContents.length) {
+    await createBalance({
+      balanceType:
+        childPrestigeNumerator + childPrestigeDenominator > 0
+          ? "content:tabcoin:credit"
+          : "content:tabcoin:debit",
+      recipientId: childContents[0].id,
+      amount: childPrestigeNumerator + childPrestigeDenominator,
+      originatorType: "orchestrator",
+      originatorId: childContents[0].id,
+    });
+  }
+
+  return [...rootContents, ...childContents];
+}
+
+async function backdateContent(contentId, publishedAt) {
+  await database.query({
+    text: `
+      UPDATE
+        contents
+      SET
+        published_at = $1,
+        created_at = $1,
+        updated_at = $1
+      WHERE
+        id = $2
+    ;`,
+    values: [publishedAt, contentId],
+  });
+}
+
+async function updateRewardedAt(userId, rewardedAt) {
+  const results = await database.query({
+    text: `
+      UPDATE
+        users
+      SET
+        rewarded_at = $1
+      WHERE
+        id = $2
+      RETURNING
+        *
+    ;`,
+    values: [rewardedAt, userId],
+  });
+
+  return results.rows[0];
+}
+
 async function deleteAllEmails() {
   await fetch(`${emailHttpUrl}/messages`, {
     method: "DELETE",
@@ -170,6 +295,8 @@ const orchestrator = {
   createSession,
   createContent,
   createBalance,
+  createPrestige,
+  updateRewardedAt,
   deleteAllEmails,
   getEmails,
   getLastEmail,

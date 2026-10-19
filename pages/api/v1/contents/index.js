@@ -16,6 +16,8 @@ async function getHandler(request, response) {
     perPage: request.query.per_page,
     username: request.query.username,
     strategy: request.query.strategy,
+    withChildren: request.query.with_children,
+    type: request.query.type,
   });
 
   const secureOutputValues = authorization.filterOutput(
