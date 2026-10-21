@@ -20,6 +20,12 @@
   font-size: var(--text-body-size-small, 12px);
 }
 
+/* Conteúdo pago sempre identificado, como nos cards do feed. */
+.sponsored {
+  font-weight: 600;
+  color: var(--fgColor-attention, #9a6700);
+}
+
 .remove {
   margin-left: 8px;
   padding: 0;

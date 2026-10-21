@@ -27,6 +27,7 @@ import PastTime from "interface/PastTime";
 import Sponsorship from "interface/Sponsorship";
 import CommentForm from "interface/CommentForm";
 import TabCoinButtons from "interface/TabCoinButtons";
+import { loginHref } from "interface/loginRedirect";
 import useUser from "interface/useUser";
 import { formatReadingTime } from "interface/readingTime";
 import { splitComment } from "interface/commentText";
@@ -192,9 +193,12 @@ function ContentPage({ initialContent = null, notFound = false }) {
               <Stack gap="normal">
                 <div className={ui.contentMetadataRow}>
                   <div className={ui.contentMetadata}>
-                    <span className={ui.authorLabel}>
+                    <Link
+                      className={ui.authorLabel}
+                      href={`/${encodeURIComponent(content.owner_username)}`}
+                    >
                       {content.owner_username}
-                    </span>
+                    </Link>
                     <span>{formatReadingTime(content.body)}</span>
                     <span>·</span>
                     <PastTime date={content.published_at} />
@@ -271,6 +275,15 @@ function ContentPage({ initialContent = null, notFound = false }) {
             </Stack>
           </section>
         )}
+
+        {content && (
+          <nav aria-label="Continuar lendo" className={ui.continueReading}>
+            <Link href={`/${encodeURIComponent(content.owner_username)}`}>
+              Mais publicações de {content.owner_username}
+            </Link>
+            <Link href="/#publicacoes">Voltar para o feed</Link>
+          </nav>
+        )}
       </Stack>
     </DefaultLayout>
   );
@@ -314,7 +327,12 @@ function CommentItem({ comment: initialComment, user, router, isLoadingUser }) {
       />
       <Stack gap="condensed" className={ui.contentWithVotesBody}>
         <div className={ui.contentMetadata}>
-          <span className={ui.authorLabel}>{comment.owner_username}</span>
+          <Link
+            className={ui.authorLabel}
+            href={`/${encodeURIComponent(comment.owner_username)}`}
+          >
+            {comment.owner_username}
+          </Link>
           <span>·</span>
           <PastTime date={comment.published_at} />
         </div>
@@ -412,7 +430,7 @@ function ReplyBox({
     }
 
     if (!user) {
-      router.push("/login");
+      router.push(loginHref(router.asPath));
       return;
     }
 

@@ -4,6 +4,9 @@ import { Heading, Label, LabelGroup, Truncate } from "@primer/react";
 import DefaultLayout from "interface/DefaultLayout";
 import { BarChart } from "interface/Charts";
 import analytics from "models/analytics.js";
+import authorization from "models/authorization.js";
+import session from "models/session.js";
+import user from "models/user.js";
 import classes from "./index.module.css";
 
 const VotesGraph = dynamic(() => import("interface/VotesGraph"), {
@@ -313,7 +316,31 @@ export default function StatusPage({
   );
 }
 
-export async function getServerSideProps() {
+async function isStatusAdmin(request) {
+  const sessionToken = request.cookies?.session_id;
+  if (!sessionToken) {
+    return false;
+  }
+
+  try {
+    const sessionObject = await session.findOneValidByToken(sessionToken);
+    const userFound = await user.findOneById(sessionObject.user_id);
+    return authorization.can(userFound, "read:status:all");
+  } catch {
+    return false;
+  }
+}
+
+export async function getServerSideProps({ req }) {
+  if (!(await isStatusAdmin(req))) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
   const [
     usersCreated,
     rootContentPublished,

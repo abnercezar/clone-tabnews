@@ -51,6 +51,8 @@ export default function Sponsorship({ sponsorship, onRemoved }) {
         {hostname ? ` (${hostname})` : ""} <LinkExternalIcon size={14} />
       </a>
       <div className={styles.credit}>
+        <span className={styles.sponsored}>Patrocinado</span>
+        {" · "}
         Contribuindo com {sponsorship.owner_username}
         {user?.id === sponsorship.owner_id && (
           <button

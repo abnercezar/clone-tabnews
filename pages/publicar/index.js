@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import {
@@ -17,9 +17,14 @@ import {
 import { useConfirmDialog } from "interface/ConfirmDialog";
 import DefaultLayout from "interface/DefaultLayout";
 import useUser from "interface/useUser";
+import { loginHref } from "interface/loginRedirect";
 import {
   PUBLISH_TEMPLATES,
+  clearPublishDraft,
   findPublishTemplate,
+  findTemplateGuides,
+  readPublishDraft,
+  writePublishDraft,
 } from "interface/publishTemplates";
 
 const CommentEditor = dynamic(() => import("interface/CommentEditor"), {
@@ -27,9 +32,12 @@ const CommentEditor = dynamic(() => import("interface/CommentEditor"), {
 });
 
 const MAX_BODY_LENGTH = 20000;
+// Custo cobrado pelo servidor ao publicar um anúncio (models/content.js).
+const AD_COST = 100;
 
 export default function PublishPage() {
   const { user, isLoading } = useUser();
+  const { asPath } = useRouter();
 
   return (
     <DefaultLayout
@@ -53,7 +61,7 @@ export default function PublishPage() {
               description="Só quem tem conta ativada pode publicar no AgroTab."
             />
             <Stack direction="horizontal" gap="condensed">
-              <LinkButton href="/login" variant="primary">
+              <LinkButton href={loginHref(asPath)} variant="primary">
                 Entrar
               </LinkButton>
               <LinkButton href="/cadastro">Criar conta</LinkButton>
@@ -85,9 +93,42 @@ function PublishForm() {
   const [isAd, setIsAd] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [restoredDraft, setRestoredDraft] = useState(false);
+  const draftReady = useRef(false);
   const isTooLong = body.length > MAX_BODY_LENGTH;
+  const missing = [!title.trim() && "o título", !body.trim() && "o conteúdo"]
+    .filter(Boolean)
+    .join(" e ");
+  const leftoverGuides = findTemplateGuides(body);
+  const balance = user?.tabcash ?? 0;
+  const canSponsor = balance >= AD_COST;
 
   const { query } = useRouter();
+
+  // O texto fica guardado no navegador até publicar: fechar a aba ou a
+  // sessão expirar não apaga o que a pessoa escreveu.
+  useEffect(() => {
+    const draft = readPublishDraft(user.id);
+    if (draft) {
+      setTitle(draft.title);
+      setBody(draft.body);
+      setRestoredDraft(true);
+    }
+    draftReady.current = true;
+  }, [user.id]);
+
+  useEffect(() => {
+    if (draftReady.current) {
+      writePublishDraft(user.id, { title, body });
+    }
+  }, [user.id, title, body]);
+
+  function discardDraft() {
+    clearPublishDraft(user.id);
+    setTitle("");
+    setBody(findPublishTemplate(query.modelo)?.body ?? "");
+    setRestoredDraft(false);
+  }
 
   // /publicar?modelo=pergunta (links da home) já abre com o roteiro.
   useEffect(() => {
@@ -123,6 +164,18 @@ function PublishForm() {
       return;
     }
 
+    if (isAd) {
+      const confirmed = await confirm({
+        title: `Usar ${AD_COST} AgroCash nesta publicação?`,
+        body: `A publicação vai aparecer no espaço de anúncio, marcada como Patrocinado. Seu saldo vai de ${balance} para ${balance - AD_COST} AgroCash.`,
+        confirmLabel: "Patrocinar e publicar",
+      });
+
+      if (!confirmed) {
+        return;
+      }
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -139,6 +192,7 @@ function PublishForm() {
       const responseBody = await response.json();
 
       if (response.status === 201) {
+        clearPublishDraft(user.id);
         mutate();
         const params = new URLSearchParams({ publicado: "1" });
         if (responseBody.first_publication) {
@@ -166,6 +220,15 @@ function PublishForm() {
   return (
     <form onSubmit={handleSubmit}>
       <Stack gap="normal">
+        {restoredDraft && (
+          <Flash role="status">
+            Recuperamos o texto que você não chegou a publicar.{" "}
+            <Button size="small" variant="invisible" onClick={discardDraft}>
+              Descartar rascunho
+            </Button>
+          </Flash>
+        )}
+
         {errorMessage && (
           <Flash variant="danger" role="alert">
             {errorMessage}
@@ -209,8 +272,9 @@ function PublishForm() {
             autofocus={false}
           />
           <FormControl.Caption>
-            Markdown no estilo TabNews. Para imagens hospedadas em outro lugar
-            use ![descrição](https://url-da-imagem).
+            Use a barra do editor para negrito, listas e links. Para mostrar uma
+            imagem que já está na internet, escreva
+            ![descrição](endereço-da-imagem).
           </FormControl.Caption>
         </FormControl>
 
@@ -224,23 +288,47 @@ function PublishForm() {
           {body.length}/{MAX_BODY_LENGTH}
         </Text>
 
-        <FormControl>
-          <FormControl.Label htmlFor="is-ad">
-            Patrocinar publicação (100 AgroCash)
+        {leftoverGuides.length > 0 && (
+          <Flash variant="warning">
+            Ainda há trechos do modelo entre colchetes, como “
+            {leftoverGuides[0]}”. Troque pelos seus dados ou apague antes de
+            publicar.
+          </Flash>
+        )}
+
+        <Heading as="h2" variant="small">
+          Opção paga
+        </Heading>
+        {/* O FormControl liga rótulo e caixa pelo próprio id; um id fixo
+            na caixa era sobrescrito e deixava o rótulo solto. */}
+        <FormControl id="is-ad" disabled={!canSponsor}>
+          <FormControl.Label>
+            Patrocinar publicação ({AD_COST} AgroCash)
           </FormControl.Label>
           <Checkbox
-            id="is-ad"
             checked={isAd}
             onChange={(event) => setIsAd(event.target.checked)}
           />
           <FormControl.Caption>
-            Seu saldo atual: {user?.tabcash ?? 0} AgroCash. Publicações
-            patrocinadas entram no espaço de anúncio (Revenue Share).
+            Seu saldo atual: {balance} AgroCash.{" "}
+            {canSponsor
+              ? "A publicação aparece no espaço de anúncio, marcada como Patrocinado. Você confirma antes de gastar."
+              : `Para patrocinar, é preciso ter pelo menos ${AD_COST} AgroCash.`}
           </FormControl.Caption>
         </FormControl>
 
         <Stack.Item>
+          {missing && (
+            <Text
+              as="p"
+              id="publish-missing"
+              sx={{ color: "fg.muted", fontSize: 1, mt: 0, mb: 2 }}
+            >
+              Para publicar, preencha {missing}.
+            </Text>
+          )}
           <Button
+            aria-describedby={missing ? "publish-missing" : undefined}
             type="submit"
             variant="primary"
             disabled={

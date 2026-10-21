@@ -4,6 +4,7 @@ import { useReward } from "react-rewards";
 import { IconButton, Text, Tooltip } from "@primer/react";
 import { ChevronDownIcon, ChevronUpIcon } from "@primer/octicons-react";
 import useUser from "interface/useUser";
+import { loginHref } from "interface/loginRedirect";
 import classes from "./index.module.css";
 
 export default function TabCoinButtons({ content, onBalanceChange }) {
@@ -50,7 +51,7 @@ export default function TabCoinButtons({ content, onBalanceChange }) {
     setErrorMessage(null);
 
     if (!user && !isLoading) {
-      router.push(`/login?redirect=${encodeURIComponent(router.asPath)}`);
+      router.push(loginHref(router.asPath));
       return;
     }
 

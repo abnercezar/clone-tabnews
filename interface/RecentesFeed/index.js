@@ -139,6 +139,7 @@ export default function RecentesFeed({
         description,
       }}
     >
+      <h1 className={ui.visuallyHidden}>{title}</h1>
       <RecentTabNav />
 
       {errorMessage && <Flash variant="danger">{errorMessage}</Flash>}

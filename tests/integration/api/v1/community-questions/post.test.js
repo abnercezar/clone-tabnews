@@ -83,6 +83,9 @@ describe("`POST /api/v1/community-questions`", () => {
       ]);
       expect(responseBody.total_votes).toBe(0);
       expect(responseBody.owner_id).toBeUndefined();
+      const periodMs =
+        Date.parse(responseBody.ends_at) - Date.parse(responseBody.starts_at);
+      expect(periodMs).toBe(7 * 24 * 60 * 60 * 1000);
 
       const lastEvent = await orchestrator.getLastEvent();
       expect(lastEvent.type).toBe("create:community_question");

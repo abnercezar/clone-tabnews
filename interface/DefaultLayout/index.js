@@ -31,6 +31,7 @@ import webserver from "infra/webserver";
 import { writeColorMode } from "interface/colorMode";
 import useSearchBox from "interface/SearchBox";
 import useUser from "interface/useUser";
+import { loginHref } from "interface/loginRedirect";
 import styles from "./index.module.css";
 
 const containerMaxWidth = {
@@ -102,15 +103,21 @@ export default function DefaultLayout({
 }
 
 function SiteHeader() {
-  const { asPath, pathname } = useRouter();
+  const { asPath, isReady, pathname } = useRouter();
   const { user, isLoading } = useUser();
+  // Em página estática o asPath do servidor é o padrão da rota; o retorno
+  // pós-login só entra no href depois que o router conhece a URL real.
+  const [loginLink, setLoginLink] = useState("/login");
+  useEffect(() => {
+    if (isReady) {
+      setLoginLink(loginHref(asPath));
+    }
+  }, [asPath, isReady]);
   const { SearchBarButton, SearchIconButton, SearchBoxOverlay } =
     useSearchBox();
   const isRelevantes =
     pathname === "/" || asPath === "/" || asPath.startsWith("/?");
   const isRecentes = pathname === "/recentes" || asPath.startsWith("/recentes");
-  // Na home as abas do feed já fazem essa navegação; não repetimos no topo.
-  const isHome = pathname === "/" && !asPath.includes("usuario=");
 
   return (
     <>
@@ -119,36 +126,30 @@ function SiteHeader() {
           <Header.Item className={styles.itemFlush}>
             <Header.Link
               href="/"
-              aria-label={
-                isHome ? "AgroTab, página inicial" : "Página inicial Relevantes"
-              }
+              aria-label="Página inicial Relevantes"
               aria-current={isRelevantes ? "page" : undefined}
             >
               <span className={styles.logo}>
                 <AgroTabLogo size={32} />
               </span>
               <span className={styles.brand}>AgroTab</span>
-              {!isHome && (
-                <span
-                  className={isRelevantes ? styles.activeLink : styles.navLink}
-                >
-                  Relevantes
-                </span>
-              )}
+              <span
+                className={isRelevantes ? styles.activeLink : styles.navLink}
+              >
+                Relevantes
+              </span>
             </Header.Link>
           </Header.Item>
 
-          {!isHome && (
-            <Header.Item className={styles.itemFlush}>
-              <Header.Link
-                href="/recentes"
-                aria-current={isRecentes ? "page" : undefined}
-                className={isRecentes ? styles.activeLink : styles.navLink}
-              >
-                Recentes
-              </Header.Link>
-            </Header.Item>
-          )}
+          <Header.Item className={styles.itemFlush}>
+            <Header.Link
+              href="/recentes"
+              aria-current={isRecentes ? "page" : undefined}
+              className={isRecentes ? styles.activeLink : styles.navLink}
+            >
+              Recentes
+            </Header.Link>
+          </Header.Item>
         </nav>
 
         <div className={styles.spacer} aria-hidden="true" />
@@ -167,10 +168,14 @@ function SiteHeader() {
                 <ThemeSwitcher />
               </Header.Item>
               <Header.Item className={styles.itemMl2}>
-                <Header.Link href="/login">Login</Header.Link>
+                <Header.Link href={loginLink} className={styles.authLink}>
+                  Entrar
+                </Header.Link>
               </Header.Item>
-              <Header.Item className={styles.itemMr1}>
-                <Header.Link href="/cadastro">Cadastrar</Header.Link>
+              <Header.Item className={`${styles.itemMr1} ${styles.signupItem}`}>
+                <Header.Link href="/cadastro" className={styles.authLink}>
+                  Criar conta
+                </Header.Link>
               </Header.Item>
             </>
           )}
@@ -280,7 +285,7 @@ function UserMenu({ user }) {
                 <ActionList.LeadingVisual>
                   <SignOutIcon />
                 </ActionList.LeadingVisual>
-                Deslogar
+                Sair
               </ActionList.Item>
             </ActionList>
           </ActionMenu.Overlay>
@@ -369,6 +374,9 @@ function ColorModeSwitch() {
 }
 
 function SiteFooter({ maxWidth }) {
+  const { user } = useUser();
+  const showStatus = Boolean(user?.features?.includes("read:status:all"));
+
   return (
     <footer className={styles.footer} style={{ maxWidth }}>
       <div className={styles.footerContainer}>
@@ -387,8 +395,7 @@ function SiteFooter({ maxWidth }) {
           <Link href="/sobre">Sobre</Link>
           <Link href="/faq">FAQ</Link>
           <Link href="/termos-de-uso">Termos de Uso</Link>
-          <Link href="/status">Status</Link>
-          <Link href="/recentes/rss">RSS</Link>
+          {showStatus && <Link href="/status">Status</Link>}
         </div>
       </div>
     </footer>

@@ -108,3 +108,10 @@
   font-size: 14px;
   color: var(--fgColor-muted, #656d76);
 }
+
+/* No celular o convite aparece no meio do feed (pages/index.js). */
+@media (max-width: 899px) {
+  .sideJoin {
+    display: none;
+  }
+}

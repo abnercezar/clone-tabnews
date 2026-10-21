@@ -66,3 +66,58 @@ export const PUBLISH_TEMPLATES = [
 export function findPublishTemplate(id) {
   return PUBLISH_TEMPLATES.find((template) => template.id === id) || null;
 }
+
+// Trechos-guia entre colchetes ("[ex.: soja, café, gado de corte]") que
+// continuam no texto: sinal de que o modelo foi publicado sem preencher.
+const TEMPLATE_GUIDES = [
+  ...new Set(
+    PUBLISH_TEMPLATES.flatMap((template) =>
+      template.body.match(/\[[^\]\n]+\]/g),
+    ),
+  ),
+];
+
+export function findTemplateGuides(body) {
+  const text = String(body || "");
+  return TEMPLATE_GUIDES.filter((guide) => text.includes(guide));
+}
+
+const DRAFT_PREFIX = "agrotab:publicar:rascunho:";
+
+export function readPublishDraft(userId, storage = globalThis.localStorage) {
+  try {
+    const raw = storage?.getItem(DRAFT_PREFIX + userId);
+    if (!raw) return null;
+    const draft = JSON.parse(raw);
+    if (typeof draft?.title !== "string" || typeof draft?.body !== "string") {
+      return null;
+    }
+    return draft;
+  } catch {
+    return null;
+  }
+}
+
+export function writePublishDraft(
+  userId,
+  draft,
+  storage = globalThis.localStorage,
+) {
+  try {
+    if (!draft.title.trim() && !draft.body.trim()) {
+      storage?.removeItem(DRAFT_PREFIX + userId);
+      return;
+    }
+    storage?.setItem(DRAFT_PREFIX + userId, JSON.stringify(draft));
+  } catch {
+    // Sem armazenamento, o texto vive só enquanto a página estiver aberta.
+  }
+}
+
+export function clearPublishDraft(userId, storage = globalThis.localStorage) {
+  try {
+    storage?.removeItem(DRAFT_PREFIX + userId);
+  } catch {
+    // Idem.
+  }
+}

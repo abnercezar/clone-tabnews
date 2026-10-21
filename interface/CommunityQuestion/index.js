@@ -18,6 +18,7 @@ import {
 } from "@primer/octicons-react";
 import PastTime, { formatPastDuration } from "interface/PastTime";
 import useUser from "interface/useUser";
+import { loginHref } from "interface/loginRedirect";
 import {
   clearDraft,
   computeResults,
@@ -90,6 +91,12 @@ export default function CommunityQuestion({ onPublished }) {
   }
 
   if (status === "error" && !question) {
+    // Para quem só visita, uma falha aqui não deve ser a primeira impressão
+    // da home: o card some. Quem cria perguntas vê o aviso para agir.
+    if (!user?.features?.includes("create:community_question")) {
+      return null;
+    }
+
     return (
       <section className={styles.card} aria-labelledby="cq-error-title">
         <p className={styles.eyebrow}>Pergunta da Comunidade</p>
@@ -419,7 +426,8 @@ function Poll({ question, user, onVoted, onExplain }) {
 
       {showLoginHint && (
         <Flash className={styles.inlineFlash} role="status">
-          Para votar, entre na sua conta. <Link href="/login">Entrar</Link> ou{" "}
+          Para votar, entre na sua conta.{" "}
+          <Link href={loginHref("/#pergunta")}>Entrar</Link> ou{" "}
           <Link href="/cadastro">criar conta grátis</Link>.
         </Flash>
       )}
@@ -473,7 +481,7 @@ function Composer({ question, user, seed, onCancel, onPublished }) {
           pessoas do campo vão encontrar.
         </p>
         <div className={styles.shareRow}>
-          <LinkButton href="/login" variant="primary">
+          <LinkButton href={loginHref("/#pergunta")} variant="primary">
             Entrar
           </LinkButton>
           <LinkButton href="/cadastro">Criar conta</LinkButton>

@@ -69,6 +69,26 @@
   background-color: var(--bgColor-accent-muted, #ddf4ff);
 }
 
+/* O nome do autor leva ao perfil, sem perder o visual de etiqueta. */
+a.authorLabel:hover {
+  text-decoration: underline;
+}
+
+/* Saídas no fim da publicação: a leitura não termina num beco. */
+.continueReading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--base-size-8, 8px) var(--base-size-24, 24px);
+  padding-top: var(--base-size-16, 16px);
+  border-top: 1px solid var(--borderColor-muted, #d0d7de);
+}
+
+.continueReading a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+}
+
 .reply {
   margin-top: var(--base-size-12, 12px);
   margin-left: var(--base-size-16, 16px);
@@ -128,4 +148,14 @@
   overflow-wrap: anywhere;
   font-size: 16px;
   line-height: 1.7;
+}
+
+/* Texto só para leitor de tela (título da página sem cabeçalho visual). */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }

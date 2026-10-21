@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import {
   ActionList,
@@ -154,6 +155,10 @@ export default function UserProfilePage() {
           description: "Este perfil não existe no AgroTab.",
         }}
       >
+        <Head>
+          {/* Endereço inexistente não deve ser indexado como página real. */}
+          <meta name="robots" content="noindex" />
+        </Head>
         <Stack gap="normal" align="center" className={classes.emptyState}>
           <Heading as="h1" variant="medium">
             Perfil não encontrado

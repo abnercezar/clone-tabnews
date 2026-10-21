@@ -344,14 +344,17 @@ async function addFeaturesToUser(userObject, features) {
 }
 
 // Cria uma Pergunta da Comunidade. `startsAt`/`endsAt` ajustam o período
-// via SQL para simular perguntas futuras ou encerradas.
+// via SQL para simular perguntas futuras ou encerradas. O texto padrão é
+// só do teste: a pergunta da home vem do banco, com início e fim.
 async function createCommunityQuestion({
   ownerId,
-  title = "O que você aprendeu na última safra que gostaria de ter sabido antes?",
-  description,
+  title = "Qual decisão da safra você quer comparar com a comunidade?",
+  description = null,
   category = "lavoura",
   kind = "poll",
-  options = kind === "poll" ? ["Plantio", "Colheita", "Comercialização"] : [],
+  options = kind === "poll"
+    ? ["Mantive o plano", "Mudei no meio da safra", "Ainda vou decidir"]
+    : [],
   resultsVisibility,
   startsAt,
   endsAt,
@@ -370,7 +373,9 @@ async function createCommunityQuestion({
     await database.query({
       text: `
         UPDATE community_questions
-        SET starts_at = COALESCE($2, starts_at), ends_at = $3
+        SET
+          starts_at = COALESCE($2, starts_at),
+          ends_at = COALESCE($3, ends_at)
         WHERE id = $1
       ;`,
       values: [created.id, startsAt || null, endsAt || null],

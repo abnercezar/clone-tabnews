@@ -27,3 +27,9 @@
   text-align: center;
   font-size: var(--text-body-size-medium, 14px);
 }
+
+.terms {
+  margin: var(--base-size-12, 12px) 0 0;
+  font-size: var(--text-body-size-small, 12px);
+  color: var(--fgColor-muted, #59636e);
+}

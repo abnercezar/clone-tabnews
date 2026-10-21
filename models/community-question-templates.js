@@ -3,6 +3,21 @@
 // unitário garante que cada modelo passa por elas.
 const communityQuestionTemplates = [
   {
+    id: "plantio-clima",
+    title: "Com o clima deste início, o que você fez no plantio da soja?",
+    description:
+      "Até 16 de outubro, 30,1% da área de soja já estava semeada, quase o dobro da semana anterior. O número esconde dois Brasis: no Centro-Oeste a chuva falha e tem gente plantando no pó; no Sul o solo encharcou, a máquina parou e já há replantio. Quem perde dia agora aperta a janela do milho safrinha.",
+    category: "clima",
+    kind: "poll",
+    options: [
+      "Plantei no pó, antes da chuva firmar",
+      "Esperei a chuva regularizar",
+      "Parei porque o solo encharcou",
+      "Já tive de replantar parte da área",
+      "Ainda não comecei",
+    ],
+  },
+  {
     id: "adubacao-safra",
     title: "Com o adubo ainda caro, o que você fez com a adubação desta safra?",
     description:

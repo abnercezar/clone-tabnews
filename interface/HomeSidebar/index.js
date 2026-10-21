@@ -18,13 +18,17 @@ const TEMPLATE_ICONS = {
 export default function HomeSidebar({ showJoin = false }) {
   return (
     <aside className={classes.sidebar} aria-label="Comece por aqui">
-      {showJoin && <JoinCard />}
+      {showJoin && (
+        <div className={classes.sideJoin}>
+          <JoinCard />
+        </div>
+      )}
       <TemplatesCard />
     </aside>
   );
 }
 
-function JoinCard() {
+export function JoinCard() {
   return (
     <section className={`${classes.card} ${classes.joinCard}`}>
       <div className={classes.joinHeader}>
