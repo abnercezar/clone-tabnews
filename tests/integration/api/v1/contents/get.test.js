@@ -161,6 +161,49 @@ describe("`GET /api/v1/contents`", () => {
       ).toBe(true);
     });
 
+    test("Searches posts and comments by title or body", async () => {
+      const author = await orchestrator.createUser({
+        username: "autorbusca",
+      });
+      await orchestrator.activateUser(author);
+
+      await orchestrator.createContent({
+        owner_id: author.id,
+        title: "Manejo ferrugemsafrinha99",
+        body: "Aplicar fungicida no estágio R1.",
+      });
+
+      const other = await orchestrator.createContent({
+        owner_id: author.id,
+        title: "Assunto distante da busca",
+        body: "Nada a ver com o termo procurado.",
+      });
+
+      await orchestrator.createContent({
+        owner_id: author.id,
+        parent_id: other.id,
+        body: "Comentário ferrugemsafrinha99 no talhão.",
+      });
+
+      const response = await fetch(
+        `${webserver.origin}/api/v1/contents?q=FERRUGEMSAFRINHA99&strategy=new`,
+      );
+
+      expect(response.status).toBe(200);
+      const responseBody = await response.json();
+      expect(responseBody).toHaveLength(2);
+      expect(responseBody.some((item) => item.parent_id === null)).toBe(true);
+      expect(responseBody.some((item) => item.parent_id !== null)).toBe(true);
+      expect(
+        responseBody.some((item) => item.title === "Assunto distante da busca"),
+      ).toBe(false);
+
+      const empty = await fetch(
+        `${webserver.origin}/api/v1/contents?q=termoinexistente99&strategy=new`,
+      );
+      expect(await empty.json()).toEqual([]);
+    });
+
     test("Filters sponsored ads with type=ad", async () => {
       const author = await orchestrator.createUser({
         username: "autorclassificados",

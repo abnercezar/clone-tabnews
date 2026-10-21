@@ -10,6 +10,7 @@ import {
   Spinner,
 } from "@primer/react";
 import { SearchIcon, XCircleFillIcon } from "@primer/octicons-react";
+import { createExcerpt } from "interface/excerpt";
 import classes from "./index.module.css";
 
 const searchId = (process.env.NEXT_PUBLIC_SEARCH_ID || "").trim();
@@ -138,6 +139,7 @@ export default function useSearchBox() {
               variant="invisible"
               aria-label="Fechar pesquisa"
               onClick={handleClose}
+              className={classes.closeButton}
             />
           </div>
 
@@ -231,13 +233,15 @@ function AgroSearch({ query, onQueryChange, onNavigate }) {
           signal: abortController.signal,
         });
 
-        if (!response.ok) {
+        const payload = await response.json();
+
+        if (!response.ok || !Array.isArray(payload)) {
           setResults([]);
           setErrorMessage("Não foi possível pesquisar agora.");
           return;
         }
 
-        setResults(await response.json());
+        setResults(payload);
       } catch (error) {
         if (error.name === "AbortError") {
           return;
@@ -257,53 +261,70 @@ function AgroSearch({ query, onQueryChange, onNavigate }) {
     };
   }, [query]);
 
+  const term = query.trim();
+  const list = Array.isArray(results) ? results : [];
+
   return (
     <form
       className={classes.fallbackForm}
       onSubmit={(event) => event.preventDefault()}
     >
-      <input
-        className={classes.fallbackInput}
-        autoFocus
-        value={query}
-        onChange={(event) => onQueryChange(event.target.value)}
-        placeholder="Buscar publicações…"
-        aria-label="Termo de pesquisa"
-      />
+      <div className={classes.searchRow}>
+        <input
+          className={classes.fallbackInput}
+          autoFocus
+          value={query}
+          onChange={(event) => onQueryChange(event.target.value)}
+          placeholder="Pesquisar no AgroTab"
+          aria-label="Termo de pesquisa"
+          enterKeyHint="search"
+        />
+        <button
+          type="submit"
+          className={classes.searchButton}
+          aria-label="Pesquisar"
+        >
+          <SearchIcon size={16} />
+        </button>
+      </div>
 
-      {isSearching && (
-        <div className={classes.spinnerWrapper}>
-          <Spinner size="small" />
-        </div>
-      )}
+      {isSearching && <p className={classes.status}>Pesquisando…</p>}
 
       {errorMessage && <p className={classes.empty}>{errorMessage}</p>}
 
-      {results && results.length === 0 && !isSearching && !errorMessage && (
-        <p className={classes.empty}>Nenhuma publicação encontrada.</p>
+      {results && list.length === 0 && !isSearching && !errorMessage && (
+        <p className={classes.empty}>
+          Nenhuma publicação encontrada para “{term}”.
+        </p>
       )}
 
-      {results && results.length > 0 && (
+      {list.length > 0 && (
         <ul className={classes.results}>
-          {results.map((content) => (
-            <li key={content.id}>
-              <Link
-                href={`/${content.owner_username}/${content.slug}`}
-                className={classes.resultLink}
-                onClick={(event) => {
-                  event.preventDefault();
-                  const href = `/${content.owner_username}/${content.slug}`;
-                  onNavigate();
-                  router.push(href);
-                }}
-              >
-                {content.title}
-              </Link>
-              <span className={classes.resultAuthor}>
-                {content.owner_username}
-              </span>
-            </li>
-          ))}
+          {list.map((content) => {
+            const href = `/${content.owner_username}/${content.slug}`;
+            const excerpt = createExcerpt(content.body, 140);
+            const showExcerpt = excerpt && excerpt !== content.title;
+
+            return (
+              <li key={content.id}>
+                <Link
+                  href={href}
+                  className={classes.resultLink}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    onNavigate();
+                    router.push(href);
+                  }}
+                >
+                  <span className={classes.resultTitle}>{content.title}</span>
+                  <span className={classes.resultPath}>{href}</span>
+                  {showExcerpt && (
+                    <span className={classes.resultSnippet}>{excerpt}</span>
+                  )}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
     </form>
