@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import {
   ActionList,
@@ -20,8 +19,10 @@ import {
   ShareIcon,
   TrashIcon,
 } from "@primer/octicons-react";
+import { useConfirmDialog } from "interface/ConfirmDialog";
 import DefaultLayout from "interface/DefaultLayout";
 import Confetti from "interface/Confetti";
+import MarkdownViewer from "interface/MarkdownViewer";
 import PastTime from "interface/PastTime";
 import Sponsorship from "interface/Sponsorship";
 import CommentForm from "interface/CommentForm";
@@ -29,21 +30,33 @@ import TabCoinButtons from "interface/TabCoinButtons";
 import useUser from "interface/useUser";
 import { formatReadingTime } from "interface/readingTime";
 import { splitComment } from "interface/commentText";
+import { createExcerpt } from "interface/excerpt";
 import ui from "interface/styles.module.css";
+import controller from "infra/controller.js";
+import { NotFoundError } from "infra/errors.js";
+import authorization from "models/authorization.js";
+import contentModel from "models/content.js";
 
-const MarkdownViewer = dynamic(() => import("interface/MarkdownViewer"), {
-  ssr: false,
-});
+// Remonta a página a cada post: navegar de um post para outro não mostra
+// conteúdo, comentários nem respostas do post anterior.
+export default function ContentRoute(props) {
+  const { query } = useRouter();
 
-export default function ContentPage() {
+  return <ContentPage key={`${query.username}/${query.slug}`} {...props} />;
+}
+
+function ContentPage({ initialContent = null, notFound = false }) {
   const router = useRouter();
   const { username, slug, publicado, primeira } = router.query;
   const { user, isLoading: isLoadingUser } = useUser();
-  const [content, setContent] = useState(null);
+  const confirm = useConfirmDialog();
+  const [content, setContent] = useState(initialContent);
   const [comments, setComments] = useState([]);
   const [sponsorship, setSponsorship] = useState(null);
   const [isReplyingToPost, setIsReplyingToPost] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(
+    notFound ? "Conteúdo não encontrado." : null,
+  );
   const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
@@ -59,17 +72,29 @@ export default function ContentPage() {
 
     async function loadContent() {
       try {
-        const response = await fetch(`/api/v1/contents/${username}/${slug}`);
-        if (response.status === 404) {
+        // Conteúdo já veio do servidor (SSR): só busca o que depende do cliente.
+        if (notFound) {
+          setContent(null);
           setErrorMessage("Conteúdo não encontrado.");
           return;
         }
-        if (!response.ok) {
-          setErrorMessage("Não foi possível carregar o conteúdo.");
-          return;
+
+        if (initialContent) {
+          setContent(initialContent);
+          setErrorMessage(null);
+        } else {
+          const response = await fetch(`/api/v1/contents/${username}/${slug}`);
+          if (response.status === 404) {
+            setErrorMessage("Conteúdo não encontrado.");
+            return;
+          }
+          if (!response.ok) {
+            setErrorMessage("Não foi possível carregar o conteúdo.");
+            return;
+          }
+          const contentFound = await response.json();
+          setContent(contentFound);
         }
-        const contentFound = await response.json();
-        setContent(contentFound);
 
         const commentsResponse = await fetch(
           `/api/v1/contents/${username}/${slug}/children`,
@@ -88,12 +113,15 @@ export default function ContentPage() {
       }
     }
     loadContent();
-  }, [username, slug]);
+  }, [username, slug, initialContent, notFound]);
 
   async function handleDelete() {
-    const confirmed = window.confirm(
-      "Excluir esta publicação? Essa ação não pode ser desfeita.",
-    );
+    const confirmed = await confirm({
+      title: "Excluir esta publicação?",
+      body: "Essa ação não pode ser desfeita.",
+      confirmLabel: "Excluir",
+      danger: true,
+    });
     if (!confirmed) {
       return;
     }
@@ -114,7 +142,18 @@ export default function ContentPage() {
     <DefaultLayout
       contentWidth="large"
       metadata={{
-        title: content ? content.title : "Conteúdo",
+        title: content
+          ? content.title
+          : notFound
+            ? "Conteúdo não encontrado"
+            : "Conteúdo",
+        description: content ? createExcerpt(content.body) : undefined,
+        type: content ? "article" : undefined,
+        author: content?.owner_username,
+        canonicalPath: content
+          ? `/${content.owner_username}/${content.slug}`
+          : undefined,
+        publishedTime: content?.published_at,
       }}
     >
       {showConfetti && <Confetti />}
@@ -454,4 +493,38 @@ function ShareButton({ username, slug, title }) {
       </Button>
     </Tooltip>
   );
+}
+
+// Renderiza o post (título, corpo e metatags) no servidor para buscadores e
+// prévias de links (WhatsApp, redes sociais). Votos, comentários e patrocínio
+// seguem no cliente. Atenção: models/infra só podem ser usados aqui dentro —
+// usá-los no componente leva `pg` para o bundle do navegador.
+export async function getServerSideProps({ params, res }) {
+  try {
+    const contentFound = await contentModel.findOneByUsernameAndSlug(
+      params.username,
+      params.slug,
+    );
+    const secureOutputValues = authorization.filterOutput(
+      controller.createAnonymousUser(),
+      "read:content",
+      contentFound,
+    );
+
+    return {
+      props: {
+        // Datas do banco viram string ISO, como na resposta da API.
+        initialContent: JSON.parse(JSON.stringify(secureOutputValues)),
+      },
+    };
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      res.statusCode = 404;
+      return { props: { notFound: true } };
+    }
+
+    // Falha no servidor não derruba a página: o cliente tenta pela API.
+    console.error(error);
+    return { props: {} };
+  }
 }

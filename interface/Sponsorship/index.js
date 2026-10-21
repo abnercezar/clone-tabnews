@@ -1,16 +1,23 @@
 import { LinkExternalIcon } from "@primer/octicons-react";
+import { useConfirmDialog } from "interface/ConfirmDialog";
 import useUser from "interface/useUser";
 import styles from "./index.module.css";
 
 export default function Sponsorship({ sponsorship, onRemoved }) {
   const { user } = useUser();
+  const confirm = useConfirmDialog();
 
   if (!sponsorship) {
     return null;
   }
 
   async function handleRemove() {
-    const confirmed = window.confirm("Remover este patrocínio?");
+    const confirmed = await confirm({
+      title: "Remover este patrocínio?",
+      body: "O anúncio deixa de aparecer na publicação.",
+      confirmLabel: "Remover",
+      danger: true,
+    });
     if (!confirmed) {
       return;
     }

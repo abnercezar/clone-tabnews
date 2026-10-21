@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActionList,
   ActionMenu,
@@ -27,6 +27,7 @@ import {
 import AgroCashCount from "interface/AgroCashCount";
 import AgroCoinCount from "interface/AgroCoinCount";
 import AgroTabLogo from "interface/AgroTabLogo";
+import webserver from "infra/webserver";
 import { writeColorMode } from "interface/colorMode";
 import useSearchBox from "interface/SearchBox";
 import useUser from "interface/useUser";
@@ -36,6 +37,7 @@ const containerMaxWidth = {
   small: "544px",
   medium: "768px",
   large: "1012px",
+  wide: "1280px",
 };
 
 export default function DefaultLayout({
@@ -44,24 +46,55 @@ export default function DefaultLayout({
   contentWidth = "large",
 }) {
   const maxWidth = containerMaxWidth[contentWidth] ?? containerMaxWidth.large;
+  const { asPath, isReady, pathname } = useRouter();
+  const pageTitle = metadata.title ? `${metadata.title} · AgroTab` : "AgroTab";
+  // Em rotas dinâmicas sem SSR o asPath é o padrão ("/[username]") até o
+  // router ficar pronto; nesse caso não há URL canônica confiável.
+  const hasRealPath = isReady || !pathname.includes("[");
+  const canonicalPath =
+    metadata.canonicalPath || (hasRealPath ? asPath.split(/[?#]/)[0] : null);
+  const canonicalUrl = canonicalPath
+    ? `${webserver.canonicalOrigin}${canonicalPath}`
+    : null;
 
   return (
     <div className={styles.wrapper}>
       <Head>
-        <title>
-          {metadata.title ? `${metadata.title} · AgroTab` : "AgroTab"}
-        </title>
+        <title>{pageTitle}</title>
 
         {metadata.description && (
           <meta name="description" content={metadata.description} />
         )}
+
+        {/* Prévia de links no WhatsApp, redes sociais e buscadores. */}
+        {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+        <meta property="og:site_name" content="AgroTab" />
+        <meta property="og:locale" content="pt_BR" />
+        <meta property="og:type" content={metadata.type || "website"} />
+        <meta property="og:title" content={metadata.title || "AgroTab"} />
+        {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
+        {metadata.description && (
+          <meta property="og:description" content={metadata.description} />
+        )}
+        {metadata.author && (
+          <meta property="article:author" content={metadata.author} />
+        )}
+        {metadata.publishedTime && (
+          <meta
+            property="article:published_time"
+            content={metadata.publishedTime}
+          />
+        )}
+        <meta name="twitter:card" content="summary" />
       </Head>
 
       <SiteHeader />
 
-      <main className={styles.main} style={{ maxWidth }}>
-        {children}
-      </main>
+      <div className={styles.contentClip}>
+        <main className={styles.main} style={{ maxWidth }}>
+          {children}
+        </main>
+      </div>
 
       <SiteFooter maxWidth={maxWidth} />
     </div>
@@ -76,57 +109,77 @@ function SiteHeader() {
   const isRelevantes =
     pathname === "/" || asPath === "/" || asPath.startsWith("/?");
   const isRecentes = pathname === "/recentes" || asPath.startsWith("/recentes");
+  // Na home as abas do feed já fazem essa navegação; não repetimos no topo.
+  const isHome = pathname === "/" && !asPath.includes("usuario=");
 
   return (
-    <Header as="header" className={styles.header}>
+    <>
+      <Header as="header" className={styles.header}>
+        <nav className={styles.nav}>
+          <Header.Item className={styles.itemFlush}>
+            <Header.Link
+              href="/"
+              aria-label={
+                isHome ? "AgroTab, página inicial" : "Página inicial Relevantes"
+              }
+              aria-current={isRelevantes ? "page" : undefined}
+            >
+              <span className={styles.logo}>
+                <AgroTabLogo size={32} />
+              </span>
+              <span className={styles.brand}>AgroTab</span>
+              {!isHome && (
+                <span
+                  className={isRelevantes ? styles.activeLink : styles.navLink}
+                >
+                  Relevantes
+                </span>
+              )}
+            </Header.Link>
+          </Header.Item>
+
+          {!isHome && (
+            <Header.Item className={styles.itemFlush}>
+              <Header.Link
+                href="/recentes"
+                aria-current={isRecentes ? "page" : undefined}
+                className={isRecentes ? styles.activeLink : styles.navLink}
+              >
+                Recentes
+              </Header.Link>
+            </Header.Item>
+          )}
+        </nav>
+
+        <div className={styles.spacer} aria-hidden="true" />
+
+        <div className={styles.tools}>
+          {!isLoading && (
+            <Header.Item className={styles.searchItem}>
+              <SearchBarButton />
+              <SearchIconButton />
+            </Header.Item>
+          )}
+
+          {!isLoading && !user && (
+            <>
+              <Header.Item className={styles.itemMr1}>
+                <ThemeSwitcher />
+              </Header.Item>
+              <Header.Item className={styles.itemMl2}>
+                <Header.Link href="/login">Login</Header.Link>
+              </Header.Item>
+              <Header.Item className={styles.itemMr1}>
+                <Header.Link href="/cadastro">Cadastrar</Header.Link>
+              </Header.Item>
+            </>
+          )}
+
+          {user && <UserMenu user={user} />}
+        </div>
+      </Header>
       <SearchBoxOverlay />
-
-      <nav className={styles.nav}>
-        <Header.Item className={styles.itemFlush}>
-          <Header.Link
-            href="/"
-            aria-label="Página inicial Relevantes"
-            aria-current={isRelevantes ? "page" : undefined}
-          >
-            <AgroTabLogo size={32} />
-            <span className={styles.brand}>AgroTab</span>
-            <span className={isRelevantes ? styles.activeLink : styles.navLink}>
-              Relevantes
-            </span>
-          </Header.Link>
-        </Header.Item>
-
-        <Header.Item full className={styles.itemFlush}>
-          <Header.Link
-            href="/recentes"
-            aria-current={isRecentes ? "page" : undefined}
-            className={isRecentes ? styles.activeLink : styles.navLink}
-          >
-            Recentes
-          </Header.Link>
-        </Header.Item>
-      </nav>
-
-      {!isLoading && (
-        <Header.Item className={styles.searchItem}>
-          <SearchBarButton />
-          <SearchIconButton />
-        </Header.Item>
-      )}
-
-      {!isLoading && !user && (
-        <>
-          <Header.Item className={styles.itemMl2}>
-            <Header.Link href="/login">Login</Header.Link>
-          </Header.Item>
-          <Header.Item className={styles.itemMr1}>
-            <Header.Link href="/cadastro">Cadastrar</Header.Link>
-          </Header.Item>
-        </>
-      )}
-
-      {user && <UserMenu user={user} />}
-    </Header>
+    </>
   );
 }
 
@@ -234,6 +287,46 @@ function UserMenu({ user }) {
         </ActionMenu>
       </Header.Item>
     </>
+  );
+}
+
+function ThemeSwitcher() {
+  const { colorMode, resolvedColorMode, setColorMode } = useTheme();
+  const [systemDark, setSystemDark] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const apply = () => setSystemDark(media.matches);
+    apply();
+    media.addEventListener("change", apply);
+    return () => media.removeEventListener("change", apply);
+  }, []);
+
+  const mode = resolvedColorMode || colorMode;
+  const isLight =
+    mode === "day" || mode === "light"
+      ? true
+      : mode === "night" || mode === "dark"
+        ? false
+        : !systemDark;
+
+  function handleSwitch() {
+    const nextMode = isLight ? "night" : "day";
+    setColorMode(nextMode);
+    writeColorMode(nextMode);
+  }
+
+  return (
+    <Tooltip text={isLight ? "Modo escuro" : "Modo claro"} direction="s">
+      <IconButton
+        icon={isLight ? MoonIcon : SunIcon}
+        aria-label='Alternar tema entre "claro" e "escuro"'
+        onClick={handleSwitch}
+        variant="invisible"
+        size="small"
+        className={isLight ? styles.switcherLight : styles.switcherDark}
+      />
+    </Tooltip>
   );
 }
 

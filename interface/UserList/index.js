@@ -1,4 +1,5 @@
 import { Button, Label, Link, Stack } from "@primer/react";
+import { useConfirmDialog } from "interface/ConfirmDialog";
 import PastTime from "interface/PastTime";
 import useUser from "interface/useUser";
 import { useState } from "react";
@@ -76,6 +77,7 @@ function UserList({ userList, listNumberStart, onUserNuked }) {
 
 function UserListItem({ user, onUserNuked }) {
   const { user: loggedUser } = useUser();
+  const confirm = useConfirmDialog();
   const [isNuking, setIsNuking] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
 
@@ -89,18 +91,23 @@ function UserListItem({ user, onUserNuked }) {
   }
 
   async function handleNuke() {
-    const confirmDelete1 = window.confirm(
-      `Atenção: Você está realizando um Nuke!\n\nDeseja banir permanentemente o usuário "${user.username}", expirar as sessões e despublicar os conteúdos?`,
-    );
+    const confirmDelete1 = await confirm({
+      title: "Atenção: você está realizando um Nuke",
+      body: `Deseja banir permanentemente o usuário "${user.username}", expirar as sessões e despublicar os conteúdos?`,
+      confirmLabel: "Continuar",
+      danger: true,
+    });
 
     if (!confirmDelete1) return;
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const confirmDelete2 = window.confirm(
-      `Nuke em "${user.username}"\n\nConfirme novamente esta operação.`,
-    );
-
+    const confirmDelete2 = await confirm({
+      title: `Nuke em "${user.username}"`,
+      body: "Confirme novamente esta operação.",
+      confirmLabel: "Banir",
+      danger: true,
+    });
     if (!confirmDelete2) return;
 
     setIsNuking(true);

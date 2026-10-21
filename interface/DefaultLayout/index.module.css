@@ -3,23 +3,73 @@
   background-color: var(--bgColor-default, #ffffff);
 }
 
-.header {
+/* Corta o hero de ponta a ponta da home sem cortar o header (que rola no
+   celular quando o usuário logado tem muitos itens). */
+.contentClip {
+  overflow-x: clip;
+}
+
+.header.header {
+  --agro-header-bg: #238636;
+  --agro-gold: #f2c94c;
+  --header-bgColor: var(--agro-header-bg);
+  --header-fgColor-default: rgba(255, 255, 255, 0.72);
+  --header-fgColor-logo: #ffffff;
+  --headerSearch-bgColor: rgba(255, 255, 255, 0.08);
+  --headerSearch-borderColor: rgba(255, 255, 255, 0.18);
+  position: sticky;
+  top: 0;
+  z-index: 10;
   min-width: max-content;
   overflow: visible;
-  padding-inline: var(--base-size-8, 8px);
+  padding: 6px var(--base-size-8, 8px) 0;
+  background-color: var(--agro-header-bg);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+}
+
+.header.header::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 6px;
+  background: linear-gradient(
+    90deg,
+    #009c3b 0% 33.333%,
+    #ffdf00 33.333% 66.666%,
+    #002776 66.666% 100%
+  );
 }
 
 @media (min-width: 1012px) {
-  .header {
+  .header.header {
     padding-inline: var(--base-size-16, 16px);
   }
 }
 
+.logo {
+  display: inline-flex;
+  color: #ffffff;
+}
+
 .nav {
   display: flex;
-  flex: 1;
+  flex: 0 0 auto;
+  align-items: center;
+  align-self: stretch;
   margin: 0;
-  padding: 0;
+  padding: 12px 8px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+  min-width: 16px;
+}
+
+.tools {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  margin: 0;
 }
 
 .itemFlush {
@@ -39,12 +89,21 @@
 
 .navLink {
   margin-left: var(--base-size-16, 16px);
+  color: rgba(255, 255, 255, 0.72);
+  transition: color 120ms ease;
+}
+
+.navLink:hover {
+  color: #ffffff;
 }
 
 .activeLink {
   margin-left: var(--base-size-16, 16px);
+  color: #ffffff;
   text-decoration: underline;
-  text-underline-offset: 6px;
+  text-decoration-color: var(--agro-gold);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 8px;
 }
 
 .itemMr1 {
@@ -103,6 +162,24 @@
   display: flex;
   justify-content: center;
   width: 100%;
+}
+
+.switcherLight,
+.switcherDark {
+  padding-inline: 7px;
+  background-color: transparent;
+  color: #ffffff;
+}
+
+.switcherLight:hover,
+.switcherDark:hover {
+  background-color: transparent;
+  color: var(--agro-gold);
+}
+
+.switcherLight:focus-visible,
+.switcherDark:focus-visible {
+  outline: 2px solid #fff;
 }
 
 .menuButton {

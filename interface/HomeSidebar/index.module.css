@@ -1,0 +1,110 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--base-size-16, 16px);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--base-size-12, 12px);
+  padding: var(--base-size-16, 16px);
+  border: 1px solid var(--borderColor-muted, #d0d7de);
+  border-radius: 12px;
+  background-color: var(--bgColor-default, #ffffff);
+}
+
+.joinCard {
+  align-items: flex-start;
+  border-top: 3px solid var(--bgColor-success-emphasis, #1f883d);
+}
+
+.joinHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--base-size-8, 8px);
+}
+
+.joinLogo {
+  display: inline-flex;
+  color: var(--fgColor-success, #1a7f37);
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--fgColor-default, #1f2328);
+}
+
+.cardText {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--fgColor-default, #1f2328);
+}
+
+.cardFootnote {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--fgColor-muted, #656d76);
+}
+
+.templateList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--base-size-4, 4px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.templateLink {
+  display: flex;
+  align-items: center;
+  gap: var(--base-size-12, 12px);
+  padding: var(--base-size-8, 8px);
+  border-radius: 8px;
+  color: var(--fgColor-default, #1f2328);
+  text-decoration: none;
+}
+
+.templateLink:hover {
+  background-color: var(--bgColor-muted, #f6f8fa);
+  text-decoration: none;
+}
+
+.templateLink:focus-visible {
+  outline: 2px solid var(--fgColor-accent, #0969da);
+  outline-offset: 0;
+}
+
+.templateIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  color: var(--fgColor-success, #1a7f37);
+  background-color: var(--bgColor-muted, #f6f8fa);
+}
+
+.templateText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.templateLabel {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.templateDescription {
+  font-size: 14px;
+  color: var(--fgColor-muted, #656d76);
+}

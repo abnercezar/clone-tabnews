@@ -1,6 +1,8 @@
 import { Button, Link, Stack } from "@primer/react";
 import { CommentIcon } from "@primer/octicons-react";
 import PastTime from "interface/PastTime";
+import TabCoinButtons from "interface/TabCoinButtons";
+import { createExcerpt } from "interface/excerpt";
 import classes from "./index.module.css";
 
 function excerpt(text, maxLength = 255) {
@@ -16,10 +18,25 @@ function excerpt(text, maxLength = 255) {
   return `${plain.slice(0, maxLength).trimEnd()}…`;
 }
 
-export default function ContentList({ contentList, pagination }) {
+// variant="cards" (home): cartões com resumo; padrão é a lista numerada.
+export default function ContentList({
+  contentList,
+  pagination,
+  variant = "list",
+}) {
   const listNumberStart = pagination
     ? pagination.perPage * (pagination.currentPage - 1) + 1
     : 1;
+
+  if (variant === "cards") {
+    return (
+      <ul className={classes.cards}>
+        {(contentList || []).map((content) => (
+          <ContentCard key={content.id} content={content} />
+        ))}
+      </ul>
+    );
+  }
 
   return (
     <>
@@ -103,6 +120,41 @@ function ContentListItem({ content }) {
           </address>
           {" · "}
           <PastTime date={content.published_at} />
+        </div>
+      </article>
+    </li>
+  );
+}
+
+function ContentCard({ content }) {
+  const href = `/${content.owner_username}/${content.slug}`;
+  const isAd = content.type === "ad";
+  const summary = createExcerpt(content.body, 180);
+
+  return (
+    <li className={classes.card}>
+      <article className={classes.cardRow}>
+        {!isAd && <TabCoinButtons content={content} />}
+        <div className={classes.cardBody}>
+          <Link className={classes.cardTitle} href={href}>
+            {content.title}
+          </Link>
+          {summary && <p className={classes.cardSummary}>{summary}</p>}
+          <div className={classes.cardFooter}>
+            <span className={classes.cardAuthor}>
+              <span className={classes.avatar} aria-hidden="true">
+                {String(content.owner_username || "?")
+                  .charAt(0)
+                  .toUpperCase()}
+              </span>
+              <Link href={`/${content.owner_username}`}>
+                {content.owner_username}
+              </Link>
+              <span aria-hidden="true">·</span>
+              <PastTime date={content.published_at} />
+            </span>
+            {isAd && <span className={classes.sponsored}>Patrocinado</span>}
+          </div>
         </div>
       </article>
     </li>

@@ -64,6 +64,7 @@
     "react-rewards": "^2.1.0",
     "recharts": "^2.15.4",
     "swr": "2.4.1",
+    "three": "^0.186.1",
     "uuid": "11.1.1",
     "vis-network": "^9.1.9"
   },

@@ -1,21 +1,21 @@
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/router";
 import {
   ActionList,
   Button,
   Heading,
   IconButton,
+  Link,
   Overlay,
   Spinner,
 } from "@primer/react";
 import { SearchIcon, XCircleFillIcon } from "@primer/octicons-react";
 import classes from "./index.module.css";
 
-const searchURL =
-  (process.env.NEXT_PUBLIC_SEARCH_URL || "") +
-  (process.env.NEXT_PUBLIC_SEARCH_ID || "");
-
-const SITE_SEARCH_HOST =
-  process.env.NEXT_PUBLIC_WEBSERVER_HOST || "agrotab.com.br";
+const searchId = (process.env.NEXT_PUBLIC_SEARCH_ID || "").trim();
+const searchURL = searchId
+  ? `${process.env.NEXT_PUBLIC_SEARCH_URL || "https://cse.google.com/cse.js?cx="}${searchId}`
+  : "";
 
 export default function useSearchBox() {
   const [isOpen, setIsOpen] = useState(false);
@@ -108,19 +108,6 @@ export default function useSearchBox() {
       }
     }
 
-    function handleFallbackSubmit(event) {
-      event.preventDefault();
-      const term = fallbackQuery.trim();
-      handleClose();
-      if (!term) {
-        return;
-      }
-      const url = `https://www.google.com/search?q=${encodeURIComponent(
-        `site:${SITE_SEARCH_HOST} ${term}`,
-      )}`;
-      window.open(url, "_self");
-    }
-
     if (!isOpen) {
       return null;
     }
@@ -134,7 +121,7 @@ export default function useSearchBox() {
         onEscape={handleClose}
         onClickOutside={handleClose}
         aria-labelledby="search-title"
-        top={32}
+        top={72}
         left="50vw"
         anchorSide="inside-center"
         className={classes.overlay}
@@ -144,7 +131,7 @@ export default function useSearchBox() {
         >
           <div className={classes.header}>
             <Heading as="h2" id="search-title" className={classes.title}>
-              Pesquisar com o Google
+              {searchURL ? "Pesquisar com o Google" : "Pesquisar"}
             </Heading>
             <IconButton
               icon={XCircleFillIcon}
@@ -167,22 +154,11 @@ export default function useSearchBox() {
               }}
             />
           ) : (
-            <form
-              className={classes.fallbackForm}
-              onSubmit={handleFallbackSubmit}
-            >
-              <input
-                className={classes.fallbackInput}
-                autoFocus
-                value={fallbackQuery}
-                onChange={(event) => setFallbackQuery(event.target.value)}
-                placeholder="Buscar em agrotab.com.br…"
-                aria-label="Termo de pesquisa"
-              />
-              <Button type="submit" variant="primary">
-                Pesquisar
-              </Button>
-            </form>
+            <AgroSearch
+              query={fallbackQuery}
+              onQueryChange={setFallbackQuery}
+              onNavigate={handleClose}
+            />
           )}
 
           {searchURL && (
@@ -222,6 +198,116 @@ export default function useSearchBox() {
     SearchBoxOverlay,
     SearchIconButton,
   };
+}
+
+function AgroSearch({ query, onQueryChange, onNavigate }) {
+  const router = useRouter();
+  const [results, setResults] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  useEffect(() => {
+    const term = query.trim();
+
+    if (term.length < 2) {
+      setResults(null);
+      setErrorMessage(null);
+      setIsSearching(false);
+      return;
+    }
+
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(async () => {
+      setIsSearching(true);
+      setErrorMessage(null);
+
+      try {
+        const params = new URLSearchParams({
+          q: term,
+          per_page: "8",
+          strategy: "new",
+        });
+        const response = await fetch(`/api/v1/contents?${params}`, {
+          signal: abortController.signal,
+        });
+
+        if (!response.ok) {
+          setResults([]);
+          setErrorMessage("Não foi possível pesquisar agora.");
+          return;
+        }
+
+        setResults(await response.json());
+      } catch (error) {
+        if (error.name === "AbortError") {
+          return;
+        }
+        setResults([]);
+        setErrorMessage("Não foi possível conectar ao servidor.");
+      } finally {
+        if (!abortController.signal.aborted) {
+          setIsSearching(false);
+        }
+      }
+    }, 250);
+
+    return () => {
+      clearTimeout(timeoutId);
+      abortController.abort();
+    };
+  }, [query]);
+
+  return (
+    <form
+      className={classes.fallbackForm}
+      onSubmit={(event) => event.preventDefault()}
+    >
+      <input
+        className={classes.fallbackInput}
+        autoFocus
+        value={query}
+        onChange={(event) => onQueryChange(event.target.value)}
+        placeholder="Buscar publicações…"
+        aria-label="Termo de pesquisa"
+      />
+
+      {isSearching && (
+        <div className={classes.spinnerWrapper}>
+          <Spinner size="small" />
+        </div>
+      )}
+
+      {errorMessage && <p className={classes.empty}>{errorMessage}</p>}
+
+      {results && results.length === 0 && !isSearching && !errorMessage && (
+        <p className={classes.empty}>Nenhuma publicação encontrada.</p>
+      )}
+
+      {results && results.length > 0 && (
+        <ul className={classes.results}>
+          {results.map((content) => (
+            <li key={content.id}>
+              <Link
+                href={`/${content.owner_username}/${content.slug}`}
+                className={classes.resultLink}
+                onClick={(event) => {
+                  event.preventDefault();
+                  const href = `/${content.owner_username}/${content.slug}`;
+                  onNavigate();
+                  router.push(href);
+                }}
+              >
+                {content.title}
+              </Link>
+              <span className={classes.resultAuthor}>
+                {content.owner_username}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </form>
+  );
 }
 
 function GoogleBox({

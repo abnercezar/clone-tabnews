@@ -1,6 +1,6 @@
 .list {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.75rem;
   grid-template-columns: min-content minmax(0, 1fr);
   width: 100%;
   padding: 0;
@@ -21,8 +21,9 @@
 
 .title {
   overflow: auto;
-  font-weight: 500;
+  font-weight: 600;
   font-size: var(--text-body-size-large, 16px);
+  line-height: 1.35;
 }
 
 .title > a:link {
@@ -74,4 +75,104 @@
 .tabcoins {
   font-weight: 600;
   color: var(--fgColor-accent, #0969da);
+}
+
+/* Variante "cards" (home). */
+.cards {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  padding: var(--base-size-16, 16px);
+  border-bottom: 1px solid var(--borderColor-muted, #d0d7de);
+}
+
+.card:last-child {
+  border-bottom: 0;
+}
+
+.cardRow {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--base-size-12, 12px);
+}
+
+.cardBody {
+  min-width: 0;
+  flex: 1;
+}
+
+.cardTitle {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+  word-wrap: break-word;
+}
+
+.cardTitle:link {
+  color: var(--fgColor-default, #1f2328);
+}
+
+.cardTitle:visited {
+  color: var(--fgColor-muted, #656d76);
+}
+
+.cardSummary {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: var(--base-size-4, 4px) 0 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--fgColor-muted, #656d76);
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--base-size-12, 12px);
+  margin-top: var(--base-size-12, 12px);
+  font-size: 14px;
+  color: var(--fgColor-muted, #656d76);
+}
+
+.cardAuthor {
+  display: flex;
+  align-items: center;
+  gap: var(--base-size-4, 4px);
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.cardAuthor a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: inherit;
+  text-decoration: none;
+}
+
+.cardAuthor a:hover {
+  text-decoration: underline;
+}
+
+.avatar {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 2px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fgColor-success, #1a7f37);
+  background-color: var(--bgColor-success-muted, #dafbe1);
 }

@@ -22,17 +22,18 @@
 .searchBarButton {
   display: none;
   padding-inline: 13px;
-  color: #8c959f;
-  background-color: var(--headerSearch-bgColor, #0d1117);
-  border-color: var(--headerSearch-borderColor, #30363d);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.72);
+  background-color: var(--headerSearch-bgColor, rgba(255, 255, 255, 0.08));
+  border-color: var(--headerSearch-borderColor, rgba(255, 255, 255, 0.18));
   cursor: text;
   text-align: left;
 }
 
 .searchBarButton:hover {
-  color: #8c959f;
-  background-color: var(--headerSearch-bgColor, #0d1117);
-  border-color: var(--headerSearch-borderColor, #30363d);
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.32);
 }
 
 @media (min-width: 768px) {
@@ -55,6 +56,7 @@
 .overlay {
   display: flex;
   position: relative;
+  z-index: 20;
   flex-direction: column;
   width: 90vw;
   max-width: 900px;
@@ -120,4 +122,30 @@
   border: 1px solid var(--borderColor-default, #d0d7de);
   border-radius: 6px;
   font-size: 16px;
+}
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0 4px 8px;
+  list-style: none;
+}
+
+.resultLink {
+  font-weight: 600;
+}
+
+.resultAuthor {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--fgColor-muted, #656d76);
+}
+
+.empty {
+  margin: 0;
+  padding: 0 4px 8px;
+  color: var(--fgColor-muted, #656d76);
 }
