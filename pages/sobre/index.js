@@ -14,34 +14,34 @@ import {
   BeakerIcon,
   CommentDiscussionIcon,
   CpuIcon,
-  GraphIcon,
   LightBulbIcon,
   PeopleIcon,
   ProjectIcon,
   RocketIcon,
   RssIcon,
+  StarIcon,
 } from "@primer/octicons-react";
 
 const FEATURES = [
   {
-    title: "Feed de conteúdo",
+    title: "Feed de publicações",
     description:
-      "Curadoria de artigos, pesquisas e casos reais do agronegócio brasileiro.",
+      "Perguntas, relatos de campo e soluções práticas de quem vive o agronegócio brasileiro.",
     icon: RssIcon,
     tone: "green",
   },
   {
     title: "Discussões",
     description:
-      "Comentários e debates em cima do conteúdo, com quem vive o campo e a agtech.",
+      "Comentários e respostas em cada publicação, com quem vive o campo e a agtech.",
     icon: CommentDiscussionIcon,
     tone: "blue",
   },
   {
-    title: "Cotações",
+    title: "Qualificação com AgroCoins",
     description:
-      "Acompanhamento de mercado para apoiar decisões no dia a dia da fazenda.",
-    icon: GraphIcon,
+      "A comunidade qualifica o que tem fundamento — o que ajuda de verdade sobe no feed.",
+    icon: StarIcon,
     tone: "yellow",
   },
   {
@@ -85,20 +85,26 @@ const MILESTONES = [
     done: true,
   },
   {
-    title: "Feed de conteúdo",
-    body: "Publicação e leitura de conteúdos sobre tecnologia, inovação e ciência no agro.",
+    title: "Feed de publicações",
+    body: "Publicação e leitura de perguntas, relatos e soluções do agro.",
     variant: "success",
     done: true,
   },
   {
     title: "Discussões",
-    body: "Comentários e conversas em cima de cada conteúdo.",
+    body: "Comentários e respostas em cada publicação.",
+    variant: "success",
+    done: true,
+  },
+  {
+    title: "Temas por cadeia produtiva",
+    body: "Filtros como soja, café, pecuária e leite, conforme a comunidade crescer.",
     variant: "attention",
     done: false,
   },
   {
-    title: "Cotações e ferramentas",
-    body: "Indicadores de mercado e recursos para a gestão rural.",
+    title: "Perfis com credencial técnica",
+    body: "Identificação de agrônomos, veterinários e técnicos na comunidade.",
     variant: "accent",
     done: false,
   },
@@ -110,7 +116,7 @@ export default function Home() {
       metadata={{
         title: "Sobre",
         description:
-          "Menos ruído, mais fundamentos: um lugar para inteligência coletiva no agronegócio.",
+          "Menos ruído, mais fundamentos: perguntas e experiências de quem faz o agro acontecer, com fundamento técnico.",
       }}
     >
       <div className="page">
@@ -121,7 +127,7 @@ export default function Home() {
             variant="warning"
             className="build-banner"
             title="O AgroTab está em construção"
-            description="O feed de conteúdo já está aberto. Discussões e cotações chegam nas próximas etapas."
+            description="O feed e as discussões já estão abertos. Novas funcionalidades chegam conforme a comunidade cresce."
           />
 
           <section className="hero">
@@ -137,8 +143,8 @@ export default function Home() {
             </Heading>
 
             <Text as="p" className="hero-lead">
-              Tecnologia, inovação e ciência para o campo crescer — o que a
-              pesquisa e o mercado estão dizendo, do laboratório à lavoura.
+              Perguntas e experiências de quem faz o agro acontecer, com
+              fundamento técnico — do laboratório à lavoura.
             </Text>
 
             <Stack
@@ -165,8 +171,9 @@ export default function Home() {
               Tecnologia, inovação e ciência
             </Heading>
             <Text as="p" className="muted">
-              Três frentes que sustentam o AgroTab: o que já existe no campo
-              brasileiro, o que ainda está nascendo e o que a pesquisa comprova.
+              Três frentes que dão fundamento às conversas do AgroTab: o que já
+              existe no campo brasileiro, o que ainda está nascendo e o que a
+              pesquisa comprova.
             </Text>
 
             <div className="pillar-grid">
@@ -189,14 +196,13 @@ export default function Home() {
             </div>
           </section>
 
-          <section id="o-que-vem" className="section">
+          <section id="como-funciona" className="section">
             <Heading as="h2" variant="medium">
-              O que vem por aí
+              Como funciona
             </Heading>
             <Text as="p" className="muted">
-              Conteúdo, discussões, cotações e comunidade para o agronegócio
-              brasileiro. O feed de conteúdo já está aberto. Discussões e
-              cotações ainda estão em construção.
+              Publicações, discussões e qualificação pela própria comunidade do
+              agronegócio brasileiro — tudo isso já está aberto.
             </Text>
 
             <div className="feature-grid">
@@ -222,7 +228,7 @@ export default function Home() {
                 Roadmap
               </Heading>
               <Text as="p" className="muted">
-                Acompanhe o que está sendo construído até o lançamento.
+                O que já está pronto e o que vem a seguir.
               </Text>
             </div>
 

@@ -231,6 +231,8 @@ describe("`PATCH /api/v1/users/[username]`", () => {
           "read:sponsorship",
           "read:recovery_token",
           "read:email_confirmation_token",
+          "read:community_question",
+          "create:community_question_vote",
         ],
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
@@ -320,6 +322,8 @@ describe("`PATCH /api/v1/users/[username]`", () => {
           "read:sponsorship",
           "read:recovery_token",
           "read:email_confirmation_token",
+          "read:community_question",
+          "create:community_question_vote",
         ],
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
@@ -381,6 +385,8 @@ describe("`PATCH /api/v1/users/[username]`", () => {
           "read:sponsorship",
           "read:recovery_token",
           "read:email_confirmation_token",
+          "read:community_question",
+          "create:community_question_vote",
         ],
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
@@ -584,6 +590,8 @@ describe("`PATCH /api/v1/users/[username]`", () => {
         "read:sponsorship",
         "read:recovery_token",
         "read:email_confirmation_token",
+        "read:community_question",
+        "create:community_question_vote",
       ]);
     });
 

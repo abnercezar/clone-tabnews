@@ -1,0 +1,122 @@
+.homeLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--base-size-24, 24px);
+  align-items: start;
+}
+
+.mainColumn {
+  display: grid;
+  gap: var(--base-size-24, 24px);
+  min-width: 0;
+}
+
+/* A Pergunta da Comunidade já tem o próprio espaçamento no grid. */
+.mainColumn > section:first-child {
+  margin-bottom: 0;
+}
+
+.feedPanel {
+  overflow: hidden;
+  border: 1px solid var(--borderColor-muted, #d0d7de);
+  border-radius: 12px;
+  background-color: var(--bgColor-default, #ffffff);
+}
+
+.feedPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--base-size-12, 12px);
+  padding-right: var(--base-size-12, 12px);
+  border-bottom: 1px solid var(--borderColor-muted, #d0d7de);
+  /* Aba ativa no verde do AgroTab, não no laranja padrão do Primer. */
+  --underlineNav-borderColor-active: var(--bgColor-success-emphasis, #1f883d);
+}
+
+.feedPanelHeader a {
+  font-size: 16px;
+}
+
+.feedPanelHeader > nav {
+  flex: 1;
+  min-width: 0;
+  box-shadow: none;
+}
+
+.feedStatus {
+  display: flex;
+  justify-content: center;
+  padding: var(--base-size-32, 32px);
+}
+
+.feedSponsorship {
+  padding: var(--base-size-12, 12px) var(--base-size-16, 16px) 0;
+}
+
+.feedInvite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--base-size-12, 12px);
+  padding: var(--base-size-16, 16px);
+  border-top: 1px dashed var(--borderColor-default, #d1d9e0);
+  background-color: var(--bgColor-muted, #f6f8fa);
+}
+
+.feedInviteText {
+  margin: 0;
+  max-width: 40ch;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--fgColor-default, #1f2328);
+}
+
+.pagination {
+  margin: var(--base-size-24, 24px) 0;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Compensa o header ao usar âncora #publicacoes (CTA “Explorar”). */
+.feedAnchor {
+  scroll-margin-top: 4.5rem;
+}
+
+.feedPanel[data-spotlight] ul > li:first-child {
+  animation: feedSpotlight 1.6s ease;
+}
+
+@keyframes feedSpotlight {
+  0%,
+  35% {
+    background-color: var(--bgColor-success-muted, #dafbe1);
+  }
+
+  100% {
+    background-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feedPanel[data-spotlight] ul > li:first-child {
+    animation: none;
+    background-color: var(--bgColor-success-muted, #dafbe1);
+  }
+}
+
+@media (min-width: 900px) {
+  .homeLayout {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+    gap: var(--base-size-32, 32px);
+    align-items: start;
+  }
+}

@@ -43,8 +43,10 @@ export default function PastTime({ date, formatText }) {
   const duration = formatPastDuration(date);
   const text = formatText ? formatText(duration) : formatPastTime(date);
 
+  // Servidor (UTC) e navegador (horário local, segundos depois) sempre
+  // divergem num horário relativo; o texto do navegador é o que vale.
   return (
-    <time dateTime={date} title={formatFullDate(date)}>
+    <time dateTime={date} title={formatFullDate(date)} suppressHydrationWarning>
       {text}
     </time>
   );

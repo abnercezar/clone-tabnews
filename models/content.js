@@ -412,6 +412,20 @@ function parseWithChildren(withChildren) {
 // strategy=new → mais recentes; strategy=relevant → score por AgroCoins + decadência temporal.
 // withChildren=true → só comentários (parent_id NOT NULL); padrão → só raiz.
 // type=content|ad → filtra o tipo (útil para classificados).
+function parseSearchTerm(query) {
+  if (query === undefined || query === null) {
+    return null;
+  }
+
+  const term = String(query).replace(/\s+/g, " ").trim().slice(0, 80);
+
+  if (!term) {
+    return null;
+  }
+
+  return `%${term.replace(/[\\%_]/g, "\\$&")}%`;
+}
+
 async function findPublished({
   page,
   perPage,
@@ -419,6 +433,7 @@ async function findPublished({
   strategy,
   withChildren,
   type,
+  query,
 } = {}) {
   const currentPage = parsePage(page, DEFAULT_PAGE, 10000);
   const currentPerPage = parsePage(perPage, DEFAULT_PER_PAGE, MAX_PER_PAGE);
@@ -426,6 +441,7 @@ async function findPublished({
   const author = username ? username : null;
   const childrenOnly = parseWithChildren(withChildren);
   const contentType = parseContentType(type);
+  const searchTerm = parseSearchTerm(query);
   // No feed de Relevantes (sem filtro de autor), anúncios ficam de fora — como no TabNews.
   // Se o cliente pediu type explicitamente, o filtro de tipo prevalece.
   const excludeAds =
@@ -453,8 +469,13 @@ async function findPublished({
         AND ($1::varchar IS NULL OR LOWER(users.username) = LOWER($1))
         AND ($2::boolean IS FALSE OR contents.type IS DISTINCT FROM 'ad')
         AND ($3::varchar IS NULL OR contents.type = $3)
+        AND (
+          $4::varchar IS NULL
+          OR contents.title ILIKE $4
+          OR contents.body ILIKE $4
+        )
     ;`,
-    values: [author, excludeAds, contentType],
+    values: [author, excludeAds, contentType, searchTerm],
   });
 
   const orderByClause =
@@ -513,6 +534,11 @@ async function findPublished({
         AND ($3::varchar IS NULL OR LOWER(users.username) = LOWER($3))
         AND ($4::boolean IS FALSE OR contents.type IS DISTINCT FROM 'ad')
         AND ($5::varchar IS NULL OR contents.type = $5)
+        AND (
+          $6::varchar IS NULL
+          OR contents.title ILIKE $6
+          OR contents.body ILIKE $6
+        )
       ${orderByClause}
       LIMIT
         $1
@@ -525,6 +551,7 @@ async function findPublished({
       author,
       excludeAds,
       contentType,
+      searchTerm,
     ],
   });
 

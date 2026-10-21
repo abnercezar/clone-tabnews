@@ -1,0 +1,195 @@
+.hero {
+  margin-bottom: var(--base-size-24, 24px);
+  border: 1px solid var(--borderColor-muted, #d0d7de);
+  border-radius: 12px;
+  background: var(--bgColor-default, #ffffff);
+}
+
+/* Fundo branco em qualquer horário: o verde fica reservado para a ação principal. */
+.morning,
+.day,
+.golden {
+  background: var(--bgColor-default, #ffffff);
+}
+
+.night,
+:global([data-color-mode="dark"]) .hero {
+  background: linear-gradient(180deg, #163322 0%, #0e1c14 55%, #0d1117 100%);
+  border-color: #1f3d2c;
+}
+
+.night .title,
+.night .benefit,
+:global([data-color-mode="dark"]) .hero .title,
+:global([data-color-mode="dark"]) .hero .benefit {
+  color: #f0f6fc;
+}
+
+.night .subtitle,
+.night .eyebrow,
+:global([data-color-mode="dark"]) .hero .subtitle,
+:global([data-color-mode="dark"]) .hero .eyebrow {
+  color: #8dceaa;
+}
+
+@media (prefers-color-scheme: dark) {
+  :global([data-color-mode="auto"]) .hero {
+    background: linear-gradient(180deg, #163322 0%, #0e1c14 55%, #0d1117 100%);
+    border-color: #1f3d2c;
+  }
+
+  :global([data-color-mode="auto"]) .hero .title,
+  :global([data-color-mode="auto"]) .hero .benefit {
+    color: #f0f6fc;
+  }
+
+  :global([data-color-mode="auto"]) .hero .subtitle,
+  :global([data-color-mode="auto"]) .hero .eyebrow {
+    color: #8dceaa;
+  }
+}
+
+.reveal .eyebrow,
+.reveal .title,
+.reveal .subtitle,
+.reveal .actions,
+.reveal .benefit {
+  animation: rise 0.7s ease both;
+}
+
+.reveal .title {
+  animation-delay: 0.08s;
+}
+
+.reveal .subtitle {
+  animation-delay: 0.16s;
+}
+
+.reveal .actions {
+  animation-delay: 0.24s;
+}
+
+.reveal .benefit:nth-child(1) {
+  animation-delay: 0.32s;
+}
+
+.reveal .benefit:nth-child(2) {
+  animation-delay: 0.4s;
+}
+
+.reveal .benefit:nth-child(3) {
+  animation-delay: 0.48s;
+}
+
+.reveal .benefit:nth-child(4) {
+  animation-delay: 0.56s;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal .eyebrow,
+  .reveal .title,
+  .reveal .subtitle,
+  .reveal .actions,
+  .reveal .benefit {
+    animation: none;
+  }
+}
+
+.content {
+  display: grid;
+  gap: var(--base-size-24, 24px);
+  padding: var(--base-size-24, 24px) var(--base-size-16, 16px);
+}
+
+.eyebrow {
+  margin: 0 0 var(--base-size-8, 8px);
+  font-size: var(--text-body-size-small, 12px);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fgColor-success, #1a7f37);
+}
+
+.title {
+  max-width: 20ch;
+  margin: 0 0 var(--base-size-12, 12px);
+  font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: var(--fgColor-default, #1f2328);
+}
+
+.subtitle {
+  max-width: 34rem;
+  margin: 0 0 var(--base-size-20, 20px);
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--fgColor-muted, #656d76);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--base-size-12, 12px);
+}
+
+.examples {
+  display: grid;
+  gap: var(--base-size-12, 12px);
+  align-content: start;
+}
+
+.examplesLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--base-size-8, 8px);
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fgColor-muted, #59636e);
+}
+
+.benefits {
+  display: grid;
+  gap: var(--base-size-8, 8px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.benefit {
+  padding: var(--base-size-8, 8px) var(--base-size-12, 12px);
+  border-left: 3px solid var(--borderColor-default, #d1d9e0);
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--fgColor-default, #1f2328);
+}
+
+@media (min-width: 768px) {
+  .content {
+    grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+    align-items: center;
+    column-gap: var(--base-size-48, 48px);
+    padding: var(--base-size-32, 32px) var(--base-size-40, 40px);
+  }
+}
+
+/* No celular, dois exemplos bastam: a Pergunta da Comunidade sobe na tela. */
+@media (max-width: 767px) {
+  .benefit:nth-child(n + 3) {
+    display: none;
+  }
+}

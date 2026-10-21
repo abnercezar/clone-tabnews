@@ -27,6 +27,11 @@ const availableFeatures = [
   "create:sponsorship",
   "read:sponsorship",
 
+  // COMMUNITY_QUESTION
+  "create:community_question",
+  "read:community_question",
+  "create:community_question_vote",
+
   // ACTIVATION_TOKEN
   "read:activation_token",
 
@@ -62,6 +67,8 @@ const defaultActivatedFeatures = [
   "read:sponsorship",
   "read:recovery_token",
   "read:email_confirmation_token",
+  "read:community_question",
+  "create:community_question_vote",
 ];
 
 // Privilegiado / admin (estilo seed admin do TabNews, adaptado ao AgroTab).
@@ -77,6 +84,7 @@ const adminFeatures = [
   "ban:user",
   "read:firewall",
   "review:firewall",
+  "create:community_question",
 ];
 
 function can(user, feature, resource) {
@@ -218,6 +226,44 @@ function filterOutput(user, feature, resource) {
       tabcoins: Number(resource.tabcoins ?? 0),
       tabcoins_credit: Number(resource.tabcoins_credit ?? 0),
       tabcoins_debit: Number(resource.tabcoins_debit ?? 0),
+    };
+  }
+
+  if (feature === "read:community_question") {
+    // Resultado por alternativa só para quem já votou, com a pergunta
+    // encerrada ou quando a pergunta foi criada com resultados sempre visíveis.
+    const viewerOptionId = resource.viewer_option_id ?? null;
+    const canSeeResults =
+      resource.kind === "poll" &&
+      (resource.results_visibility === "always" ||
+        Boolean(viewerOptionId) ||
+        Boolean(resource.is_ended));
+
+    return {
+      id: resource.id,
+      title: resource.title,
+      description: resource.description,
+      category: resource.category,
+      kind: resource.kind,
+      results_visibility: resource.results_visibility,
+      starts_at: resource.starts_at,
+      ends_at: resource.ends_at,
+      options: (resource.options || []).map((option) => {
+        const filteredOption = {
+          id: option.id,
+          label: option.label,
+          position: Number(option.position),
+        };
+        if (canSeeResults) {
+          filteredOption.votes = Number(option.votes ?? 0);
+        }
+        return filteredOption;
+      }),
+      total_votes: Number(resource.total_votes ?? 0),
+      results_visible: canSeeResults,
+      viewer_option_id: viewerOptionId,
+      contributions_by_category: resource.contributions_by_category || {},
+      created_at: resource.created_at,
     };
   }
 

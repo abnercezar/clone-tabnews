@@ -1,0 +1,65 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--base-size-16, 16px);
+  padding: var(--base-size-16, 16px);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--base-size-12, 12px);
+  color: var(--fgColor-muted, #656d76);
+}
+
+.heading {
+  margin: 0;
+  font-size: var(--text-body-size-large, 16px);
+  font-weight: 600;
+  color: var(--fgColor-default, #1f2328);
+}
+
+.example {
+  padding: var(--base-size-16, 16px);
+  border: 1px dashed var(--borderColor-default, #d0d7de);
+  border-radius: 8px;
+  background-color: var(--bgColor-muted, #f6f8fa);
+}
+
+.label {
+  margin: 0 0 var(--base-size-8, 8px);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fgColor-success, #1a7f37);
+}
+
+.title {
+  margin: 0 0 var(--base-size-8, 8px);
+  font-size: var(--text-body-size-large, 16px);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--fgColor-default, #1f2328);
+}
+
+.body {
+  margin: 0 0 var(--base-size-8, 8px);
+  font-size: var(--text-body-size-medium, 14px);
+  line-height: 1.5;
+  color: var(--fgColor-muted, #656d76);
+}
+
+.disclaimer {
+  margin: 0;
+  font-size: var(--text-body-size-small, 12px);
+  font-style: italic;
+  color: var(--fgColor-muted, #656d76);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--base-size-8, 8px);
+}

@@ -92,8 +92,9 @@ async function injectAuthenticatedUser(request) {
   };
 }
 
-function injectAnonymousUser(request) {
-  const anonymousUserObject = {
+// Usado também no getServerSideProps das páginas públicas.
+function createAnonymousUser() {
+  return {
     features: [
       "read:activation_token",
       "read:recovery_token",
@@ -101,14 +102,17 @@ function injectAnonymousUser(request) {
       "create:session",
       "create:user",
       "read:content",
+      "read:community_question",
       "read:sponsorship",
       "read:status",
     ],
   };
+}
 
+function injectAnonymousUser(request) {
   request.context = {
     ...request.context,
-    user: anonymousUserObject,
+    user: createAnonymousUser(),
     clientIp: getClientIp(request),
   };
 }
@@ -169,6 +173,7 @@ const controller = {
   setSessionCookie, // Função para definir o cookie de sessão
   clearSessionCookie, // Função para limpar o cookie de sessão
   injectAnonymousOrUser, // Middleware para injetar usuário anônimo ou autenticado
+  createAnonymousUser, // Usuário anônimo para páginas renderizadas no servidor
   canRequest, // Função para verificar permissões do usuário
   getClientIp,
   rateLimit,

@@ -22,6 +22,7 @@ import {
 import AgroCashCount from "interface/AgroCashCount";
 import AgroCoinCount from "interface/AgroCoinCount";
 import ContentList from "interface/ContentList";
+import { useConfirmDialog } from "interface/ConfirmDialog";
 import DefaultLayout from "interface/DefaultLayout";
 import PastTime from "interface/PastTime";
 import useUser from "interface/useUser";
@@ -310,6 +311,7 @@ function OptionsMenu({
   viewer,
   userFound,
 }) {
+  const confirm = useConfirmDialog();
   const canNuke =
     !isAuthenticatedUser &&
     viewer?.features?.includes("ban:user") &&
@@ -322,9 +324,12 @@ function OptionsMenu({
   async function handleNuke() {
     setGlobalMessage(null);
 
-    const confirmDelete1 = window.confirm(
-      `Atenção: Você está realizando um Nuke!\n\nDeseja banir o usuário "${userFound.username}" e desfazer todas as suas ações?`,
-    );
+    const confirmDelete1 = await confirm({
+      title: "Atenção: você está realizando um Nuke",
+      body: `Deseja banir o usuário "${userFound.username}" e desfazer todas as suas ações?`,
+      confirmLabel: "Continuar",
+      danger: true,
+    });
 
     if (!confirmDelete1) {
       return;
@@ -333,9 +338,12 @@ function OptionsMenu({
     // Fake delay to avoid multiple accidental clicks
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const confirmDelete2 = window.confirm(
-      `Nuke em "${userFound.username}"\n\nConfirme novamente esta operação.`,
-    );
+    const confirmDelete2 = await confirm({
+      title: `Nuke em "${userFound.username}"`,
+      body: "Confirme novamente esta operação.",
+      confirmLabel: "Banir",
+      danger: true,
+    });
 
     if (!confirmDelete2) {
       return;

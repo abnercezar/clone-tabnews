@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
 import {
   Banner,
   Button,
@@ -13,8 +14,13 @@ import {
   Flash,
   Text,
 } from "@primer/react";
+import { useConfirmDialog } from "interface/ConfirmDialog";
 import DefaultLayout from "interface/DefaultLayout";
 import useUser from "interface/useUser";
+import {
+  PUBLISH_TEMPLATES,
+  findPublishTemplate,
+} from "interface/publishTemplates";
 
 const CommentEditor = dynamic(() => import("interface/CommentEditor"), {
   ssr: false,
@@ -30,7 +36,8 @@ export default function PublishPage() {
       contentWidth="large"
       metadata={{
         title: "Publicar",
-        description: "Publique um conteúdo no AgroTab.",
+        description:
+          "Publique uma pergunta, um relato de campo ou um resultado de safra no AgroTab.",
       }}
     >
       <Stack gap="spacious">
@@ -72,12 +79,38 @@ export default function PublishPage() {
 
 function PublishForm() {
   const { user, mutate } = useUser();
+  const confirm = useConfirmDialog();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [isAd, setIsAd] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isTooLong = body.length > MAX_BODY_LENGTH;
+
+  const { query } = useRouter();
+
+  // /publicar?modelo=pergunta (links da home) já abre com o roteiro.
+  useEffect(() => {
+    const template = findPublishTemplate(query.modelo);
+    if (template) {
+      setBody((current) => (current.trim() ? current : template.body));
+    }
+  }, [query.modelo]);
+
+  async function applyTemplate(template) {
+    if (body.trim()) {
+      const confirmed = await confirm({
+        title: "Substituir o texto atual?",
+        body: "O texto atual será trocado pelo modelo selecionado.",
+        confirmLabel: "Substituir",
+      });
+
+      if (!confirmed) {
+        return;
+      }
+    }
+    setBody(template.body);
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -148,6 +181,24 @@ function PublishForm() {
             block
           />
         </FormControl>
+        <Stack gap="condensed">
+          <Text sx={{ color: "fg.muted", fontSize: 1 }}>
+            Não sabe por onde começar? Use um modelo:
+          </Text>
+          <Stack direction="horizontal" gap="condensed" wrap="wrap">
+            {PUBLISH_TEMPLATES.map((template) => (
+              <Button
+                key={template.label}
+                type="button"
+                size="small"
+                onClick={() => applyTemplate(template)}
+              >
+                {template.label}
+              </Button>
+            ))}
+          </Stack>
+        </Stack>
+
         <FormControl required>
           <FormControl.Label>Conteúdo</FormControl.Label>
           <CommentEditor

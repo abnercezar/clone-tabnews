@@ -71,6 +71,8 @@ describe("`GET /api/v1/user`", () => {
           "read:sponsorship",
           "read:recovery_token",
           "read:email_confirmation_token",
+          "read:community_question",
+          "create:community_question_vote",
         ],
         tabcoins: 0,
         tabcash: 0,

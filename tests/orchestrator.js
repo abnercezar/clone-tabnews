@@ -8,6 +8,7 @@ import activation from "models/activation.js";
 import session from "models/session.js";
 import content from "models/content.js";
 import balance from "models/balance.js";
+import communityQuestion from "models/community-question.js";
 
 const emailHttpUrl = `http://${process.env.EMAIL_HTTP_HOST}:${process.env.EMAIL_HTTP_PORT}`;
 
@@ -50,14 +51,67 @@ async function waitForAllServices() {
   }
 }
 
-// Limpa o banco de dados
-async function clearDatabase() {
-  await database.query("drop schema public cascade; create schema public;");
+// A estrutura só é criada uma vez por execução do Jest. Nos arquivos seguintes
+// basta esvaziar as tabelas: derrubar o schema e reaplicar as migrations em
+// cada arquivo era o que deixava a suíte lenta.
+let schemaReady = false;
+
+function quoteIdentifier(name) {
+  return `"${String(name).replaceAll('"', '""')}"`;
 }
 
-// Executa as migrations pendentes
+async function listPublicTables() {
+  const tables = await database.query({
+    text: `
+      SELECT
+        tablename
+      FROM
+        pg_tables
+      WHERE
+        schemaname = 'public'
+    ;`,
+  });
+
+  return tables.rows.map((row) => row.tablename);
+}
+
+async function truncateApplicationTables(tableNames) {
+  const truncable = tableNames.filter((name) => name !== "pgmigrations");
+  if (truncable.length === 0) {
+    return;
+  }
+
+  await database.query(
+    `TRUNCATE TABLE ${truncable.map(quoteIdentifier).join(", ")} RESTART IDENTITY CASCADE;`,
+  );
+}
+
+// Limpa os dados de teste. A tabela `pgmigrations` fica, para as migrations
+// não rodarem de novo.
+async function clearDatabase() {
+  const tableNames = await listPublicTables();
+
+  if (!tableNames.includes("pgmigrations")) {
+    if (tableNames.length > 0) {
+      await database.query("DROP SCHEMA public CASCADE; CREATE SCHEMA public;");
+    }
+    schemaReady = false;
+    return;
+  }
+
+  await truncateApplicationTables(tableNames);
+}
+
+// Executa as migrations pendentes. Depois da primeira vez na mesma execução,
+// o schema já está em dia e a chamada seguinte não reabre o migrator.
 async function runPendingMigrations() {
-  await migrator.runPendingMigrations();
+  if (schemaReady) {
+    return [];
+  }
+
+  const migrated = await migrator.runPendingMigrations();
+  schemaReady = true;
+  return migrated;
 }
 
 // Cria um usuário de teste
@@ -289,6 +343,47 @@ async function addFeaturesToUser(userObject, features) {
   return updatedUser;
 }
 
+// Cria uma Pergunta da Comunidade. `startsAt`/`endsAt` ajustam o período
+// via SQL para simular perguntas futuras ou encerradas.
+async function createCommunityQuestion({
+  ownerId,
+  title = "O que você aprendeu na última safra que gostaria de ter sabido antes?",
+  description,
+  category = "lavoura",
+  kind = "poll",
+  options = kind === "poll" ? ["Plantio", "Colheita", "Comercialização"] : [],
+  resultsVisibility,
+  startsAt,
+  endsAt,
+} = {}) {
+  const created = await communityQuestion.create({
+    owner_id: ownerId || faker.string.uuid(),
+    title,
+    description,
+    category,
+    kind,
+    options,
+    results_visibility: resultsVisibility,
+  });
+
+  if (startsAt || endsAt) {
+    await database.query({
+      text: `
+        UPDATE community_questions
+        SET starts_at = COALESCE($2, starts_at), ends_at = $3
+        WHERE id = $1
+      ;`,
+      values: [created.id, startsAt || null, endsAt || null],
+    });
+  }
+
+  return created;
+}
+
+async function deleteAllCommunityQuestions() {
+  await database.query("DELETE FROM community_questions;");
+}
+
 async function getLastEvent() {
   const results = await database.query(
     "SELECT * FROM events ORDER BY created_at DESC LIMIT 1;",
@@ -314,6 +409,8 @@ const orchestrator = {
   extractUUID,
   activateUser,
   addFeaturesToUser,
+  createCommunityQuestion,
+  deleteAllCommunityQuestions,
 };
 
 export default orchestrator;

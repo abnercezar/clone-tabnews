@@ -103,6 +103,9 @@ describe("Content interaction e-mail notifications", () => {
     const sendSpy = jest
       .spyOn(email, "send")
       .mockRejectedValueOnce(new Error("smtp indisponivel"));
+    // O model registra a falha de propósito. Sem o spy, o Jest imprime o
+    // console.error e a suíte parece quebrada mesmo com o teste passando.
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
     try {
       const result = await notification.notifyParentContentAuthor({
@@ -111,7 +114,9 @@ describe("Content interaction e-mail notifications", () => {
       });
       expect(result).toEqual({ sent: false, reason: "send_failed" });
       expect(sendSpy).toHaveBeenCalled();
+      expect(errorSpy).toHaveBeenCalled();
     } finally {
+      errorSpy.mockRestore();
       sendSpy.mockRestore();
     }
   });
