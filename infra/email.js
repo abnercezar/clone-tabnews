@@ -10,6 +10,11 @@ const transporter = nodemailer.createTransport({
   },
   // TLS implícito só na 465; nas demais portas (ex.: 587) o nodemailer usa STARTTLS.
   secure: Number(process.env.EMAIL_SMTP_PORT) === 465,
+  // Sem isso o nodemailer espera 2 minutos quando o SMTP não responde, e um
+  // comentário de teste fica preso até esse prazo.
+  connectionTimeout: 10_000,
+  greetingTimeout: 10_000,
+  socketTimeout: 20_000,
 });
 
 async function send(mailOptions) {
