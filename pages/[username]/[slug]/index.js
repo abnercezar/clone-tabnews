@@ -16,6 +16,7 @@ import {
 } from "@primer/react";
 import {
   KebabHorizontalIcon,
+  PencilIcon,
   ShareIcon,
   TrashIcon,
 } from "@primer/octicons-react";
@@ -26,6 +27,7 @@ import MarkdownViewer from "interface/MarkdownViewer";
 import PastTime from "interface/PastTime";
 import Sponsorship from "interface/Sponsorship";
 import CommentForm from "interface/CommentForm";
+import ContentEditForm from "interface/ContentEditForm";
 import TabCoinButtons from "interface/TabCoinButtons";
 import { loginHref } from "interface/loginRedirect";
 import useUser from "interface/useUser";
@@ -59,6 +61,7 @@ function ContentPage({ initialContent = null, notFound = false }) {
     notFound ? "Conteúdo não encontrado." : null,
   );
   const [showConfetti, setShowConfetti] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (publicado === "1") {
@@ -203,16 +206,51 @@ function ContentPage({ initialContent = null, notFound = false }) {
                     <span>·</span>
                     <PastTime date={content.published_at} />
                   </div>
-                  {user?.id === content.owner_id && (
-                    <ContentOptionsMenu onDelete={handleDelete} />
-                  )}
+                  {(canEditContent(user, content) ||
+                    user?.id === content.owner_id) &&
+                    !isEditing && (
+                      <ContentOptionsMenu
+                        onEdit={
+                          canEditContent(user, content)
+                            ? () => setIsEditing(true)
+                            : undefined
+                        }
+                        onDelete={
+                          user?.id === content.owner_id
+                            ? handleDelete
+                            : undefined
+                        }
+                      />
+                    )}
                 </div>
-                <Heading as="h1" className={ui.articleTitle}>
-                  {content.title}
-                </Heading>
-                <div className={ui.contentBody}>
-                  <MarkdownViewer value={content.body} rich />
-                </div>
+                {isEditing ? (
+                  <ContentEditForm
+                    content={content}
+                    onCancel={() => setIsEditing(false)}
+                    onSaved={(updated) => {
+                      setIsEditing(false);
+                      if (
+                        updated.slug !== content.slug ||
+                        updated.owner_username !== content.owner_username
+                      ) {
+                        router.replace(
+                          `/${updated.owner_username}/${updated.slug}`,
+                        );
+                        return;
+                      }
+                      setContent(updated);
+                    }}
+                  />
+                ) : (
+                  <>
+                    <Heading as="h1" className={ui.articleTitle}>
+                      {content.title}
+                    </Heading>
+                    <div className={ui.contentBody}>
+                      <MarkdownViewer value={content.body} rich />
+                    </div>
+                  </>
+                )}
               </Stack>
             </div>
           </article>
@@ -293,6 +331,7 @@ function CommentItem({ comment: initialComment, user, router, isLoadingUser }) {
   const [comment, setComment] = useState(initialComment);
   const [replies, setReplies] = useState([]);
   const [isReplying, setIsReplying] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const parts = splitComment(comment.body);
 
   useEffect(() => {
@@ -326,19 +365,35 @@ function CommentItem({ comment: initialComment, user, router, isLoadingUser }) {
         }
       />
       <Stack gap="condensed" className={ui.contentWithVotesBody}>
-        <div className={ui.contentMetadata}>
-          <Link
-            className={ui.authorLabel}
-            href={`/${encodeURIComponent(comment.owner_username)}`}
-          >
-            {comment.owner_username}
-          </Link>
-          <span>·</span>
-          <PastTime date={comment.published_at} />
+        <div className={ui.contentMetadataRow}>
+          <div className={ui.contentMetadata}>
+            <Link
+              className={ui.authorLabel}
+              href={`/${encodeURIComponent(comment.owner_username)}`}
+            >
+              {comment.owner_username}
+            </Link>
+            <span>·</span>
+            <PastTime date={comment.published_at} />
+          </div>
+          {canEditContent(user, comment) && !isEditing && (
+            <ContentOptionsMenu onEdit={() => setIsEditing(true)} />
+          )}
         </div>
-        <div className={ui.contentBody}>
-          <MarkdownViewer value={comment.body} rich />
-        </div>
+        {isEditing ? (
+          <ContentEditForm
+            content={comment}
+            onCancel={() => setIsEditing(false)}
+            onSaved={(updated) => {
+              setComment(updated);
+              setIsEditing(false);
+            }}
+          />
+        ) : (
+          <div className={ui.contentBody}>
+            <MarkdownViewer value={comment.body} rich />
+          </div>
+        )}
         <ReplyBox
           isOpen={isReplying}
           onOpen={() => setIsReplying(true)}
@@ -360,32 +415,63 @@ function CommentItem({ comment: initialComment, user, router, isLoadingUser }) {
             />
           )}
         </ReplyBox>
-        {replies.map((reply) => {
-          return (
-            <article
-              key={reply.id}
-              id={`comentario-${reply.id}`}
-              className={ui.reply}
-            >
-              <Stack gap="condensed">
-                <div className={ui.contentMetadata}>
-                  <span className={ui.authorLabel}>{reply.owner_username}</span>
-                  <span>·</span>
-                  <PastTime date={reply.published_at} />
-                </div>
-                <div className={ui.contentBody}>
-                  <MarkdownViewer value={reply.body} rich />
-                </div>
-              </Stack>
-            </article>
-          );
-        })}
+        {replies.map((reply) => (
+          <ReplyItem key={reply.id} reply={reply} user={user} />
+        ))}
       </Stack>
     </article>
   );
 }
 
-function ContentOptionsMenu({ onDelete }) {
+function ReplyItem({ reply: initialReply, user }) {
+  const [reply, setReply] = useState(initialReply);
+  const [isEditing, setIsEditing] = useState(false);
+
+  return (
+    <article id={`comentario-${reply.id}`} className={ui.reply}>
+      <Stack gap="condensed">
+        <div className={ui.contentMetadataRow}>
+          <div className={ui.contentMetadata}>
+            <span className={ui.authorLabel}>{reply.owner_username}</span>
+            <span>·</span>
+            <PastTime date={reply.published_at} />
+          </div>
+          {canEditContent(user, reply) && !isEditing && (
+            <ContentOptionsMenu onEdit={() => setIsEditing(true)} />
+          )}
+        </div>
+        {isEditing ? (
+          <ContentEditForm
+            content={reply}
+            onCancel={() => setIsEditing(false)}
+            onSaved={(updated) => {
+              setReply(updated);
+              setIsEditing(false);
+            }}
+          />
+        ) : (
+          <div className={ui.contentBody}>
+            <MarkdownViewer value={reply.body} rich />
+          </div>
+        )}
+      </Stack>
+    </article>
+  );
+}
+
+function canEditContent(user, content) {
+  if (!user || !content) {
+    return false;
+  }
+
+  if (user.id === content.owner_id) {
+    return Boolean(user.features?.includes("update:content"));
+  }
+
+  return Boolean(user.features?.includes("update:content:others"));
+}
+
+function ContentOptionsMenu({ onEdit, onDelete }) {
   return (
     <div className={ui.contentOptions}>
       <ActionMenu>
@@ -399,12 +485,22 @@ function ContentOptionsMenu({ onDelete }) {
         </ActionMenu.Anchor>
         <ActionMenu.Overlay>
           <ActionList>
-            <ActionList.Item variant="danger" onSelect={onDelete}>
-              <ActionList.LeadingVisual>
-                <TrashIcon />
-              </ActionList.LeadingVisual>
-              Apagar
-            </ActionList.Item>
+            {onEdit && (
+              <ActionList.Item onSelect={onEdit}>
+                <ActionList.LeadingVisual>
+                  <PencilIcon />
+                </ActionList.LeadingVisual>
+                Editar
+              </ActionList.Item>
+            )}
+            {onDelete && (
+              <ActionList.Item variant="danger" onSelect={onDelete}>
+                <ActionList.LeadingVisual>
+                  <TrashIcon />
+                </ActionList.LeadingVisual>
+                Apagar
+              </ActionList.Item>
+            )}
           </ActionList>
         </ActionMenu.Overlay>
       </ActionMenu>

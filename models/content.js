@@ -27,7 +27,8 @@ function generateBaseSlug(title) {
   return slug.length > 0 ? slug : "conteudo";
 }
 
-async function slugExistsForOwner(ownerId, slug, options) {
+async function slugExistsForOwner(ownerId, slug, options = {}) {
+  const exceptContentId = options.exceptContentId || null;
   const results = await database.query(
     {
       text: `
@@ -38,9 +39,10 @@ async function slugExistsForOwner(ownerId, slug, options) {
       WHERE
         owner_id = $1
         AND slug = $2
+        AND ($3::uuid IS NULL OR id <> $3)
       LIMIT 1
     ;`,
-      values: [ownerId, slug],
+      values: [ownerId, slug, exceptContentId],
     },
     options,
   );
@@ -411,6 +413,7 @@ function parseWithChildren(withChildren) {
 // Lista o feed.
 // strategy=new → mais recentes; strategy=relevant → score por AgroCoins + decadência temporal.
 // withChildren=true → só comentários (parent_id NOT NULL); padrão → só raiz.
+// Com termo de busca, publicações e comentários entram juntos.
 // type=content|ad → filtra o tipo (útil para classificados).
 function parseSearchTerm(query) {
   if (query === undefined || query === null) {
@@ -451,9 +454,11 @@ async function findPublished({
     validator.username(author);
   }
 
-  const parentClause = childrenOnly
-    ? "contents.parent_id IS NOT NULL"
-    : "contents.parent_id IS NULL";
+  const parentClause = searchTerm
+    ? "TRUE"
+    : childrenOnly
+      ? "contents.parent_id IS NOT NULL"
+      : "contents.parent_id IS NULL";
 
   const countResults = await database.query({
     text: `
@@ -666,6 +671,65 @@ async function findLatestPublishedByOwnerId(ownerId, options = {}) {
   );
 
   return results.rows[0] || null;
+}
+
+// Atualiza título e texto de um conteúdo publicado.
+// Comentário ignora o título enviado e usa a primeira linha do texto.
+// O endereço (slug) só muda quando o título muda.
+async function update(contentFound, input, options = {}) {
+  validator.body(input.body);
+
+  const nextTitle = contentFound.parent_id
+    ? titleFromBody(input.body)
+    : input.title;
+
+  if (!contentFound.parent_id) {
+    validator.title(nextTitle);
+  }
+
+  const slug =
+    nextTitle === contentFound.title
+      ? contentFound.slug
+      : await buildUniqueSlug(contentFound.owner_id, nextTitle, {
+          ...options,
+          exceptContentId: contentFound.id,
+        });
+
+  const results = await database.query(
+    {
+      text: `
+        UPDATE
+          contents
+        SET
+          title = $2,
+          body = $3,
+          slug = $4,
+          updated_at = timezone('utc', now())
+        WHERE
+          id = $1
+          AND status = 'published'
+        RETURNING
+          *
+      ;`,
+      values: [contentFound.id, nextTitle, input.body, slug],
+    },
+    options,
+  );
+
+  if (results.rowCount === 0) {
+    throw new NotFoundError({
+      message: "O conteúdo informado não foi encontrado no sistema.",
+      action: "Verifique o endereço e tente novamente.",
+    });
+  }
+
+  const updated = results.rows[0];
+  updated.owner_username = contentFound.owner_username;
+  updated.tabcoins = Number(contentFound.tabcoins ?? 0);
+  updated.tabcoins_credit = Number(contentFound.tabcoins_credit ?? 0);
+  updated.tabcoins_debit = Number(contentFound.tabcoins_debit ?? 0);
+
+  return updated;
 }
 
 // Marca como excluído e reverte TabCoins do autor (paridade TabNews).
@@ -893,6 +957,7 @@ const content = {
   findAllByIds,
   confirmFirewallStatus,
   undoFirewallStatus,
+  update,
   remove,
   creditOrDebitTabCoins,
 };

@@ -9,7 +9,7 @@ import classes from "./index.module.css";
 
 // Exemplos do tipo de conversa que cabe aqui (não são publicações reais).
 const EXAMPLE_QUESTIONS = [
-  "Como você controla carrapato no verão?",
+  "Como você suplementa o gado na seca?",
   "Quanto rendeu o milho safrinha na sua região?",
   "Vale a pena travar o preço da soja antes do plantio?",
   "Qual pastagem aguentou melhor a última seca?",
