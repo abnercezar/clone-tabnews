@@ -2,10 +2,12 @@ import { createRouter } from "next-connect";
 import controller from "infra/controller.js";
 import database from "infra/database.js";
 import content from "models/content.js";
+import communityQuestion from "models/community-question.js";
 import event from "models/event.js";
 import firewall from "models/firewall";
 import notification from "models/notification.js";
 import authorization from "models/authorization.js";
+import { ValidationError } from "infra/errors.js";
 
 const TEN_MINUTES = 10 * 60 * 1000;
 
@@ -19,6 +21,7 @@ async function getHandler(request, response) {
     strategy: request.query.strategy,
     withChildren: request.query.with_children,
     type: request.query.type,
+    query: request.query.q,
   });
 
   const secureOutputValues = authorization.filterOutput(
@@ -37,7 +40,26 @@ async function getHandler(request, response) {
 async function postHandler(request, response) {
   const userTryingToCreate = request.context.user;
 
+  const communityQuestionId = request.body?.community_question_id;
+  const communityQuestionCategory = request.body?.community_question_category;
+
   const created = await database.withTransaction(async (transaction) => {
+    if (communityQuestionId !== undefined && communityQuestionId !== null) {
+      if (request.body?.parent_id || request.body?.type === "ad") {
+        throw new ValidationError({
+          message:
+            "Só publicações comuns podem responder à Pergunta da Comunidade.",
+          action: "Remova o comentário ou o patrocínio e tente novamente.",
+        });
+      }
+
+      await communityQuestion.findActiveById(
+        communityQuestionId,
+        {},
+        { transaction },
+      );
+    }
+
     const newContent = await content.create(
       {
         owner_id: userTryingToCreate.id,
@@ -48,6 +70,19 @@ async function postHandler(request, response) {
       },
       { transaction },
     );
+
+    if (communityQuestionId !== undefined && communityQuestionId !== null) {
+      await communityQuestion.addContribution(
+        {
+          questionId: communityQuestionId,
+          contentId: newContent.id,
+          category: communityQuestionCategory,
+        },
+        { transaction },
+      );
+      newContent.community_question_id = communityQuestionId;
+      newContent.community_question_category = communityQuestionCategory;
+    }
 
     await event.create(
       {
@@ -60,6 +95,7 @@ async function postHandler(request, response) {
           id: newContent.id,
           content_id: newContent.id,
           parent_id: newContent.parent_id,
+          community_question_id: newContent.community_question_id,
         },
       },
       { transaction },
@@ -95,6 +131,12 @@ async function postHandler(request, response) {
     created.newContent,
   );
   secureOutputValues.first_publication = created.firstPublication;
+  if (created.newContent.community_question_id) {
+    secureOutputValues.community_question_id =
+      created.newContent.community_question_id;
+    secureOutputValues.community_question_category =
+      created.newContent.community_question_category;
+  }
 
   return response.status(201).json(secureOutputValues);
 }

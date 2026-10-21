@@ -91,6 +91,8 @@ describe("Use case: Registration Flow (all successful)", () => {
       "read:sponsorship",
       "read:recovery_token",
       "read:email_confirmation_token",
+      "read:community_question",
+      "create:community_question_vote",
     ]);
   });
 
