@@ -17,8 +17,8 @@ export default function QuestionTemplates({ selectedId, onPick }) {
         Modelos prontos
       </Heading>
       <p className={styles.hint}>
-        Perguntas sobre o que mais pesa no bolso do produtor agora. O modelo
-        preenche o formulário; revise e defina o encerramento antes de publicar.
+        Ponto de partida para o formulário. A home só mostra a pergunta
+        publicada enquanto o prazo dela estiver valendo.
       </p>
       <ul className={styles.list}>
         {communityQuestionTemplates.map((item) => {

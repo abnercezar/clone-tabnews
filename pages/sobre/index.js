@@ -1,310 +1,186 @@
 import DefaultLayout from "interface/DefaultLayout";
+import { Heading, Link, LinkButton, Stack, Text } from "@primer/react";
 import {
-  Banner,
-  Heading,
-  Label,
-  LabelGroup,
-  LinkButton,
-  Stack,
-  Text,
-  Timeline,
-} from "@primer/react";
-import {
-  ArrowRightIcon,
-  BeakerIcon,
   CommentDiscussionIcon,
-  CpuIcon,
-  LightBulbIcon,
-  PeopleIcon,
-  ProjectIcon,
-  RocketIcon,
-  RssIcon,
+  ClockIcon,
+  MegaphoneIcon,
+  QuestionIcon,
+  StarFillIcon,
   StarIcon,
 } from "@primer/octicons-react";
 
 const FEATURES = [
   {
-    title: "Feed de publicações",
+    title: "Relevantes",
     description:
-      "Perguntas, relatos de campo e soluções práticas de quem vive o agronegócio brasileiro.",
-    icon: RssIcon,
-    tone: "green",
-  },
-  {
-    title: "Discussões",
-    description:
-      "Comentários e respostas em cada publicação, com quem vive o campo e a agtech.",
-    icon: CommentDiscussionIcon,
-    tone: "blue",
-  },
-  {
-    title: "Qualificação com AgroCoins",
-    description:
-      "A comunidade qualifica o que tem fundamento — o que ajuda de verdade sobe no feed.",
+      "A página inicial prioriza publicações recentes com boa avaliação e conversa. Conteúdo bom e antigo cede lugar ao que ainda está em uso.",
     icon: StarIcon,
-    tone: "yellow",
-  },
-  {
-    title: "Comunidade",
-    description:
-      "A troca acontece no feed e nas discussões — sem ser uma rede social à parte.",
-    icon: PeopleIcon,
     tone: "green",
-  },
-];
-
-const PILLARS = [
-  {
-    title: "Tecnologia",
-    description:
-      "Agtech, dados, automação e ferramentas digitais para o campo produzir com mais precisão e menos desperdício.",
-    icon: CpuIcon,
-    tone: "green",
+    href: "/",
   },
   {
-    title: "Inovação",
+    title: "Recentes",
     description:
-      "Novos modelos de negócio, práticas e soluções criadas no Brasil para os desafios reais da produção rural.",
-    icon: LightBulbIcon,
-    tone: "yellow",
-  },
-  {
-    title: "Ciência",
-    description:
-      "Pesquisa, evidências e conhecimento técnico traduzidos para quem decide na fazenda, na universidade e na indústria.",
-    icon: BeakerIcon,
+      "Tudo em ordem cronológica, em três abas: publicações, comentários e classificados.",
+    icon: ClockIcon,
     tone: "blue",
-  },
-];
-
-const MILESTONES = [
-  {
-    title: "Fundação",
-    body: "Infraestrutura, contas e fluxo de cadastro.",
-    variant: "success",
-    done: true,
+    href: "/recentes",
   },
   {
-    title: "Feed de publicações",
-    body: "Publicação e leitura de perguntas, relatos e soluções do agro.",
-    variant: "success",
-    done: true,
+    title: "Pergunta da comunidade",
+    description:
+      "Uma pergunta por vez na home. Quem já passou por aquilo no campo conta a experiência, com prazo para responder.",
+    icon: QuestionIcon,
+    tone: "yellow",
+    href: "/",
   },
   {
     title: "Discussões",
-    body: "Comentários e respostas em cada publicação.",
-    variant: "success",
-    done: true,
+    description:
+      "Comentário também é conteúdo e tem página própria. A resposta vale tanto quanto a publicação que abriu o assunto.",
+    icon: CommentDiscussionIcon,
+    tone: "green",
+    href: "/recentes/comentarios/1",
   },
   {
-    title: "Temas por cadeia produtiva",
-    body: "Filtros como soja, café, pecuária e leite, conforme a comunidade crescer.",
-    variant: "attention",
-    done: false,
+    title: "AgroCoins",
+    description:
+      "A comunidade qualifica o que tem fundamento. O que ajuda de verdade sobe; moeda interna, sem lastro fora do AgroTab.",
+    icon: StarFillIcon,
+    tone: "yellow",
+    href: "/faq#agrocoin",
   },
   {
-    title: "Perfis com credencial técnica",
-    body: "Identificação de agrônomos, veterinários e técnicos na comunidade.",
-    variant: "accent",
-    done: false,
+    title: "Classificados",
+    description:
+      "Publicação patrocinada, paga com AgroCash, fica fora do feed de Relevantes e aparece na aba de classificados.",
+    icon: MegaphoneIcon,
+    tone: "blue",
+    href: "/recentes/classificados/1",
   },
 ];
 
-export default function Home() {
+export default function SobrePage() {
   return (
     <DefaultLayout
       metadata={{
         title: "Sobre",
         description:
-          "Menos ruído, mais fundamentos: perguntas e experiências de quem faz o agro acontecer, com fundamento técnico.",
+          "O AgroTab é a comunidade de perguntas, relatos de campo e resultados de safra do agronegócio brasileiro.",
       }}
     >
       <div className="page">
-        <div className="flag-bar" aria-hidden />
-
         <Stack gap="spacious" paddingBlock="normal">
-          <Banner
-            variant="warning"
-            className="build-banner"
-            title="O AgroTab está em construção"
-            description="O feed e as discussões já estão abertos. Novas funcionalidades chegam conforme a comunidade cresce."
-          />
-
           <section className="hero">
-            <LabelGroup>
-              <Label variant="success">AgroTab</Label>
-              <Label variant="attention">Em construção</Label>
-              <Label variant="accent">Brasil</Label>
-            </LabelGroup>
-
-            <Heading as="h1" variant="large" className="hero-title">
-              Menos ruído, mais fundamentos: um lugar para inteligência coletiva
-              no agronegócio.
-            </Heading>
-
-            <Text as="p" className="hero-lead">
-              Perguntas e experiências de quem faz o agro acontecer, com
-              fundamento técnico — do laboratório à lavoura.
+            <Text as="p" className="eyebrow">
+              Comunidade do agronegócio
             </Text>
-
+            <Heading as="h1" className="hero-title">
+              Pergunte a quem já passou por isso no campo.
+            </Heading>
+            <Text as="p" className="hero-lead">
+              Produtores, técnicos e consultores trocam perguntas, relatos e
+              resultados de safra. A leitura é aberta. Para publicar e comentar,
+              a conta é gratuita.
+            </Text>
             <Stack
               direction={{ narrow: "vertical", regular: "horizontal" }}
               gap="condensed"
               align="center"
             >
-              <LinkButton
-                href="/"
-                variant="primary"
-                size="large"
-                trailingVisual={ArrowRightIcon}
-              >
-                Ler os conteúdos
+              <LinkButton href="/" variant="primary" size="large">
+                Ver discussões
               </LinkButton>
-              <LinkButton href="/cadastro" variant="default" size="large">
+              <LinkButton
+                href="/publicar?modelo=pergunta"
+                variant="default"
+                size="large"
+              >
+                Fazer uma pergunta
+              </LinkButton>
+              <LinkButton href="/cadastro" variant="invisible" size="large">
                 Criar conta
               </LinkButton>
             </Stack>
           </section>
 
-          <section id="pilares" className="section">
+          <section className="section">
             <Heading as="h2" variant="medium">
-              Tecnologia, inovação e ciência
+              O que é o AgroTab
             </Heading>
             <Text as="p" className="muted">
-              Três frentes que dão fundamento às conversas do AgroTab: o que já
-              existe no campo brasileiro, o que ainda está nascendo e o que a
-              pesquisa comprova.
+              Uma plataforma comunitária do agronegócio brasileiro. O assunto
+              cabe quando ajuda uma decisão no campo: produção, pecuária,
+              agtech, pesquisa, gestão da fazenda e mercado. Menos ruído, mais
+              fundamento — o que a comunidade qualifica sobe em{" "}
+              <Link href="/">Relevantes</Link>. Dúvidas de uso estão no{" "}
+              <Link href="/faq">FAQ</Link> e as regras, nos{" "}
+              <Link href="/termos-de-uso">Termos de Uso</Link>.
             </Text>
-
-            <div className="pillar-grid">
-              {PILLARS.map(({ title, description, icon: Icon, tone }) => (
-                <article
-                  key={title}
-                  className={`feature-card pillar tone-${tone}`}
-                >
-                  <span className={`feature-icon tone-${tone}`}>
-                    <Icon size={20} />
-                  </span>
-                  <Heading as="h3" variant="small">
-                    {title}
-                  </Heading>
-                  <Text as="p" className="muted">
-                    {description}
-                  </Text>
-                </article>
-              ))}
-            </div>
           </section>
 
-          <section id="como-funciona" className="section">
+          <section className="section">
             <Heading as="h2" variant="medium">
               Como funciona
             </Heading>
             <Text as="p" className="muted">
-              Publicações, discussões e qualificação pela própria comunidade do
-              agronegócio brasileiro — tudo isso já está aberto.
+              O que já está aberto para ler, publicar e qualificar.
             </Text>
-
             <div className="feature-grid">
-              {FEATURES.map(({ title, description, icon: Icon, tone }) => (
-                <article key={title} className={`feature-card tone-${tone}`}>
-                  <span className={`feature-icon tone-${tone}`}>
-                    <Icon size={20} />
-                  </span>
-                  <Heading as="h3" variant="small">
-                    {title}
-                  </Heading>
-                  <Text as="p" className="muted">
-                    {description}
-                  </Text>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <section className="section split">
-            <div>
-              <Heading as="h2" variant="medium">
-                Roadmap
-              </Heading>
-              <Text as="p" className="muted">
-                O que já está pronto e o que vem a seguir.
-              </Text>
-            </div>
-
-            <Timeline>
-              {MILESTONES.map((item) => (
-                <Timeline.Item key={item.title}>
-                  <Timeline.Badge variant={item.variant}>
-                    {item.done ? <ProjectIcon /> : <RocketIcon />}
-                  </Timeline.Badge>
-                  <Timeline.Body>
-                    <Text as="strong">{item.title}</Text>
+              {FEATURES.map(
+                ({ title, description, icon: Icon, tone, href }) => (
+                  <article key={title} className={`feature-card tone-${tone}`}>
+                    <span className={`feature-icon tone-${tone}`}>
+                      <Icon size={20} />
+                    </span>
+                    <Heading as="h3" variant="small">
+                      <Link href={href}>{title}</Link>
+                    </Heading>
                     <Text as="p" className="muted">
-                      {item.body}
+                      {description}
                     </Text>
-                  </Timeline.Body>
-                </Timeline.Item>
-              ))}
-            </Timeline>
+                  </article>
+                ),
+              )}
+            </div>
           </section>
         </Stack>
       </div>
 
       <style jsx>{`
-        .page {
-          --br-green: #009c3b;
-          --br-green-soft: #e8f8ee;
-          --br-yellow: #ffdf00;
-          --br-yellow-soft: #fff8cc;
-          --br-blue: #002776;
-          --br-blue-soft: #e8eefc;
-          --br-white: #ffffff;
-        }
-
-        .flag-bar {
-          height: 4px;
-          margin: 0 0 16px;
-          background: linear-gradient(
-            90deg,
-            var(--br-green) 0%,
-            var(--br-green) 33.3%,
-            var(--br-yellow) 33.3%,
-            var(--br-yellow) 66.6%,
-            var(--br-blue) 66.6%,
-            var(--br-blue) 100%
-          );
-        }
-
-        .page :global(.build-banner) {
-          font-size: 16px;
-        }
-
-        .page :global(.build-banner h2) {
-          font-size: clamp(18px, 2.4vw, 22px);
-          font-weight: 700;
-          line-height: 1.35;
-        }
-
         .hero {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
           gap: 16px;
-          padding: 8px 0;
+        }
+
+        .page :global(.eyebrow) {
+          margin: 0;
+          font-size: 12px;
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--fgColor-success, #1a7f37);
         }
 
         .page :global(.hero-title) {
-          max-width: 22ch;
+          max-width: 18ch;
+          margin: 0;
           letter-spacing: -0.02em;
         }
 
-        .page :global(.hero-lead) {
-          max-width: 62ch;
+        .page :global(.hero-lead),
+        .page :global(.muted) {
+          max-width: 68ch;
           margin: 0;
-          font-size: 18px;
+          font-size: 16px;
           line-height: 1.6;
           color: var(--fgColor-muted, #656d76);
+        }
+
+        .page :global(.hero-lead) {
+          font-size: 18px;
         }
 
         .section {
@@ -313,19 +189,7 @@ export default function Home() {
           gap: 12px;
         }
 
-        .split {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr);
-          gap: 24px;
-        }
-
-        .page :global(.muted) {
-          margin: 0;
-          color: var(--fgColor-muted, #656d76);
-        }
-
-        .feature-grid,
-        .pillar-grid {
+        .feature-grid {
           display: grid;
           grid-template-columns: 1fr;
           gap: 16px;
@@ -339,23 +203,19 @@ export default function Home() {
           padding: 20px;
           border: 1px solid var(--borderColor-default, #d0d7de);
           border-radius: 12px;
-          background: var(--br-white);
-          box-shadow: var(
-            --shadow-resting-small,
-            0 1px 0 rgba(31, 35, 40, 0.04)
-          );
+          background: var(--bgColor-muted, #f6f8fa);
         }
 
         .feature-card.tone-green {
-          border-left: 6px solid var(--br-green);
+          border-left: 4px solid var(--bgColor-success-emphasis, #1f883d);
         }
 
         .feature-card.tone-yellow {
-          border-left: 6px solid var(--br-yellow);
+          border-left: 4px solid #c69026;
         }
 
         .feature-card.tone-blue {
-          border-left: 6px solid var(--br-blue);
+          border-left: 4px solid var(--fgColor-accent, #0969da);
         }
 
         .feature-icon {
@@ -368,32 +228,23 @@ export default function Home() {
         }
 
         .feature-icon.tone-green {
-          color: var(--br-green);
-          background: var(--br-green-soft);
+          color: var(--fgColor-success, #1a7f37);
+          background: color-mix(in srgb, currentColor 14%, transparent);
         }
 
         .feature-icon.tone-yellow {
-          color: #8a7200;
-          background: var(--br-yellow-soft);
+          color: #9a6700;
+          background: color-mix(in srgb, currentColor 14%, transparent);
         }
 
         .feature-icon.tone-blue {
-          color: var(--br-blue);
-          background: var(--br-blue-soft);
+          color: var(--fgColor-accent, #0969da);
+          background: color-mix(in srgb, currentColor 14%, transparent);
         }
 
         @media (min-width: 768px) {
-          .pillar-grid {
-            grid-template-columns: 1fr 1fr 1fr;
-          }
-
           .feature-grid {
             grid-template-columns: 1fr 1fr;
-          }
-
-          .split {
-            grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.2fr);
-            align-items: start;
           }
         }
       `}</style>

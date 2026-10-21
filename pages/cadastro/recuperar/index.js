@@ -30,6 +30,12 @@ function RecoverPasswordForm() {
     event.preventDefault();
     setErrorMessage(null);
     setSuccessEmail(null);
+
+    if (!email.trim()) {
+      setErrorMessage("Informe o e-mail da sua conta.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {

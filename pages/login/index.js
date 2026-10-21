@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "next/router";
 import {
   Button,
   FormControl,
@@ -10,18 +11,19 @@ import {
 import DefaultLayout from "interface/DefaultLayout";
 import PasswordInput from "interface/PasswordInput";
 import classes from "interface/authForm.module.css";
+import { safeRedirectPath } from "interface/loginRedirect";
 
 export default function LoginPage() {
   return (
     <DefaultLayout
       contentWidth="small"
       metadata={{
-        title: "Login",
+        title: "Entrar",
         description: "Acesse sua conta no AgroTab.",
       }}
     >
       <Heading as="h1" className={classes.heading}>
-        Login
+        Entrar
       </Heading>
       <LoginForm />
     </DefaultLayout>
@@ -29,6 +31,7 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
+  const { query } = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
@@ -37,6 +40,14 @@ function LoginForm() {
   async function handleSubmit(event) {
     event.preventDefault();
     setErrorMessage(null);
+
+    // O Primer marca os campos com aria-required, sem validação nativa:
+    // campo vazio é barrado aqui, antes de ir ao servidor.
+    if (!email.trim() || !password) {
+      setErrorMessage("Preencha o e-mail e a senha para entrar.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -50,7 +61,8 @@ function LoginForm() {
       });
 
       if (response.status === 201) {
-        location.href = "/";
+        // Volta para onde a pessoa estava (votar, responder, publicar).
+        location.href = safeRedirectPath(query.redirect);
         return;
       }
 
@@ -84,11 +96,11 @@ function LoginForm() {
   return (
     <form className={classes.form} onSubmit={handleSubmit}>
       <FormControl required className={classes.field}>
-        <FormControl.Label>Seu Email</FormControl.Label>
+        <FormControl.Label>E-mail</FormControl.Label>
         <TextInput
           type="email"
           autoComplete="email"
-          placeholder="Digite seu email"
+          placeholder="Digite seu e-mail"
           autoFocus
           value={email}
           onChange={(event) => {
@@ -128,16 +140,16 @@ function LoginForm() {
         disabled={isSubmitting}
         block
       >
-        {isSubmitting ? "Entrando..." : "Login"}
+        {isSubmitting ? "Entrando..." : "Entrar"}
       </Button>
 
       <div className={classes.links}>
         <span>
-          Novo no AgroTab? <Link href="/cadastro">Crie sua conta aqui.</Link>
+          Novo no AgroTab? <Link href="/cadastro">Criar conta</Link>
         </span>
         <span>
           Esqueceu sua senha?{" "}
-          <Link href="/cadastro/recuperar">Clique aqui.</Link>
+          <Link href="/cadastro/recuperar">Recuperar a senha</Link>
         </span>
       </div>
     </form>

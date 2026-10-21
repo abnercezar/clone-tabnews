@@ -12,6 +12,8 @@ const OPTIONS_MIN = 2;
 const OPTIONS_MAX = 6;
 const OPTION_LABEL_MAX = 120;
 const CONTRIBUTIONS_PER_PAGE = 10;
+// Sem data de fim, a pergunta não fica fixa na home.
+const DEFAULT_PERIOD_MS = 7 * 24 * 60 * 60 * 1000;
 
 const ACTIVE_CLAUSE = `
   community_questions.starts_at <= timezone('utc', now())
@@ -63,13 +65,28 @@ function validateCreateInput(input) {
     description = input.description.trim() || null;
   }
 
-  let endsAt = null;
+  let startsAt = new Date();
+  if (input.starts_at !== undefined && input.starts_at !== null) {
+    startsAt = new Date(input.starts_at);
+    if (
+      Number.isNaN(startsAt.getTime()) ||
+      startsAt.getTime() < Date.now() - 60_000
+    ) {
+      throw new ValidationError({
+        message: "A data de início não é válida.",
+        action: "Use o momento atual ou uma data futura.",
+      });
+    }
+  }
+
+  // Sem encerramento, a pergunta sai da home depois de 7 dias.
+  let endsAt = new Date(startsAt.getTime() + DEFAULT_PERIOD_MS);
   if (input.ends_at !== undefined && input.ends_at !== null) {
     endsAt = new Date(input.ends_at);
-    if (Number.isNaN(endsAt.getTime()) || endsAt <= new Date()) {
+    if (Number.isNaN(endsAt.getTime()) || endsAt <= startsAt) {
       throw new ValidationError({
         message: "A data de encerramento não é válida.",
-        action: "Informe uma data futura no formato ISO 8601.",
+        action: "Informe um encerramento depois do início.",
       });
     }
   }
@@ -82,6 +99,7 @@ function validateCreateInput(input) {
     category: input.category,
     kind: input.kind,
     resultsVisibility,
+    startsAt,
     endsAt,
     options,
   };
@@ -142,9 +160,9 @@ async function create(input, options = {}) {
     {
       text: `
         INSERT INTO
-          community_questions (owner_id, title, description, category, kind, results_visibility, ends_at)
+          community_questions (owner_id, title, description, category, kind, results_visibility, starts_at, ends_at)
         VALUES
-          ($1, $2, $3, $4, $5, $6, $7)
+          ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING
           id
       ;`,
@@ -155,6 +173,7 @@ async function create(input, options = {}) {
         values.category,
         values.kind,
         values.resultsVisibility,
+        values.startsAt,
         values.endsAt,
       ],
     },
@@ -277,6 +296,31 @@ async function findOneDetailed(
 
 async function findActive({ viewerId } = {}) {
   return findOneDetailed({ onlyActive: true, viewerId });
+}
+
+// Perguntas que ainda vão aparecer ou que estão na home agora.
+async function findSchedule() {
+  const results = await database.query({
+    text: `
+      SELECT
+        id,
+        title,
+        category,
+        kind,
+        starts_at,
+        ends_at
+      FROM
+        community_questions
+      WHERE
+        ends_at IS NULL
+        OR ends_at > timezone('utc', now())
+      ORDER BY
+        starts_at ASC,
+        created_at ASC
+    ;`,
+  });
+
+  return results.rows;
 }
 
 async function findActiveById(id, { viewerId } = {}, options = {}) {
@@ -429,6 +473,7 @@ const communityQuestion = {
   validateCreateInput,
   create,
   findActive,
+  findSchedule,
   findActiveById,
   vote,
   addContribution,

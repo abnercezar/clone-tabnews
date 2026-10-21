@@ -1,4 +1,8 @@
+/* O UnderlineNav põe um h2 visualmente oculto ao lado do <nav>. Solto no
+   <main>, ele herdava "width: 100%" do layout e vazava 200 px para a
+   direita (rolagem lateral no desktop); o contêiner o mantém fora disso. */
 .nav {
+  position: relative;
   width: 100%;
   margin-bottom: var(--base-size-16, 16px);
 }

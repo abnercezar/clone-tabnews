@@ -20,20 +20,18 @@ export default function RecentTabNav() {
   const { pathname } = useRouter();
 
   return (
-    <UnderlineNav
-      aria-label="Conteúdos recentes"
-      className={classes.nav}
-      variant="flush"
-    >
-      {TABS.map((tab) => (
-        <UnderlineNav.Item
-          key={tab.href}
-          href={tab.href}
-          aria-current={pathname.startsWith(tab.match) ? "page" : undefined}
-        >
-          {tab.label}
-        </UnderlineNav.Item>
-      ))}
-    </UnderlineNav>
+    <div className={classes.nav}>
+      <UnderlineNav aria-label="Conteúdos recentes" variant="flush">
+        {TABS.map((tab) => (
+          <UnderlineNav.Item
+            key={tab.href}
+            href={tab.href}
+            aria-current={pathname.startsWith(tab.match) ? "page" : undefined}
+          >
+            {tab.label}
+          </UnderlineNav.Item>
+        ))}
+      </UnderlineNav>
+    </div>
   );
 }

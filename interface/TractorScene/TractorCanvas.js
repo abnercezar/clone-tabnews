@@ -216,12 +216,14 @@ export default function TractorCanvas() {
     let distance = 0;
     let spawnDebt = 0;
     let phase = "";
+    let sceneVisible = false;
 
     function setPhase(next) {
-      if (phase !== next) {
-        phase = next;
-        stage.dataset.phase = next;
+      if (!sceneVisible || phase === next) {
+        return;
       }
+      phase = next;
+      stage.dataset.phase = next;
     }
 
     function restart() {
@@ -415,11 +417,33 @@ export default function TractorCanvas() {
       raf = window.requestAnimationFrame(loop);
     }
 
+    let showed = false;
+    let showFallback = 0;
+    function showScene() {
+      if (showed) {
+        return;
+      }
+      showed = true;
+      sceneVisible = true;
+      window.clearTimeout(showFallback);
+      if (!reduceMotion) {
+        time = 0;
+        distance = 0;
+        last = 0;
+        update(0, 0);
+        composer.render();
+      }
+      stage.dataset.painted = "true";
+    }
+
     if (reduceMotion) {
       time = READY_AT + 2;
+      sceneVisible = true;
       update(time, 0);
       delete stage.dataset.phase;
       composer.render();
+      stage.dataset.painted = "true";
+      showed = true;
     } else {
       update(0, 0);
       composer.render();
@@ -469,10 +493,7 @@ export default function TractorCanvas() {
         return;
       }
       scenery.addCattle(baked);
-      if (!raf) {
-        update(time, 0);
-        composer.render();
-      }
+      showScene();
     }
     try {
       cattleWorker = new Worker(
@@ -486,8 +507,11 @@ export default function TractorCanvas() {
       );
     }
 
+    showFallback = window.setTimeout(showScene, 2500);
+
     return () => {
       disposed = true;
+      window.clearTimeout(showFallback);
       cattleWorker?.terminate();
       window.cancelAnimationFrame(raf);
       canvas.removeEventListener("click", onClick);
@@ -495,6 +519,7 @@ export default function TractorCanvas() {
       intersection.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
       delete stage.dataset.phase;
+      delete stage.dataset.painted;
 
       const materials = new Set();
       scene.traverse((node) => {

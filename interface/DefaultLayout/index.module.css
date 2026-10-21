@@ -106,6 +106,14 @@
   text-underline-offset: 8px;
 }
 
+/* Área de toque de pelo menos 32 px de altura (WCAG 2.5.8 pede 24). */
+.authLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  white-space: nowrap;
+}
+
 .itemMr1 {
   margin-right: var(--base-size-4, 4px);
 }
@@ -273,5 +281,34 @@
   .footerLinks {
     gap: var(--base-size-32, 32px);
     padding-inline: var(--base-size-32, 32px);
+  }
+}
+
+/* Celular: o cabeçalho tem logo, abas, busca, tema e acesso; sem compactar,
+   passava da largura da tela e criava rolagem lateral. */
+@media (max-width: 543px) {
+  .nav {
+    padding-inline: 4px;
+  }
+
+  .navLink,
+  .activeLink {
+    margin-left: var(--base-size-8, 8px);
+  }
+
+  .searchItem {
+    margin-left: var(--base-size-4, 4px);
+  }
+
+  .itemMl2 {
+    margin-left: var(--base-size-4, 4px);
+  }
+}
+
+/* Telas bem estreitas: "Criar conta" sai do topo (o convite está no feed e
+   na página Entrar). */
+@media (max-width: 419px) {
+  .signupItem {
+    display: none;
   }
 }

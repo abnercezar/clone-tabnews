@@ -5,6 +5,21 @@ import communityQuestion from "models/community-question.js";
 import event from "models/event.js";
 import authorization from "models/authorization.js";
 
+async function getHandler(request, response) {
+  const schedule = await communityQuestion.findSchedule();
+
+  return response.status(200).json(
+    schedule.map((question) => ({
+      id: question.id,
+      title: question.title,
+      category: question.category,
+      kind: question.kind,
+      starts_at: question.starts_at,
+      ends_at: question.ends_at,
+    })),
+  );
+}
+
 async function postHandler(request, response) {
   const userTryingToCreate = request.context.user;
 
@@ -18,6 +33,7 @@ async function postHandler(request, response) {
           category: request.body?.category,
           kind: request.body?.kind,
           results_visibility: request.body?.results_visibility,
+          starts_at: request.body?.starts_at,
           ends_at: request.body?.ends_at,
           options: request.body?.options,
         },
@@ -49,5 +65,6 @@ async function postHandler(request, response) {
 
 export default createRouter()
   .use(controller.injectAnonymousOrUser)
+  .get(controller.canRequest("create:community_question"), getHandler)
   .post(controller.canRequest("create:community_question"), postHandler)
   .handler(controller.errorHandlers);
