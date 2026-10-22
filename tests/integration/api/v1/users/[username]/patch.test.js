@@ -236,6 +236,11 @@ describe("`PATCH /api/v1/users/[username]`", () => {
           "create:newsletter_subscription",
           "update:newsletter_subscription",
         ],
+        occupation: null,
+        crops: [],
+        state: null,
+        founder: false,
+        notify_replies: true,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
@@ -329,6 +334,11 @@ describe("`PATCH /api/v1/users/[username]`", () => {
           "create:newsletter_subscription",
           "update:newsletter_subscription",
         ],
+        occupation: null,
+        crops: [],
+        state: null,
+        founder: false,
+        notify_replies: true,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
@@ -394,6 +404,11 @@ describe("`PATCH /api/v1/users/[username]`", () => {
           "create:newsletter_subscription",
           "update:newsletter_subscription",
         ],
+        occupation: null,
+        crops: [],
+        state: null,
+        founder: false,
+        notify_replies: true,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
@@ -467,6 +482,11 @@ describe("`PATCH /api/v1/users/[username]`", () => {
         username: "AlteradoPorPrivilegiado",
         email: defaultUser.email,
         features: defaultUser.features,
+        occupation: null,
+        crops: [],
+        state: null,
+        founder: false,
+        notify_replies: true,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
@@ -529,7 +549,8 @@ describe("`PATCH /api/v1/users/[username]`", () => {
       expect(responseBody).toEqual({
         name: "ValidationError",
         message: "Os campos a seguir não são permitidos nesta operação: id.",
-        action: "Envie apenas os campos permitidos: username, email, password.",
+        action:
+          "Envie apenas os campos permitidos: username, email, password, occupation, crops, state, notify_replies, founder.",
         status_code: 400,
       });
 
@@ -577,7 +598,8 @@ describe("`PATCH /api/v1/users/[username]`", () => {
         name: "ValidationError",
         message:
           "Os campos a seguir não são permitidos nesta operação: features.",
-        action: "Envie apenas os campos permitidos: username, email, password.",
+        action:
+          "Envie apenas os campos permitidos: username, email, password, occupation, crops, state, notify_replies, founder.",
         status_code: 400,
       });
 

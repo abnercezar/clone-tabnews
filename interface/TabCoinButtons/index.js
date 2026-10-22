@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useReward } from "react-rewards";
 import { IconButton, Text, Tooltip } from "@primer/react";
-import { ChevronDownIcon, ChevronUpIcon } from "@primer/octicons-react";
+import { ThumbsdownIcon, ThumbsupIcon } from "@primer/octicons-react";
 import useUser from "interface/useUser";
 import { loginHref } from "interface/loginRedirect";
 import classes from "./index.module.css";
@@ -39,7 +39,7 @@ export default function TabCoinButtons({ content, onBalanceChange }) {
       decay: 0.94,
       spread: 60,
       elementCount: 4,
-      emoji: ["😡"],
+      emoji: ["👎"],
     },
   );
 
@@ -110,11 +110,11 @@ export default function TabCoinButtons({ content, onBalanceChange }) {
 
   return (
     <div className={classes.wrapper}>
-      <Tooltip text="Achei relevante" direction="n">
+      <Tooltip text="Útil 👍" direction="n">
         <IconButton
           variant="invisible"
-          aria-label="Creditar AgroCoin"
-          icon={ChevronUpIcon}
+          aria-label="Marcar como útil"
+          icon={ThumbsupIcon}
           size="small"
           className={classes.creditButton}
           onClick={() => transactTabCoin("credit")}
@@ -125,7 +125,7 @@ export default function TabCoinButtons({ content, onBalanceChange }) {
       <Text
         as="span"
         className={classes.balance}
-        title={`créditos: ${contentObject.tabcoins_credit ?? 0} · débitos: ${Math.abs(contentObject.tabcoins_debit ?? 0)}`}
+        title={`útil: ${contentObject.tabcoins_credit ?? 0} · não útil: ${Math.abs(contentObject.tabcoins_debit ?? 0)}`}
       >
         <span
           id={rewardId}
@@ -135,11 +135,11 @@ export default function TabCoinButtons({ content, onBalanceChange }) {
         {contentObject.tabcoins ?? 0}
       </Text>
 
-      <Tooltip text="Sem relevância" direction="n">
+      <Tooltip text="Não útil" direction="n">
         <IconButton
           variant="invisible"
-          aria-label="Debitar AgroCoin"
-          icon={ChevronDownIcon}
+          aria-label="Marcar como não útil"
+          icon={ThumbsdownIcon}
           size="small"
           className={classes.debitButton}
           onClick={() => transactTabCoin("debit")}

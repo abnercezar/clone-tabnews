@@ -18,6 +18,10 @@ function walk(dir, acc = []) {
   return acc;
 }
 
+// interface/JsonLd é a única exceção: serializa dados estruturados com
+// JSON.stringify e escapa "<" (coberto pelo teste abaixo).
+const ALLOWED = [path.join("interface", "JsonLd", "index.js")];
+
 describe("Markdown / XSS posture", () => {
   test("pages and interface do not use dangerouslySetInnerHTML", () => {
     const roots = [
@@ -33,6 +37,10 @@ describe("Markdown / XSS posture", () => {
           continue;
         }
         const source = readFileSync(file, "utf8");
+        const relative = path.relative(process.cwd(), file);
+        if (ALLOWED.includes(relative)) {
+          continue;
+        }
         if (source.includes("dangerouslySetInnerHTML")) {
           offenders.push(path.relative(process.cwd(), file));
         }
@@ -40,5 +48,18 @@ describe("Markdown / XSS posture", () => {
     }
 
     expect(offenders).toEqual([]);
+  });
+});
+
+describe("JSON-LD", () => {
+  test("serializeJsonLd não deixa fechar a tag script", async () => {
+    const { serializeJsonLd } = await import("interface/JsonLd");
+    const output = serializeJsonLd({
+      headline: '</script><script>alert("xss")</script>',
+    });
+    expect(output).not.toContain("<");
+    expect(JSON.parse(output).headline).toBe(
+      '</script><script>alert("xss")</script>',
+    );
   });
 });

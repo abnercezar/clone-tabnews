@@ -331,4 +331,65 @@ describe("Content interaction e-mail notifications", () => {
       emails.every((item) => item.recipients[0] === "<autor.dup@agrotab.test>"),
     ).toBe(true);
   });
+
+  test("Author who turned off reply e-mails is not notified", async () => {
+    const { session: authorSession } = await createActivatedSession({
+      username: "autorSemAviso",
+      email: "autor.semaviso@agrotab.test",
+    });
+    const patchResponse = await fetch(
+      `${webserver.origin}/api/v1/users/autorSemAviso`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Cookie: `session_id=${authorSession.token}`,
+        },
+        body: JSON.stringify({ notify_replies: false }),
+      },
+    );
+    expect(patchResponse.status).toBe(200);
+
+    const postResponse = await postContent(authorSession.token, {
+      title: "Post sem aviso",
+      body: "Base.",
+    });
+    const post = await postResponse.json();
+    await orchestrator.deleteAllEmails();
+
+    const { session: commenterSession } = await createActivatedSession({
+      username: "comentaSemAviso",
+    });
+    const commentResponse = await postContent(commenterSession.token, {
+      parent_id: post.id,
+      body: "Comentário que não gera e-mail.",
+    });
+    expect(commentResponse.status).toBe(201);
+
+    expect(await orchestrator.getEmails()).toHaveLength(0);
+  });
+
+  test("Notification e-mail has a link to turn the notices off", async () => {
+    const { session: authorSession } = await createActivatedSession({
+      username: "autorComLink",
+      email: "autor.comlink@agrotab.test",
+    });
+    const postResponse = await postContent(authorSession.token, {
+      title: "Post com link de saída",
+      body: "Base.",
+    });
+    const post = await postResponse.json();
+    await orchestrator.deleteAllEmails();
+
+    const { session: commenterSession } = await createActivatedSession({
+      username: "comentaComLink",
+    });
+    await postContent(commenterSession.token, {
+      parent_id: post.id,
+      body: "Comentário com aviso.",
+    });
+
+    const lastEmail = await orchestrator.getLastEmail();
+    expect(lastEmail.text).toContain(`${webserver.origin}/perfil#avisos`);
+  });
 });

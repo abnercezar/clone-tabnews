@@ -75,8 +75,14 @@ async function listPublicTables() {
   return tables.rows.map((row) => row.tablename);
 }
 
+// Tabelas com dados de referência inseridos pelas migrations (a lista fixa
+// de tags): apagá-las deixaria o banco diferente do de produção.
+const REFERENCE_TABLES = ["pgmigrations", "tags"];
+
 async function truncateApplicationTables(tableNames) {
-  const truncable = tableNames.filter((name) => name !== "pgmigrations");
+  const truncable = tableNames.filter(
+    (name) => !REFERENCE_TABLES.includes(name),
+  );
   if (truncable.length === 0) {
     return;
   }
@@ -145,6 +151,7 @@ async function createContent(contentObject) {
     body: contentObject?.body || faker.lorem.paragraphs(2),
     parent_id: contentObject?.parent_id,
     type: contentObject?.type,
+    tags: contentObject?.tags,
   });
 }
 

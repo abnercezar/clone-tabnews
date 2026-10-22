@@ -22,6 +22,7 @@ async function getHandler(request, response) {
     withChildren: request.query.with_children,
     type: request.query.type,
     query: request.query.q,
+    tag: request.query.tag,
   });
 
   const secureOutputValues = authorization.filterOutput(
@@ -67,6 +68,7 @@ async function postHandler(request, response) {
         body: request.body?.body,
         parent_id: request.body?.parent_id,
         type: request.body?.type,
+        tags: request.body?.tags,
       },
       { transaction },
     );
@@ -116,6 +118,9 @@ async function postHandler(request, response) {
   // O INSERT não traz o username do autor (sem JOIN); como o autor é o próprio
   // usuário autenticado, anexamos a partir dele para a resposta ficar completa.
   created.newContent.owner_username = userTryingToCreate.username;
+  created.newContent.owner_occupation = userTryingToCreate.occupation;
+  created.newContent.owner_state = userTryingToCreate.state;
+  created.newContent.owner_founder = userTryingToCreate.founder;
 
   // Best-effort após o commit: falha de SMTP não altera o 201 do comentário.
   if (created.newContent.parent_id) {

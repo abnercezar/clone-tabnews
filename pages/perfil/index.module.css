@@ -1,0 +1,22 @@
+.section {
+  margin-top: var(--base-size-16, 16px);
+}
+
+.crops {
+  margin: 0 0 var(--base-size-16, 16px);
+  padding: 0;
+  border: 0;
+}
+
+.legend {
+  margin-bottom: var(--base-size-8, 8px);
+  padding: 0;
+  font-weight: 600;
+  font-size: var(--text-body-size-medium, 14px);
+}
+
+.cropOptions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--base-size-8, 8px);
+}

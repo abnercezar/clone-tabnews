@@ -2,6 +2,7 @@ import database from "infra/database.js";
 import validator from "models/validator.js";
 import balance from "models/balance.js";
 import prestige from "models/prestige.js";
+import tag from "models/tag.js";
 import {
   ForbiddenError,
   NotFoundError,
@@ -103,6 +104,11 @@ async function create(contentInputValues, options = {}) {
     validator.title(title);
   }
 
+  // Comentário não tem tags: herda o assunto da publicação.
+  const tagSlugs = parentId
+    ? []
+    : await tag.parseSlugs(contentInputValues.tags, options);
+
   const contentType =
     !parentId && contentInputValues.type === "ad" ? "ad" : "content";
 
@@ -123,6 +129,8 @@ async function create(contentInputValues, options = {}) {
     },
     options,
   );
+
+  newContent.tags = await tag.setForContent(newContent.id, tagSlugs, options);
 
   await creditOrDebitTabCoins(null, newContent, options);
   await updateTabCashBalance(newContent, options);
@@ -437,6 +445,7 @@ async function findPublished({
   withChildren,
   type,
   query,
+  tag: tagSlug,
 } = {}) {
   const currentPage = parsePage(page, DEFAULT_PAGE, 10000);
   const currentPerPage = parsePage(perPage, DEFAULT_PER_PAGE, MAX_PER_PAGE);
@@ -445,6 +454,7 @@ async function findPublished({
   const childrenOnly = parseWithChildren(withChildren);
   const contentType = parseContentType(type);
   const searchTerm = parseSearchTerm(query);
+  const tagFilter = tagSlug ? String(tagSlug).toLowerCase() : null;
   // No feed de Relevantes (sem filtro de autor), anúncios ficam de fora — como no TabNews.
   // Se o cliente pediu type explicitamente, o filtro de tipo prevalece.
   const excludeAds =
@@ -479,8 +489,14 @@ async function findPublished({
           OR contents.title ILIKE $4
           OR contents.body ILIKE $4
         )
+        AND ($5::varchar IS NULL OR EXISTS (
+          SELECT 1
+          FROM content_tags
+          INNER JOIN tags ON tags.id = content_tags.tag_id
+          WHERE content_tags.content_id = contents.id AND tags.slug = $5
+        ))
     ;`,
-    values: [author, excludeAds, contentType, searchTerm],
+    values: [author, excludeAds, contentType, searchTerm, tagFilter],
   });
 
   const orderByClause =
@@ -524,6 +540,10 @@ async function findPublished({
       SELECT
         contents.*,
         users.username AS owner_username,
+        users.occupation AS owner_occupation,
+        users.state AS owner_state,
+        users.founder AS owner_founder,
+        ${tag.tagsJsonSql()} AS tags,
         tabcoins_count.total_balance AS tabcoins,
         tabcoins_count.total_credit AS tabcoins_credit,
         tabcoins_count.total_debit AS tabcoins_debit
@@ -544,6 +564,12 @@ async function findPublished({
           OR contents.title ILIKE $6
           OR contents.body ILIKE $6
         )
+        AND ($7::varchar IS NULL OR EXISTS (
+          SELECT 1
+          FROM content_tags
+          INNER JOIN tags ON tags.id = content_tags.tag_id
+          WHERE content_tags.content_id = contents.id AND tags.slug = $7
+        ))
       ${orderByClause}
       LIMIT
         $1
@@ -557,6 +583,7 @@ async function findPublished({
       excludeAds,
       contentType,
       searchTerm,
+      tagFilter,
     ],
   });
 
@@ -604,6 +631,10 @@ async function findChildren(parentId) {
       SELECT
         contents.*,
         users.username AS owner_username,
+        users.occupation AS owner_occupation,
+        users.state AS owner_state,
+        users.founder AS owner_founder,
+        ${tag.tagsJsonSql()} AS tags,
         tabcoins_count.total_balance AS tabcoins,
         tabcoins_count.total_credit AS tabcoins_credit,
         tabcoins_count.total_debit AS tabcoins_debit
@@ -687,6 +718,12 @@ async function update(contentFound, input, options = {}) {
     validator.title(nextTitle);
   }
 
+  // Sem "tags" no corpo, as tags atuais ficam como estão.
+  const nextTagSlugs =
+    !contentFound.parent_id && input.tags !== undefined
+      ? await tag.parseSlugs(input.tags, options)
+      : null;
+
   const slug =
     nextTitle === contentFound.title
       ? contentFound.slug
@@ -724,7 +761,13 @@ async function update(contentFound, input, options = {}) {
   }
 
   const updated = results.rows[0];
+  updated.tags = nextTagSlugs
+    ? await tag.setForContent(updated.id, nextTagSlugs, options)
+    : await tag.findForContent(updated.id, options);
   updated.owner_username = contentFound.owner_username;
+  updated.owner_occupation = contentFound.owner_occupation;
+  updated.owner_state = contentFound.owner_state;
+  updated.owner_founder = contentFound.owner_founder;
   updated.tabcoins = Number(contentFound.tabcoins ?? 0);
   updated.tabcoins_credit = Number(contentFound.tabcoins_credit ?? 0);
   updated.tabcoins_debit = Number(contentFound.tabcoins_debit ?? 0);
@@ -804,6 +847,10 @@ async function findOneByUsernameAndSlug(username, slug) {
       SELECT
         contents.*,
         users.username AS owner_username,
+        users.occupation AS owner_occupation,
+        users.state AS owner_state,
+        users.founder AS owner_founder,
+        ${tag.tagsJsonSql()} AS tags,
         tabcoins_count.total_balance AS tabcoins,
         tabcoins_count.total_credit AS tabcoins_credit,
         tabcoins_count.total_debit AS tabcoins_debit
@@ -843,6 +890,10 @@ async function findAllByIds(ids, options = {}) {
         SELECT
           contents.*,
           users.username AS owner_username,
+          users.occupation AS owner_occupation,
+          users.state AS owner_state,
+          users.founder AS owner_founder,
+          ${tag.tagsJsonSql()} AS tags,
           tabcoins_count.total_balance AS tabcoins,
           tabcoins_count.total_credit AS tabcoins_credit,
           tabcoins_count.total_debit AS tabcoins_debit
@@ -887,6 +938,10 @@ async function confirmFirewallStatus(contentIds, options = {}) {
         SELECT
           updated_contents.*,
           users.username AS owner_username,
+          users.occupation AS owner_occupation,
+          users.state AS owner_state,
+          users.founder AS owner_founder,
+          ${tag.tagsJsonSql("updated_contents")} AS tags,
           tabcoins_count.total_balance AS tabcoins,
           tabcoins_count.total_credit AS tabcoins_credit,
           tabcoins_count.total_debit AS tabcoins_debit
@@ -928,6 +983,10 @@ async function undoFirewallStatus(contentIds, options = {}) {
         SELECT
           updated_contents.*,
           users.username AS owner_username,
+          users.occupation AS owner_occupation,
+          users.state AS owner_state,
+          users.founder AS owner_founder,
+          ${tag.tagsJsonSql("updated_contents")} AS tags,
           tabcoins_count.total_balance AS tabcoins,
           tabcoins_count.total_credit AS tabcoins_credit,
           tabcoins_count.total_debit AS tabcoins_debit
@@ -946,8 +1005,38 @@ async function undoFirewallStatus(contentIds, options = {}) {
   return results.rows;
 }
 
+// Publicações (sem comentários nem anúncios) para o sitemap.xml.
+async function findAllForSitemap({ limit = 45000 } = {}) {
+  const results = await database.query({
+    text: `
+      SELECT
+        contents.slug,
+        contents.published_at,
+        contents.updated_at,
+        users.username AS owner_username
+      FROM
+        contents
+      INNER JOIN
+        users ON contents.owner_id = users.id
+      WHERE
+        contents.status = 'published'
+        AND contents.parent_id IS NULL
+        AND contents.type = 'content'
+        AND NOT ('nuked' = ANY(users.features))
+      ORDER BY
+        contents.published_at DESC
+      LIMIT
+        $1
+    ;`,
+    values: [limit],
+  });
+
+  return results.rows;
+}
+
 const content = {
   create,
+  findAllForSitemap,
   findPublished,
   findPublishedById,
   findOneByUsernameAndSlug,

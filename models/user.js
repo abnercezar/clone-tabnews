@@ -2,6 +2,8 @@ import database from "infra/database.js";
 import password from "models/password.js";
 import validator from "models/validator.js";
 import balance from "models/balance.js";
+import profile from "models/profile.js";
+import tag from "models/tag.js";
 import { ValidationError, NotFoundError } from "infra/errors.js";
 
 // Busca um usuário pelo id
@@ -199,6 +201,37 @@ async function update(username, userInputValues, options = {}) {
     await hashPasswordInObject(valuesToApply);
   }
 
+  if ("occupation" in valuesToApply) {
+    valuesToApply.occupation = profile.validateOccupation(
+      valuesToApply.occupation,
+    );
+  }
+
+  if ("state" in valuesToApply) {
+    valuesToApply.state = profile.validateState(valuesToApply.state);
+  }
+
+  if ("crops" in valuesToApply) {
+    const cropSlugs = (await tag.findAll(options))
+      .filter((item) => item.category === "cultura")
+      .map((item) => item.slug);
+    valuesToApply.crops = profile.validateCrops(valuesToApply.crops, cropSlugs);
+  }
+
+  if ("notify_replies" in valuesToApply) {
+    valuesToApply.notify_replies = profile.validateBoolean(
+      valuesToApply.notify_replies,
+      "notify_replies",
+    );
+  }
+
+  if ("founder" in valuesToApply) {
+    valuesToApply.founder = profile.validateBoolean(
+      valuesToApply.founder,
+      "founder",
+    );
+  }
+
   const userWithNewValues = { ...currentUser, ...valuesToApply };
 
   // Segurança: o UPDATE sempre usa o id do registro carregado pelo username
@@ -223,6 +256,11 @@ async function update(username, userInputValues, options = {}) {
         username = $2,
         email = $3,
         password = $4,
+        occupation = $5,
+        crops = $6,
+        state = $7,
+        notify_replies = $8,
+        founder = $9,
         updated_at = timezone('utc', now())
       WHERE
         id =$1
@@ -234,6 +272,11 @@ async function update(username, userInputValues, options = {}) {
           userWithNewValues.username,
           userWithNewValues.email,
           userWithNewValues.password,
+          userWithNewValues.occupation,
+          userWithNewValues.crops,
+          userWithNewValues.state,
+          userWithNewValues.notify_replies,
+          userWithNewValues.founder,
         ],
       },
       options,
@@ -486,8 +529,94 @@ async function findAllWithPagination({ page = 1, perPage = 30 } = {}) {
   };
 }
 
+// Conta ligada ao login com Google (`sub` do Google).
+async function findOneByGoogleId(googleId, options = {}) {
+  const results = await database.query(
+    {
+      text: `
+        SELECT
+          *
+        FROM
+          users
+        WHERE
+          google_id = $1
+        LIMIT
+          1
+      ;`,
+      values: [googleId],
+    },
+    options,
+  );
+
+  if (results.rowCount === 0) {
+    throw new NotFoundError({
+      message: "Nenhuma conta ligada a este login do Google.",
+      action: "Entre com e-mail e senha ou crie uma conta.",
+    });
+  }
+
+  return results.rows[0];
+}
+
+async function linkGoogleAccount(userId, googleId, options = {}) {
+  const results = await database.query(
+    {
+      text: `
+        UPDATE
+          users
+        SET
+          google_id = $2,
+          updated_at = timezone('utc', now())
+        WHERE
+          id = $1
+        RETURNING
+          *
+      ;`,
+      values: [userId, googleId],
+    },
+    options,
+  );
+
+  return results.rows[0];
+}
+
+// Gera um username livre a partir de uma sugestão (ex.: parte do e-mail).
+async function generateAvailableUsername(suggestion) {
+  const base =
+    String(suggestion || "")
+      .normalize("NFKD")
+      .replace(/[^a-zA-Z0-9]/g, "")
+      .slice(0, 24) || "produtor";
+  const padded = base.length < 3 ? `${base}agro` : base;
+
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const candidate =
+      attempt === 0
+        ? padded
+        : `${padded.slice(0, 24)}${Math.floor(Math.random() * 9000) + 1000}`;
+
+    try {
+      validator.username(candidate);
+      await validateUniqueUsername(candidate);
+      return candidate;
+    } catch (error) {
+      if (!(error instanceof ValidationError)) {
+        throw error;
+      }
+    }
+  }
+
+  throw new ValidationError({
+    message: "Não foi possível gerar um nome de usuário.",
+    action: "Crie sua conta com e-mail e senha.",
+  });
+}
+
 // Exporta as funções do modelo de usuário
 const user = {
+  findOneByGoogleId,
+  linkGoogleAccount,
+  generateAvailableUsername,
   create,
   findOneById,
   findOneByUsername,

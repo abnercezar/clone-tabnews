@@ -92,6 +92,15 @@ export function findTemplateGuides(body) {
 }
 
 const DRAFT_PREFIX = "agrotab:publicar:rascunho:";
+// Quem ainda não entrou escreve sob esta chave; depois do login o texto
+// passa para a conta (moveVisitorDraft).
+export const VISITOR_DRAFT_ID = "visitante";
+// Volta do login com este endereço: o rascunho do visitante é publicado.
+export const SEND_AFTER_LOGIN_PATH = "/publicar?enviar=1";
+
+export function hasVisitorDraft(storage = globalThis.localStorage) {
+  return Boolean(readPublishDraft(VISITOR_DRAFT_ID, storage));
+}
 
 export function readPublishDraft(userId, storage = globalThis.localStorage) {
   try {
@@ -101,7 +110,10 @@ export function readPublishDraft(userId, storage = globalThis.localStorage) {
     if (typeof draft?.title !== "string" || typeof draft?.body !== "string") {
       return null;
     }
-    return draft;
+    const tags = Array.isArray(draft.tags)
+      ? draft.tags.filter((tag) => typeof tag === "string")
+      : [];
+    return { title: draft.title, body: draft.body, tags };
   } catch {
     return null;
   }
@@ -129,4 +141,22 @@ export function clearPublishDraft(userId, storage = globalThis.localStorage) {
   } catch {
     // Idem.
   }
+}
+
+// Leva o rascunho do visitante para a conta que acabou de entrar. Um
+// rascunho que a conta já tinha não é sobrescrito.
+export function moveVisitorDraft(userId, storage = globalThis.localStorage) {
+  const visitorDraft = readPublishDraft(VISITOR_DRAFT_ID, storage);
+  if (!visitorDraft) {
+    return null;
+  }
+
+  const accountDraft = readPublishDraft(userId, storage);
+  if (accountDraft && !isUntouchedTemplateDraft(accountDraft)) {
+    return null;
+  }
+
+  writePublishDraft(userId, visitorDraft, storage);
+  clearPublishDraft(VISITOR_DRAFT_ID, storage);
+  return visitorDraft;
 }

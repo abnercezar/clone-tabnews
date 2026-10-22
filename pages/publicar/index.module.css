@@ -1,0 +1,16 @@
+.tags {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.tagsLegend {
+  margin-bottom: var(--base-size-4, 4px);
+  padding: 0;
+  font-weight: 600;
+}
+
+.tagsHint {
+  color: var(--fgColor-muted, #656d76);
+  font-weight: 400;
+}

@@ -17,7 +17,6 @@ import {
 import {
   KebabHorizontalIcon,
   PencilIcon,
-  ShareIcon,
   TrashIcon,
 } from "@primer/octicons-react";
 import { useConfirmDialog } from "interface/ConfirmDialog";
@@ -27,6 +26,9 @@ import MarkdownViewer from "interface/MarkdownViewer";
 import PastTime from "interface/PastTime";
 import Sponsorship from "interface/Sponsorship";
 import CommentForm from "interface/CommentForm";
+import ShareButtons from "interface/ShareButtons";
+import AuthorCredential from "interface/AuthorCredential";
+import TagList from "interface/TagList";
 import ContentEditForm from "interface/ContentEditForm";
 import TabCoinButtons from "interface/TabCoinButtons";
 import { loginHref } from "interface/loginRedirect";
@@ -36,6 +38,7 @@ import { splitComment } from "interface/commentText";
 import { createExcerpt } from "interface/excerpt";
 import ui from "interface/styles.module.css";
 import controller from "infra/controller.js";
+import webserver from "infra/webserver";
 import { NotFoundError } from "infra/errors.js";
 import authorization from "models/authorization.js";
 import contentModel from "models/content.js";
@@ -48,13 +51,17 @@ export default function ContentRoute(props) {
   return <ContentPage key={`${query.username}/${query.slug}`} {...props} />;
 }
 
-function ContentPage({ initialContent = null, notFound = false }) {
+function ContentPage({
+  initialContent = null,
+  initialComments = [],
+  notFound = false,
+}) {
   const router = useRouter();
   const { username, slug, publicado, primeira } = router.query;
   const { user, isLoading: isLoadingUser } = useUser();
   const confirm = useConfirmDialog();
   const [content, setContent] = useState(initialContent);
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState(initialComments);
   const [sponsorship, setSponsorship] = useState(null);
   const [isReplyingToPost, setIsReplyingToPost] = useState(false);
   const [errorMessage, setErrorMessage] = useState(
@@ -158,6 +165,8 @@ function ContentPage({ initialContent = null, notFound = false }) {
           ? `/${content.owner_username}/${content.slug}`
           : undefined,
         publishedTime: content?.published_at,
+        image: content ? ogImagePath(content) : undefined,
+        jsonLd: content ? buildJsonLd(content, comments) : undefined,
       }}
     >
       {showConfetti && <Confetti />}
@@ -202,6 +211,12 @@ function ContentPage({ initialContent = null, notFound = false }) {
                     >
                       {content.owner_username}
                     </Link>
+                    <AuthorCredential
+                      occupation={content.owner_occupation}
+                      state={content.owner_state}
+                      founder={content.owner_founder}
+                    />
+                    <span>·</span>
                     <span>{formatReadingTime(content.body)}</span>
                     <span>·</span>
                     <PastTime date={content.published_at} />
@@ -246,6 +261,7 @@ function ContentPage({ initialContent = null, notFound = false }) {
                     <Heading as="h1" className={ui.articleTitle}>
                       {content.title}
                     </Heading>
+                    <TagList tags={content.tags} />
                     <div className={ui.contentBody}>
                       <MarkdownViewer value={content.body} rich />
                     </div>
@@ -373,6 +389,11 @@ function CommentItem({ comment: initialComment, user, router, isLoadingUser }) {
             >
               {comment.owner_username}
             </Link>
+            <AuthorCredential
+              occupation={comment.owner_occupation}
+              state={comment.owner_state}
+              founder={comment.owner_founder}
+            />
             <span>·</span>
             <PastTime date={comment.published_at} />
           </div>
@@ -433,6 +454,11 @@ function ReplyItem({ reply: initialReply, user }) {
         <div className={ui.contentMetadataRow}>
           <div className={ui.contentMetadata}>
             <span className={ui.authorLabel}>{reply.owner_username}</span>
+            <AuthorCredential
+              occupation={reply.owner_occupation}
+              state={reply.owner_state}
+              founder={reply.owner_founder}
+            />
             <span>·</span>
             <PastTime date={reply.published_at} />
           </div>
@@ -457,6 +483,61 @@ function ReplyItem({ reply: initialReply, user }) {
       </Stack>
     </article>
   );
+}
+
+// Dados estruturados de fórum (schema.org) para o Google entender a
+// conversa: pergunta, autor, data e respostas.
+function buildJsonLd(content, comments) {
+  const origin = webserver.canonicalOrigin;
+  const person = (username) => ({
+    "@type": "Person",
+    name: username,
+    url: `${origin}/${encodeURIComponent(username)}`,
+  });
+  const url = `${origin}/${content.owner_username}/${content.slug}`;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "DiscussionForumPosting",
+    "@id": url,
+    url,
+    headline: content.title,
+    text: createExcerpt(content.body, 5000),
+    datePublished: content.published_at,
+    dateModified: content.updated_at,
+    author: person(content.owner_username),
+    keywords:
+      (content.tags || []).map((tag) => tag.label).join(", ") || undefined,
+    interactionStatistic: [
+      {
+        "@type": "InteractionCounter",
+        interactionType: "https://schema.org/CommentAction",
+        userInteractionCount: comments.length,
+      },
+      {
+        "@type": "InteractionCounter",
+        interactionType: "https://schema.org/LikeAction",
+        userInteractionCount: Math.max(0, Number(content.tabcoins_credit) || 0),
+      },
+    ],
+    comment: comments.map((comment) => ({
+      "@type": "Comment",
+      url: `${url}#comentario-${comment.id}`,
+      text: createExcerpt(comment.body, 2000),
+      datePublished: comment.published_at,
+      author: person(comment.owner_username),
+    })),
+  };
+}
+
+function ogImagePath(content) {
+  const params = new URLSearchParams({
+    username: content.owner_username,
+    slug: content.slug,
+    // Muda quando a publicação é editada: o WhatsApp e o CDN pegam a nova.
+    v: String(new Date(content.updated_at).getTime() || 0),
+  });
+  return `/api/og?${params}`;
 }
 
 function canEditContent(user, content) {
@@ -537,11 +618,8 @@ function ReplyBox({
     onOpen();
   }
 
+  // Compartilhar fica sempre visível; responder só para quem pode publicar.
   const canReply = !user || user.features?.includes("create:content");
-
-  if (!canReply && !children) {
-    return null;
-  }
 
   return (
     <div className={framed ? ui.replyBoxFramed : ui.replyBox}>
@@ -557,55 +635,15 @@ function ReplyBox({
             </Button>
           </Tooltip>
         )}
-        <ShareButton username={username} slug={slug} title={title} />
+        <ShareButtons
+          username={username}
+          slug={slug}
+          title={title}
+          compact={!framed}
+        />
       </div>
       {children}
     </div>
-  );
-}
-
-function ShareButton({ username, slug, title }) {
-  const [isCopied, setIsCopied] = useState(false);
-
-  async function handleShare() {
-    const url = `${window.location.origin}/${username}/${slug}`;
-    const shareTitle = title || "AgroTab";
-
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: shareTitle, url });
-        return;
-      }
-    } catch (error) {
-      if (error?.name === "AbortError") {
-        return;
-      }
-    }
-
-    try {
-      await navigator.clipboard.writeText(url);
-      setIsCopied(true);
-      window.setTimeout(() => setIsCopied(false), 2000);
-    } catch {
-      setIsCopied(false);
-    }
-  }
-
-  return (
-    <Tooltip text="Compartilhar" direction="n">
-      <Button
-        onClick={handleShare}
-        aria-label={isCopied ? "Link copiado!" : "Compartilhar"}
-      >
-        {isCopied ? (
-          <span className={ui.linkCopied} role="status">
-            Link copiado!
-          </span>
-        ) : (
-          <ShareIcon size={16} aria-hidden="true" />
-        )}
-      </Button>
-    </Tooltip>
   );
 }
 
@@ -625,10 +663,20 @@ export async function getServerSideProps({ params, res }) {
       contentFound,
     );
 
+    // Comentários no HTML: buscadores e conexões lentas já recebem a
+    // conversa inteira, sem esperar o JavaScript.
+    const children = await contentModel.findChildren(contentFound.id);
+    const secureChildren = authorization.filterOutput(
+      controller.createAnonymousUser(),
+      "read:content",
+      children,
+    );
+
     return {
       props: {
         // Datas do banco viram string ISO, como na resposta da API.
         initialContent: JSON.parse(JSON.stringify(secureOutputValues)),
+        initialComments: JSON.parse(JSON.stringify(secureChildren)),
       },
     };
   } catch (error) {

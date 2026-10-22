@@ -56,6 +56,7 @@ async function patchHandler(request, response) {
       {
         title: request.body?.title,
         body: request.body?.body,
+        tags: request.body?.tags,
       },
       { transaction },
     );

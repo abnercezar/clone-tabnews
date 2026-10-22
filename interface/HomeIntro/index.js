@@ -41,7 +41,13 @@ function handleExplore(event) {
 export default function HomeIntro() {
   const { resolvedColorMode } = useTheme();
   const [playIntro, setPlayIntro] = useState(false);
-  const period = resolvedColorMode === "night" ? "night" : "day";
+  // O servidor não sabe o tema: começa no dia e ajusta depois de montar,
+  // sem divergir do HTML que veio pronto.
+  const [period, setPeriod] = useState("day");
+
+  useEffect(() => {
+    setPeriod(resolvedColorMode === "night" ? "night" : "day");
+  }, [resolvedColorMode]);
 
   useEffect(() => {
     const reduceMotion = window.matchMedia(
@@ -71,11 +77,11 @@ export default function HomeIntro() {
             Comunidade do agronegócio
           </Text>
           <Heading as="h1" id="home-intro-title" className={classes.title}>
-            Quem vive o agro tem muito a compartilhar.
+            Pergunte a quem já passou por isso no campo.
           </Heading>
           <Text as="p" className={classes.subtitle}>
-            Perguntas, experiências e soluções práticas de quem faz o
-            agronegócio acontecer.
+            Produtores, agrônomos e técnicos respondendo dúvidas reais da
+            lavoura e da criação.
           </Text>
           <div className={classes.actions}>
             <LinkButton
@@ -89,11 +95,10 @@ export default function HomeIntro() {
             <LinkButton
               href="#publicacoes"
               size="large"
-              variant="invisible"
               leadingVisual={ArrowDownIcon}
               onClick={handleExplore}
             >
-              Ver o que a comunidade está discutindo
+              Ver discussões
             </LinkButton>
           </div>
         </div>

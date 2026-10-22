@@ -1,0 +1,65 @@
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--base-size-12, 12px);
+}
+
+.group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.legend {
+  margin-bottom: var(--base-size-4, 4px);
+  padding: 0;
+  color: var(--fgColor-muted, #656d76);
+  font-size: var(--text-body-size-small, 12px);
+  font-weight: 600;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--base-size-8, 8px);
+}
+
+/* Alvo de toque de 36px: dá para acertar com o dedo no celular. */
+.option,
+.selected {
+  min-height: 36px;
+  padding: 0 var(--base-size-12, 12px);
+  border: 1px solid var(--borderColor-default, #d0d7de);
+  border-radius: 999px;
+  background: var(--bgColor-default, #ffffff);
+  color: var(--fgColor-default, #1f2328);
+  font: inherit;
+  font-size: var(--text-body-size-medium, 14px);
+  cursor: pointer;
+}
+
+.option:hover:not(:disabled) {
+  border-color: var(--fgColor-success, #1a7f37);
+}
+
+.option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.selected {
+  border-color: var(--bgColor-success-emphasis, #1f883d);
+  background: var(--bgColor-success-emphasis, #1f883d);
+  color: var(--fgColor-onEmphasis, #ffffff);
+  font-weight: 600;
+}
+
+.option:focus-visible,
+.selected:focus-visible {
+  outline: 2px solid var(--focus-outlineColor, #0969da);
+  outline-offset: 2px;
+}
+
+.muted {
+  color: var(--fgColor-muted, #656d76);
+}

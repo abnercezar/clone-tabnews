@@ -13,7 +13,16 @@ import {
 } from "infra/errors.js";
 
 // Apenas estes campos podem ser alterados via PATCH; qualquer outro é rejeitado.
-const ALLOWED_UPDATE_FIELDS = ["username", "email", "password"];
+const ALLOWED_UPDATE_FIELDS = [
+  "username",
+  "email",
+  "password",
+  "occupation",
+  "crops",
+  "state",
+  "notify_replies",
+  "founder",
+];
 
 function pickAllowedUpdateFields(inputValues) {
   const receivedValues = inputValues ?? {};
@@ -69,6 +78,17 @@ async function patchHandler(request, response) {
   }
 
   const userInputValues = pickAllowedUpdateFields(request.body);
+
+  // O selo "Membro fundador" é dado à mão pela equipe, nunca pela própria pessoa.
+  if (
+    "founder" in userInputValues &&
+    !authorization.can(userTryingToPatch, "update:user:others")
+  ) {
+    throw new ForbiddenError({
+      message: "Só a equipe do AgroTab pode marcar membros fundadores.",
+      action: 'Remova o campo "founder" e tente novamente.',
+    });
+  }
 
   const updatedUser = await user.update(username, userInputValues);
 

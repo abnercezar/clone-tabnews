@@ -1,0 +1,28 @@
+.list,
+.listSmall {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--base-size-8, 8px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.listSmall {
+  gap: var(--base-size-4, 4px);
+}
+
+.tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--bgColor-success-muted, #dafbe1);
+  color: var(--fgColor-success, #1a7f37);
+  font-size: var(--text-body-size-small, 12px);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.tag:hover {
+  text-decoration: underline;
+}

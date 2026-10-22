@@ -14,6 +14,7 @@ export default function CommentEditor({
   initialHeight = "30vh",
   isInvalid = false,
   autofocus = true,
+  uploadImages,
 }) {
   const editorRef = useRef(null);
   const [isWriteOnly, setIsWriteOnly] = useState(mode === "split");
@@ -60,6 +61,7 @@ export default function CommentEditor({
         mode={mode}
         placeholder=""
         onChange={onChange}
+        uploadImages={uploadImages}
         editorConfig={{
           autofocus,
           autocapitalize: "sentences",

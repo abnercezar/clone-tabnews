@@ -1,10 +1,21 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { Button, Flash, FormControl, Heading, TextInput } from "@primer/react";
+import {
+  Button,
+  Checkbox,
+  Flash,
+  FormControl,
+  Heading,
+  Select,
+  TextInput,
+} from "@primer/react";
 import DefaultLayout from "interface/DefaultLayout";
 import PasswordInput from "interface/PasswordInput";
 import useUser from "interface/useUser";
+import { useTags } from "interface/TagPicker";
+import { MAX_CROPS, OCCUPATIONS, STATES } from "models/profile.js";
 import classes from "interface/authForm.module.css";
+import profileClasses from "./index.module.css";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -21,7 +32,8 @@ export default function ProfilePage() {
       contentWidth="small"
       metadata={{
         title: "Editar perfil",
-        description: "Atualize seu usuário, e-mail e senha no AgroTab.",
+        description:
+          "Atualize seu usuário, ocupação, culturas, e-mail e senha no AgroTab.",
       }}
     >
       <Heading as="h1" className={classes.heading}>
@@ -36,6 +48,22 @@ function ProfileForm({ user, mutate }) {
   const [username, setUsername] = useState(user.username);
   const [email, setEmail] = useState(user.email);
   const [password, setPassword] = useState("");
+  const [occupation, setOccupation] = useState(user.occupation || "");
+  const [state, setState] = useState(user.state || "");
+  const [crops, setCrops] = useState(user.crops || []);
+  const [notifyReplies, setNotifyReplies] = useState(
+    user.notify_replies !== false,
+  );
+  const tags = useTags();
+  const cropTags = (tags || []).filter((tag) => tag.category === "cultura");
+
+  function toggleCrop(slug) {
+    if (crops.includes(slug)) {
+      setCrops(crops.filter((crop) => crop !== slug));
+    } else if (crops.length < MAX_CROPS) {
+      setCrops([...crops, slug]);
+    }
+  }
   const [savedUsername, setSavedUsername] = useState(user.username);
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
@@ -50,6 +78,10 @@ function ProfileForm({ user, mutate }) {
     const requestBody = {
       username,
       email,
+      occupation: occupation || null,
+      state: state || null,
+      crops,
+      notify_replies: notifyReplies,
     };
 
     if (password) {
@@ -133,6 +165,90 @@ function ProfileForm({ user, mutate }) {
           block
         />
       </FormControl>
+
+      <Heading as="h2" variant="small" className={profileClasses.section}>
+        Como você aparece na comunidade
+      </Heading>
+
+      <FormControl className={classes.field}>
+        <FormControl.Label htmlFor="occupation">Ocupação</FormControl.Label>
+        <Select
+          id="occupation"
+          value={occupation}
+          onChange={(event) => setOccupation(event.target.value)}
+          block
+        >
+          <Select.Option value="">Prefiro não informar</Select.Option>
+          {OCCUPATIONS.map((item) => (
+            <Select.Option key={item.value} value={item.value}>
+              {item.label}
+            </Select.Option>
+          ))}
+        </Select>
+        <FormControl.Caption>
+          Aparece ao lado do seu nome nas publicações e comentários.
+        </FormControl.Caption>
+      </FormControl>
+
+      <FormControl className={classes.field}>
+        <FormControl.Label htmlFor="state">Estado</FormControl.Label>
+        <Select
+          id="state"
+          value={state}
+          onChange={(event) => setState(event.target.value)}
+          block
+        >
+          <Select.Option value="">Prefiro não informar</Select.Option>
+          {STATES.map((uf) => (
+            <Select.Option key={uf} value={uf}>
+              {uf}
+            </Select.Option>
+          ))}
+        </Select>
+      </FormControl>
+
+      <fieldset className={profileClasses.crops}>
+        <legend className={profileClasses.legend}>
+          Culturas e criações (até {MAX_CROPS})
+        </legend>
+        <div className={profileClasses.cropOptions}>
+          {cropTags.map((tag) => (
+            <FormControl key={tag.slug} layout="horizontal">
+              <Checkbox
+                checked={crops.includes(tag.slug)}
+                disabled={
+                  !crops.includes(tag.slug) && crops.length >= MAX_CROPS
+                }
+                onChange={() => toggleCrop(tag.slug)}
+              />
+              <FormControl.Label>{tag.label}</FormControl.Label>
+            </FormControl>
+          ))}
+        </div>
+      </fieldset>
+
+      <Heading
+        as="h2"
+        variant="small"
+        id="avisos"
+        className={profileClasses.section}
+      >
+        Avisos por e-mail
+      </Heading>
+
+      <FormControl layout="horizontal" className={classes.field}>
+        <Checkbox
+          checked={notifyReplies}
+          onChange={(event) => setNotifyReplies(event.target.checked)}
+        />
+        <FormControl.Label>
+          Avisar quando alguém responder minhas publicações e comentários
+        </FormControl.Label>
+      </FormControl>
+
+      <Heading as="h2" variant="small" className={profileClasses.section}>
+        Acesso
+      </Heading>
 
       <FormControl id="password" className={classes.field}>
         <FormControl.Label>Nova senha</FormControl.Label>

@@ -78,6 +78,11 @@ describe("`GET /api/v1/user`", () => {
         ],
         tabcoins: 0,
         tabcash: 0,
+        occupation: null,
+        crops: [],
+        state: null,
+        founder: false,
+        notify_replies: true,
         created_at: createdUser.created_at.toISOString(),
         updated_at: activatedUser.updated_at.toISOString(),
       });
@@ -263,6 +268,11 @@ describe("`GET /api/v1/user`", () => {
         features: activatedUser.features,
         tabcoins: 0,
         tabcash: 0,
+        occupation: null,
+        crops: [],
+        state: null,
+        founder: false,
+        notify_replies: true,
         created_at: createdUser.created_at.toISOString(),
         updated_at: activatedUser.updated_at.toISOString(),
       });

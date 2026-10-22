@@ -47,7 +47,9 @@ function pluralize(count, singular, plural) {
   return `${count} ${count === 1 ? singular : plural}`;
 }
 
-export default function CommunityQuestion({ onPublished }) {
+// `fallback`: o que mostrar para visitantes quando não há pergunta aberta
+// (a home usa para destacar uma pergunta da semana com feed vazio).
+export default function CommunityQuestion({ onPublished, fallback = null }) {
   const { user } = useUser();
   const [question, setQuestion] = useState(null);
   const [status, setStatus] = useState("loading");
@@ -99,7 +101,7 @@ export default function CommunityQuestion({ onPublished }) {
 
     return (
       <section className={styles.card} aria-labelledby="cq-error-title">
-        <p className={styles.eyebrow}>Pergunta da Comunidade</p>
+        <p className={styles.eyebrow}>Pergunta da semana</p>
         <h2 id="cq-error-title" className={styles.emptyTitle}>
           Não conseguimos carregar a pergunta agora.
         </h2>
@@ -109,7 +111,7 @@ export default function CommunityQuestion({ onPublished }) {
   }
 
   if (status === "empty") {
-    return <EmptyQuestion user={user} />;
+    return <EmptyQuestion user={user} fallback={fallback} />;
   }
 
   function openComposer(seed) {
@@ -147,7 +149,7 @@ export default function CommunityQuestion({ onPublished }) {
       <div className={styles.header}>
         <p className={styles.eyebrow}>
           <span className={styles.pulse} aria-hidden="true" />
-          Pergunta da Comunidade
+          Pergunta da semana
         </p>
         <span className={styles.categoryBadge}>{categoryLabel}</span>
         {question.ends_at && (
@@ -198,7 +200,7 @@ export default function CommunityQuestion({ onPublished }) {
             Compartilhar minha experiência
           </Button>
           <Text as="p" className={styles.shareHint}>
-            Vira uma publicação no AgroTab, com comentários e AgroCoins.
+            Vira uma publicação no AgroTab, com comentários e votos de útil.
           </Text>
         </div>
       )}
@@ -223,13 +225,13 @@ function QuestionSkeleton() {
   );
 }
 
-function EmptyQuestion({ user }) {
+function EmptyQuestion({ user, fallback }) {
   const canCreate = user?.features?.includes("create:community_question");
 
   // Na home o feed e os modelos já orientam a primeira participação;
   // sem pergunta ativa, o card só aparece para quem pode criar uma.
   if (!canCreate) {
-    return null;
+    return fallback;
   }
 
   return (
@@ -238,7 +240,7 @@ function EmptyQuestion({ user }) {
       aria-labelledby="cq-empty-title"
       data-testid="community-question-empty"
     >
-      <p className={styles.eyebrow}>Pergunta da Comunidade</p>
+      <p className={styles.eyebrow}>Pergunta da semana</p>
       <h2 id="cq-empty-title" className={styles.emptyTitle}>
         Nenhuma pergunta aberta agora.
       </h2>

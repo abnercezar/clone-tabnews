@@ -1,7 +1,9 @@
 import { Link, Tooltip } from "@primer/react";
-import { SquareFillIcon } from "@primer/octicons-react";
+import { ThumbsupIcon } from "@primer/octicons-react";
 import classes from "./index.module.css";
 
+// Na tela, o saldo de AgroCoins aparece como "reputação": a soma dos votos
+// "útil" recebidos. A regra de pontuação no backend não muda.
 export default function AgroCoinCount({
   amount = 0,
   href,
@@ -12,15 +14,13 @@ export default function AgroCoinCount({
   const numericAmount = Number(amount);
   const modes = {
     tooltip: {
-      iconLabel: "AgroCoins",
+      iconLabel: "Reputação",
       iconSize: 16,
       text: numericAmount.toLocaleString("pt-BR"),
     },
     full: {
       iconSize: 20,
-      text: `${numericAmount.toLocaleString("pt-BR")} AgroCoin${
-        numericAmount > 1 || numericAmount < -1 ? "s" : ""
-      }`,
+      text: `${numericAmount.toLocaleString("pt-BR")} de reputação`,
     },
   };
 
@@ -28,10 +28,10 @@ export default function AgroCoinCount({
 
   const content = (
     <span className={`${classes.wrapper} ${className || ""}`.trim()}>
-      <SquareFillIcon
+      <ThumbsupIcon
         aria-label={iconLabel}
         aria-hidden={!iconLabel}
-        fill="#0969da"
+        fill="#1a7f37"
         size={iconSize}
       />
       <span>{text}</span>
@@ -43,17 +43,17 @@ export default function AgroCoinCount({
   }
 
   return (
-    <Tooltip text="AgroCoins" direction={direction}>
+    <Tooltip text="Reputação: votos de útil recebidos" direction={direction}>
       {href ? (
         <Link
           href={href}
           className={classes.link}
-          aria-label={`${amount} AgroCoins`}
+          aria-label={`${amount} de reputação`}
         >
           {content}
         </Link>
       ) : (
-        <span tabIndex={0} aria-label={`${amount} AgroCoins`}>
+        <span tabIndex={0} aria-label={`${amount} de reputação`}>
           {content}
         </span>
       )}
