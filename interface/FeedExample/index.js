@@ -30,12 +30,10 @@ export default function FeedExample() {
       </article>
 
       <div className={classes.actions}>
-        <LinkButton href="/publicar?modelo=pergunta" variant="primary">
+        <LinkButton href="/publicar" variant="primary">
           Fazer a primeira pergunta
         </LinkButton>
-        <LinkButton href="/publicar?modelo=relato">
-          Compartilhar experiência
-        </LinkButton>
+        <LinkButton href="/publicar">Compartilhar experiência</LinkButton>
       </div>
     </section>
   );

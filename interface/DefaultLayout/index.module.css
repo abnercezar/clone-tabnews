@@ -305,8 +305,8 @@
   }
 }
 
-/* Telas bem estreitas: "Criar conta" sai do topo (o convite está no feed e
-   na página Entrar). */
+/* Telas bem estreitas: "Cadastrar" sai do topo (o convite está no feed e
+   na página de login). */
 @media (max-width: 419px) {
   .signupItem {
     display: none;

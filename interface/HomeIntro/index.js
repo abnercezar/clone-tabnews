@@ -79,7 +79,7 @@ export default function HomeIntro() {
           </Text>
           <div className={classes.actions}>
             <LinkButton
-              href="/publicar?modelo=pergunta"
+              href="/publicar"
               variant="primary"
               size="large"
               leadingVisual={QuestionIcon}

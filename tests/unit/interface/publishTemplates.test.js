@@ -2,6 +2,7 @@ import {
   PUBLISH_TEMPLATES,
   clearPublishDraft,
   findTemplateGuides,
+  isUntouchedTemplateDraft,
   readPublishDraft,
   writePublishDraft,
 } from "interface/publishTemplates";
@@ -30,6 +31,33 @@ describe("findTemplateGuides", () => {
       ),
     ).toEqual([]);
     expect(findTemplateGuides(undefined)).toEqual([]);
+  });
+});
+
+describe("isUntouchedTemplateDraft", () => {
+  test("modelo intacto e sem título não é texto da pessoa", () => {
+    expect(
+      isUntouchedTemplateDraft({
+        title: "  ",
+        body: PUBLISH_TEMPLATES[0].body,
+      }),
+    ).toBe(true);
+  });
+
+  test("título ou texto alterado conta como rascunho", () => {
+    expect(
+      isUntouchedTemplateDraft({
+        title: "Ferrugem na soja",
+        body: PUBLISH_TEMPLATES[0].body,
+      }),
+    ).toBe(false);
+    expect(
+      isUntouchedTemplateDraft({
+        title: "",
+        body: "Já descrevi o problema.",
+      }),
+    ).toBe(false);
+    expect(isUntouchedTemplateDraft(null)).toBe(false);
   });
 });
 

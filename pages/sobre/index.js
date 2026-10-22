@@ -91,11 +91,7 @@ export default function SobrePage() {
               <LinkButton href="/" variant="primary" size="large">
                 Ver discussões
               </LinkButton>
-              <LinkButton
-                href="/publicar?modelo=pergunta"
-                variant="default"
-                size="large"
-              >
+              <LinkButton href="/publicar" variant="default" size="large">
                 Fazer uma pergunta
               </LinkButton>
               <LinkButton href="/cadastro" variant="invisible" size="large">
