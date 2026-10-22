@@ -7,32 +7,10 @@ const TractorCanvas = dynamic(() => import("./TractorCanvas"), {
   ssr: false,
 });
 
-// O 3D só entra em tela larga, sem economia de dados e com memória folgada.
-// Nos outros casos fica a foto da cena: mesmo visual, sem o peso do three.js.
-function canRun3D() {
-  if (!window.matchMedia("(min-width: 768px)").matches) {
-    return false;
-  }
-  const connection = navigator.connection;
-  if (connection?.saveData) {
-    return false;
-  }
-  if (
-    typeof navigator.deviceMemory === "number" &&
-    navigator.deviceMemory < 4
-  ) {
-    return false;
-  }
-  return true;
-}
-
 export default function TractorScene() {
   const [enhanced, setEnhanced] = useState(false);
 
   useEffect(() => {
-    if (!canRun3D()) {
-      return undefined;
-    }
     // Espera a página ficar ociosa: título, feed e ações carregam primeiro.
     if ("requestIdleCallback" in window) {
       const id = window.requestIdleCallback(() => setEnhanced(true), {

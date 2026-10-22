@@ -33,6 +33,88 @@ export function merge(geometries) {
   return merged;
 }
 
+// Junta, dentro de cada grupo, as peças fixas que dividem o mesmo material:
+// a imagem não muda, mas a GPU recebe uma chamada de desenho em vez de várias.
+// `keep` são os objetos que a animação mexe individualmente.
+export function bakeStatic(root, keep) {
+  root.traverse((node) => {
+    const buckets = new Map();
+    node.children.forEach((child) => {
+      if (
+        !child.isMesh ||
+        child.isInstancedMesh ||
+        child.isSkinnedMesh ||
+        keep.has(child) ||
+        child.children.length > 0 ||
+        Array.isArray(child.material) ||
+        child.renderOrder !== 0 ||
+        child.geometry.morphAttributes.position
+      ) {
+        return;
+      }
+      child.updateMatrix();
+      if (child.matrix.determinant() <= 0) {
+        return;
+      }
+      const geometry = child.geometry;
+      const key = [
+        child.material.uuid,
+        child.castShadow,
+        child.receiveShadow,
+        child.frustumCulled,
+        child.visible,
+        Boolean(geometry.index),
+        Object.keys(geometry.attributes)
+          .sort()
+          .map((name) => `${name}${geometry.attributes[name].itemSize}`)
+          .join(","),
+      ].join("|");
+      if (!buckets.has(key)) {
+        buckets.set(key, []);
+      }
+      buckets.get(key).push(child);
+    });
+
+    buckets.forEach((parts) => {
+      if (parts.length < 2) {
+        return;
+      }
+      const placed = parts.map((part) =>
+        part.geometry.clone().applyMatrix4(part.matrix),
+      );
+      const geometry = mergeGeometries(placed, false);
+      placed.forEach((copy) => copy.dispose());
+      if (!geometry) {
+        return;
+      }
+      const [first] = parts;
+      const baked = new THREE.Mesh(geometry, first.material);
+      baked.castShadow = first.castShadow;
+      baked.receiveShadow = first.receiveShadow;
+      baked.frustumCulled = first.frustumCulled;
+      parts.forEach((part) => node.remove(part));
+      node.add(baked);
+    });
+  });
+}
+
+// Todos os objetos 3D citados nas estruturas que a animação usa.
+export function referencedObjects(...sources) {
+  const found = new Set();
+  const visit = (value) => {
+    if (!value || typeof value !== "object") {
+      return;
+    }
+    if (value.isObject3D) {
+      found.add(value);
+      return;
+    }
+    Object.values(value).forEach(visit);
+  };
+  sources.forEach(visit);
+  return found;
+}
+
 const UP = new THREE.Vector3(0, 1, 0);
 
 // Tubo reto ligando dois pontos: barras, treliças, cabos grossos.
