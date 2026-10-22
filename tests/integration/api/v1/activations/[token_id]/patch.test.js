@@ -147,6 +147,8 @@ describe("`PATCH /api/v1/activations/[token_id]`", () => {
       "read:email_confirmation_token",
       "read:community_question",
       "create:community_question_vote",
+      "create:newsletter_subscription",
+      "update:newsletter_subscription",
     ]);
   });
 

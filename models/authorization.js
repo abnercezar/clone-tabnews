@@ -32,6 +32,11 @@ const availableFeatures = [
   "read:community_question",
   "create:community_question_vote",
 
+  // NEWSLETTER
+  "create:newsletter_subscription",
+  "update:newsletter_subscription",
+  "send:newsletter",
+
   // ACTIVATION_TOKEN
   "read:activation_token",
 
@@ -69,6 +74,8 @@ const defaultActivatedFeatures = [
   "read:email_confirmation_token",
   "read:community_question",
   "create:community_question_vote",
+  "create:newsletter_subscription",
+  "update:newsletter_subscription",
 ];
 
 // Privilegiado / admin (estilo seed admin do TabNews, adaptado ao AgroTab).
@@ -85,6 +92,7 @@ const adminFeatures = [
   "read:firewall",
   "review:firewall",
   "create:community_question",
+  "send:newsletter",
 ];
 
 function can(user, feature, resource) {
@@ -283,6 +291,33 @@ function filterOutput(user, feature, resource) {
     }
 
     return filterSponsorship(resource);
+  }
+
+  if (feature === "update:newsletter_subscription") {
+    // Nunca expor e-mail nem token: o link do e-mail é a única credencial.
+    return {
+      status: resource.unsubscribed_at
+        ? "unsubscribed"
+        : resource.confirmed_at
+          ? "confirmed"
+          : "pending",
+      confirmed_at: resource.confirmed_at,
+      unsubscribed_at: resource.unsubscribed_at,
+    };
+  }
+
+  if (feature === "send:newsletter") {
+    const output = {
+      recipients: Number(resource.recipients ?? 0),
+      contents: filterOutput(user, "read:content", resource.contents || []),
+    };
+
+    if (resource.sent !== undefined) {
+      output.sent = Number(resource.sent);
+      output.failed = Number(resource.failed ?? 0);
+    }
+
+    return output;
   }
 
   if (feature === "read:activation_token") {

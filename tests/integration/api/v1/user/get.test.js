@@ -73,6 +73,8 @@ describe("`GET /api/v1/user`", () => {
           "read:email_confirmation_token",
           "read:community_question",
           "create:community_question_vote",
+          "create:newsletter_subscription",
+          "update:newsletter_subscription",
         ],
         tabcoins: 0,
         tabcash: 0,

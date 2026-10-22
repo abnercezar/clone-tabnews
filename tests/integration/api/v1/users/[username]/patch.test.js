@@ -233,6 +233,8 @@ describe("`PATCH /api/v1/users/[username]`", () => {
           "read:email_confirmation_token",
           "read:community_question",
           "create:community_question_vote",
+          "create:newsletter_subscription",
+          "update:newsletter_subscription",
         ],
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
@@ -324,6 +326,8 @@ describe("`PATCH /api/v1/users/[username]`", () => {
           "read:email_confirmation_token",
           "read:community_question",
           "create:community_question_vote",
+          "create:newsletter_subscription",
+          "update:newsletter_subscription",
         ],
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
@@ -387,6 +391,8 @@ describe("`PATCH /api/v1/users/[username]`", () => {
           "read:email_confirmation_token",
           "read:community_question",
           "create:community_question_vote",
+          "create:newsletter_subscription",
+          "update:newsletter_subscription",
         ],
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
@@ -592,6 +598,8 @@ describe("`PATCH /api/v1/users/[username]`", () => {
         "read:email_confirmation_token",
         "read:community_question",
         "create:community_question_vote",
+        "create:newsletter_subscription",
+        "update:newsletter_subscription",
       ]);
     });
 
