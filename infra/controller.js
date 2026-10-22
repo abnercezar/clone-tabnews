@@ -105,6 +105,8 @@ function createAnonymousUser() {
       "read:community_question",
       "read:sponsorship",
       "read:status",
+      "create:newsletter_subscription",
+      "update:newsletter_subscription",
     ],
   };
 }

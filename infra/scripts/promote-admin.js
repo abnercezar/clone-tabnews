@@ -44,6 +44,9 @@ const ADMIN_FEATURES = [
   "read:firewall",
   "review:firewall",
   "create:community_question",
+  "create:newsletter_subscription",
+  "update:newsletter_subscription",
+  "send:newsletter",
 ];
 
 async function main() {

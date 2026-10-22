@@ -93,6 +93,8 @@ describe("Use case: Registration Flow (all successful)", () => {
       "read:email_confirmation_token",
       "read:community_question",
       "create:community_question_vote",
+      "create:newsletter_subscription",
+      "update:newsletter_subscription",
     ]);
   });
 

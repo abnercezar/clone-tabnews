@@ -35,6 +35,8 @@ const ACTIVATED_FEATURES = [
   "create:sponsorship",
   "read:sponsorship",
   "read:recovery_token",
+  "create:newsletter_subscription",
+  "update:newsletter_subscription",
 ];
 
 const ADMIN_FEATURES = [
@@ -49,6 +51,7 @@ const ADMIN_FEATURES = [
   "ban:user",
   "read:firewall",
   "review:firewall",
+  "send:newsletter",
 ];
 
 const USERS = [

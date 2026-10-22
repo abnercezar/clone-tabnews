@@ -26,6 +26,7 @@ const RESERVED_USERNAMES = new Set([
   "faq",
   "login",
   "moderacao",
+  "newsletter",
   "patrocinar",
   "perfil",
   "publicar",
