@@ -16,6 +16,7 @@ import {
 import {
   GearIcon,
   ListUnorderedIcon,
+  MailIcon,
   MoonIcon,
   PersonIcon,
   PlusIcon,
@@ -272,6 +273,14 @@ function UserMenu({ user }) {
                   Moderação
                 </ActionList.LinkItem>
               )}
+              {user.features?.includes("send:newsletter") && (
+                <ActionList.LinkItem href="/newsletter">
+                  <ActionList.LeadingVisual>
+                    <MailIcon />
+                  </ActionList.LeadingVisual>
+                  Newsletter
+                </ActionList.LinkItem>
+              )}
               <ActionList.Divider />
               <ActionList.Item
                 onSelect={(event) => {
@@ -394,6 +403,7 @@ function SiteFooter({ maxWidth }) {
           <Link href="/contato">Contato</Link>
           <Link href="/sobre">Sobre</Link>
           <Link href="/faq">FAQ</Link>
+          <Link href="/newsletter">Newsletter</Link>
           <Link href="/termos-de-uso">Termos de Uso</Link>
           {showStatus && <Link href="/status">Status</Link>}
         </div>

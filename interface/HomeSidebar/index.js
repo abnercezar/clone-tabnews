@@ -3,9 +3,11 @@ import {
   ArrowRightIcon,
   BeakerIcon,
   GraphIcon,
+  MailIcon,
   QuestionIcon,
 } from "@primer/octicons-react";
 import AgroTabLogo from "interface/AgroTabLogo";
+import NewsletterSignup from "interface/NewsletterSignup";
 import { PUBLISH_TEMPLATES } from "interface/publishTemplates";
 import classes from "./index.module.css";
 
@@ -24,7 +26,28 @@ export default function HomeSidebar({ showJoin = false }) {
         </div>
       )}
       <TemplatesCard />
+      <NewsletterCard />
     </aside>
+  );
+}
+
+function NewsletterCard() {
+  return (
+    <section className={classes.card} aria-labelledby="newsletter-card-title">
+      <div className={classes.joinHeader}>
+        <span className={classes.joinLogo}>
+          <MailIcon size={20} />
+        </span>
+        <Heading
+          as="h2"
+          id="newsletter-card-title"
+          className={classes.cardTitle}
+        >
+          Destaques da semana no seu e-mail
+        </Heading>
+      </div>
+      <NewsletterSignup size="small" />
+    </section>
   );
 }
 
