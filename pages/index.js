@@ -158,9 +158,7 @@ export default function FeedPage({ initialContents = null, initialTotal = 0 }) {
               Seja um dos primeiros a contar como foi sua safra. Sua experiência
               ajuda quem está começando.
             </Text>
-            <LinkButton href="/publicar?modelo=relato">
-              Contar minha experiência
-            </LinkButton>
+            <LinkButton href="/publicar">Contar minha experiência</LinkButton>
           </div>
         )}
 

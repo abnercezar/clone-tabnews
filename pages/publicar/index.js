@@ -21,8 +21,8 @@ import { loginHref } from "interface/loginRedirect";
 import {
   PUBLISH_TEMPLATES,
   clearPublishDraft,
-  findPublishTemplate,
   findTemplateGuides,
+  isUntouchedTemplateDraft,
   readPublishDraft,
   writePublishDraft,
 } from "interface/publishTemplates";
@@ -103,13 +103,14 @@ function PublishForm() {
   const balance = user?.tabcash ?? 0;
   const canSponsor = balance >= AD_COST;
 
-  const { query } = useRouter();
-
   // O texto fica guardado no navegador até publicar: fechar a aba ou a
-  // sessão expirar não apaga o que a pessoa escreveu.
+  // sessão expirar não apaga o que a pessoa escreveu. Um modelo ainda
+  // intacto não conta como rascunho.
   useEffect(() => {
     const draft = readPublishDraft(user.id);
-    if (draft) {
+    if (draft && isUntouchedTemplateDraft(draft)) {
+      clearPublishDraft(user.id);
+    } else if (draft) {
       setTitle(draft.title);
       setBody(draft.body);
       setRestoredDraft(true);
@@ -126,17 +127,9 @@ function PublishForm() {
   function discardDraft() {
     clearPublishDraft(user.id);
     setTitle("");
-    setBody(findPublishTemplate(query.modelo)?.body ?? "");
+    setBody("");
     setRestoredDraft(false);
   }
-
-  // /publicar?modelo=pergunta (links da home) já abre com o roteiro.
-  useEffect(() => {
-    const template = findPublishTemplate(query.modelo);
-    if (template) {
-      setBody((current) => (current.trim() ? current : template.body));
-    }
-  }, [query.modelo]);
 
   async function applyTemplate(template) {
     if (body.trim()) {

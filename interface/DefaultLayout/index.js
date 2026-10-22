@@ -170,12 +170,12 @@ function SiteHeader() {
               </Header.Item>
               <Header.Item className={styles.itemMl2}>
                 <Header.Link href={loginLink} className={styles.authLink}>
-                  Entrar
+                  Login
                 </Header.Link>
               </Header.Item>
               <Header.Item className={`${styles.itemMr1} ${styles.signupItem}`}>
                 <Header.Link href="/cadastro" className={styles.authLink}>
-                  Criar conta
+                  Cadastrar
                 </Header.Link>
               </Header.Item>
             </>

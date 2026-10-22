@@ -67,6 +67,15 @@ export function findPublishTemplate(id) {
   return PUBLISH_TEMPLATES.find((template) => template.id === id) || null;
 }
 
+// Roteiro intacto, sem título: a pessoa ainda não escreveu nada, então o
+// formulário não deve reabrir já preenchido.
+export function isUntouchedTemplateDraft(draft) {
+  if (!draft || String(draft.title || "").trim()) {
+    return false;
+  }
+  return PUBLISH_TEMPLATES.some((template) => template.body === draft.body);
+}
+
 // Trechos-guia entre colchetes ("[ex.: soja, café, gado de corte]") que
 // continuam no texto: sinal de que o modelo foi publicado sem preencher.
 const TEMPLATE_GUIDES = [
