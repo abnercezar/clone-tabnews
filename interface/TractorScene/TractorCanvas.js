@@ -8,7 +8,11 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 import { animateHerd } from "./three/cattle.js";
 import { animateDriver } from "./three/driver.js";
 import { FinishShader, createParticles, createSky } from "./three/effects.js";
-import { radialTexture } from "./three/helpers.js";
+import {
+  bakeStatic,
+  radialTexture,
+  referencedObjects,
+} from "./three/helpers.js";
 import { createMaterials } from "./three/materials.js";
 import { buildTractor } from "./three/tractor.js";
 import {
@@ -158,6 +162,14 @@ export default function TractorCanvas() {
     const tractor = buildTractor(m, glowMap);
     tractor.group.position.z = TRACTOR_Z;
     scene.add(tractor.group);
+
+    const animated = referencedObjects(tractor, windFarm, scenery);
+    [
+      tractor.group,
+      windFarm.group,
+      ground.group,
+      ...scenery.items.map(({ node }) => node),
+    ].forEach((root) => bakeStatic(root, animated));
 
     const contactShadow = new THREE.Mesh(
       new THREE.PlaneGeometry(3.8, 4.6),
