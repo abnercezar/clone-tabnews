@@ -34,6 +34,10 @@ describe("`GET /api/v1/users/[username]`", () => {
         ],
         tabcoins: 0,
         tabcash: 0,
+        occupation: null,
+        crops: [],
+        state: null,
+        founder: false,
         created_at: response2Body.created_at,
         updated_at: response2Body.updated_at,
       });
@@ -67,6 +71,10 @@ describe("`GET /api/v1/users/[username]`", () => {
         ],
         tabcoins: 0,
         tabcash: 0,
+        occupation: null,
+        crops: [],
+        state: null,
+        founder: false,
         created_at: response2Body.created_at,
         updated_at: response2Body.updated_at,
       });

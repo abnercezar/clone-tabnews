@@ -34,6 +34,7 @@ const RESERVED_USERNAMES = new Set([
   "rss",
   "sobre",
   "status",
+  "tag",
 ]);
 
 function username(value) {

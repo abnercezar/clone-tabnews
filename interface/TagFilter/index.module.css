@@ -1,0 +1,38 @@
+/* Uma linha só, rolando para o lado: não empurra o feed para baixo no celular. */
+.filter {
+  overflow-x: auto;
+  padding: var(--base-size-8, 8px) var(--base-size-16, 16px);
+  border-bottom: 1px solid var(--borderColor-muted, #d8dee4);
+  scrollbar-width: thin;
+}
+
+.list {
+  display: flex;
+  gap: var(--base-size-8, 8px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  white-space: nowrap;
+}
+
+.tag,
+.current {
+  display: inline-block;
+  padding: 4px 12px;
+  border: 1px solid var(--borderColor-default, #d0d7de);
+  border-radius: 999px;
+  color: var(--fgColor-default, #1f2328);
+  font-size: var(--text-body-size-small, 12px);
+  text-decoration: none;
+}
+
+.tag:hover {
+  border-color: var(--fgColor-success, #1a7f37);
+  text-decoration: none;
+}
+
+.current {
+  border-color: var(--bgColor-success-emphasis, #1f883d);
+  background: var(--bgColor-success-emphasis, #1f883d);
+  color: var(--fgColor-onEmphasis, #ffffff);
+}

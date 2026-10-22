@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Button,
   Flash,
@@ -9,7 +9,12 @@ import {
   Text,
 } from "@primer/react";
 import DefaultLayout from "interface/DefaultLayout";
+import GoogleLoginButton from "interface/GoogleLoginButton";
 import PasswordInput from "interface/PasswordInput";
+import {
+  SEND_AFTER_LOGIN_PATH,
+  hasVisitorDraft,
+} from "interface/publishTemplates";
 import classes from "interface/authForm.module.css";
 import ui from "interface/styles.module.css";
 
@@ -36,6 +41,12 @@ function RegisterForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
+
+  // Quem escreveu uma pergunta antes de ter conta volta para publicá-la.
+  useEffect(() => {
+    setHasDraft(hasVisitorDraft());
+  }, []);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -89,6 +100,11 @@ function RegisterForm() {
 
   return (
     <form className={classes.form} onSubmit={handleSubmit}>
+      <GoogleLoginButton
+        redirect={hasDraft ? SEND_AFTER_LOGIN_PATH : "/"}
+        label="Criar conta com Google"
+      />
+
       <FormControl required className={classes.field}>
         <FormControl.Label>Nome de usuário</FormControl.Label>
         <TextInput

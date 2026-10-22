@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import {
   Button,
@@ -9,9 +9,14 @@ import {
   Link,
 } from "@primer/react";
 import DefaultLayout from "interface/DefaultLayout";
+import GoogleLoginButton from "interface/GoogleLoginButton";
 import PasswordInput from "interface/PasswordInput";
 import classes from "interface/authForm.module.css";
 import { safeRedirectPath } from "interface/loginRedirect";
+import {
+  SEND_AFTER_LOGIN_PATH,
+  hasVisitorDraft,
+} from "interface/publishTemplates";
 
 export default function LoginPage() {
   return (
@@ -34,6 +39,17 @@ function LoginForm() {
   const { query } = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [hasDraft, setHasDraft] = useState(false);
+  // O rascunho fica no navegador: só dá para saber depois de montar.
+  useEffect(() => {
+    setHasDraft(hasVisitorDraft());
+  }, []);
+  const googleRedirect =
+    typeof query.redirect === "string"
+      ? query.redirect
+      : hasDraft
+        ? SEND_AFTER_LOGIN_PATH
+        : "/";
   const [errorMessage, setErrorMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -62,7 +78,13 @@ function LoginForm() {
 
       if (response.status === 201) {
         // Volta para onde a pessoa estava (votar, responder, publicar).
-        location.href = safeRedirectPath(query.redirect);
+        // Quem escreveu uma pergunta antes de ter conta e chegou aqui pelo
+        // cadastro vai direto publicá-la.
+        const redirectPath = safeRedirectPath(query.redirect);
+        location.href =
+          redirectPath === "/" && hasVisitorDraft()
+            ? SEND_AFTER_LOGIN_PATH
+            : redirectPath;
         return;
       }
 
@@ -95,6 +117,15 @@ function LoginForm() {
 
   return (
     <form className={classes.form} onSubmit={handleSubmit}>
+      {query.erro === "google" && (
+        <Flash variant="danger" role="alert" className={classes.flash}>
+          Não foi possível entrar com o Google. Tente de novo ou use seu e-mail
+          e senha.
+        </Flash>
+      )}
+
+      <GoogleLoginButton redirect={googleRedirect} />
+
       <FormControl required className={classes.field}>
         <FormControl.Label>E-mail</FormControl.Label>
         <TextInput

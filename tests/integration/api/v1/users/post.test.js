@@ -37,6 +37,10 @@ describe("`POST /api/v1/users`", () => {
           "read:recovery_token",
           "read:email_confirmation_token",
         ],
+        occupation: null,
+        crops: [],
+        state: null,
+        founder: false,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });

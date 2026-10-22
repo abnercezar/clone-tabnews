@@ -20,8 +20,8 @@ import {
   GearIcon,
   KebabHorizontalIcon,
 } from "@primer/octicons-react";
-import AgroCashCount from "interface/AgroCashCount";
 import AgroCoinCount from "interface/AgroCoinCount";
+import AuthorCredential from "interface/AuthorCredential";
 import ContentList from "interface/ContentList";
 import { useConfirmDialog } from "interface/ConfirmDialog";
 import DefaultLayout from "interface/DefaultLayout";
@@ -263,6 +263,11 @@ function UserProfile({
         <Heading as="h1" className={classes.title}>
           {userFound.username}
         </Heading>
+        <AuthorCredential
+          occupation={userFound.occupation}
+          state={userFound.state}
+          founder={userFound.founder}
+        />
         <UserFeatures userFound={userFound} />
         {!isLoadingSession && (
           <OptionsMenu
@@ -280,9 +285,6 @@ function UserProfile({
         <div className={classes.statsGroup}>
           {userFound.tabcoins !== undefined && (
             <AgroCoinCount amount={userFound.tabcoins} mode="full" />
-          )}
-          {userFound.tabcash !== undefined && (
-            <AgroCashCount amount={userFound.tabcash} mode="full" />
           )}
           <div className={classes.pastTimeWrapper}>
             <PastTime

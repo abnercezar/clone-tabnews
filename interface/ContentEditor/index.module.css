@@ -1,0 +1,81 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--base-size-8, 8px);
+  width: 100%;
+}
+
+.modeBar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.simple {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--borderColor-default, #d0d7de);
+  border-radius: 6px;
+  background-color: var(--bgColor-default, #ffffff);
+}
+
+.simple:focus-within {
+  border-color: var(--fgColor-accent, #0969da);
+  outline: 2px solid var(--fgColor-accent, #0969da);
+  outline-offset: -1px;
+}
+
+.isInvalid,
+.isInvalid:focus-within {
+  border-color: var(--borderColor-danger-emphasis, #cf222e);
+  outline-color: var(--borderColor-danger-emphasis, #cf222e);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--base-size-4, 4px);
+  padding: var(--base-size-4, 4px);
+  border-bottom: 1px solid var(--borderColor-muted, #d8dee4);
+  background-color: var(--bgColor-muted, #f6f8fa);
+  border-radius: 6px 6px 0 0;
+}
+
+.toolbarSpacer {
+  flex: 1;
+}
+
+/* 16px evita o zoom automático do iPhone ao tocar na caixa de texto. */
+.textarea {
+  width: 100%;
+  padding: var(--base-size-12, 12px);
+  border: 0;
+  border-radius: 0 0 6px 6px;
+  outline: none;
+  resize: vertical;
+  background: transparent;
+  color: var(--fgColor-default, #1f2328);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+.preview {
+  padding: var(--base-size-12, 12px);
+}
+
+.muted {
+  color: var(--fgColor-muted, #656d76);
+}
+
+.upload {
+  display: flex;
+  flex-direction: column;
+  gap: var(--base-size-4, 4px);
+}
+
+.uploadLabel {
+  color: var(--fgColor-muted, #656d76);
+  font-size: var(--text-body-size-small, 12px);
+}

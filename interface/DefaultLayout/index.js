@@ -25,9 +25,9 @@ import {
   SunIcon,
   ThreeBarsIcon,
 } from "@primer/octicons-react";
-import AgroCashCount from "interface/AgroCashCount";
 import AgroCoinCount from "interface/AgroCoinCount";
 import AgroTabLogo from "interface/AgroTabLogo";
+import JsonLd from "interface/JsonLd";
 import webserver from "infra/webserver";
 import { writeColorMode } from "interface/colorMode";
 import useSearchBox from "interface/SearchBox";
@@ -58,6 +58,11 @@ export default function DefaultLayout({
   const canonicalUrl = canonicalPath
     ? `${webserver.canonicalOrigin}${canonicalPath}`
     : null;
+  // Sem imagem própria, a página usa a prévia padrão com a marca.
+  const imagePath = metadata.image || "/api/og";
+  const imageUrl = /^https?:\/\//.test(imagePath)
+    ? imagePath
+    : `${webserver.canonicalOrigin}${imagePath}`;
 
   return (
     <div className={styles.wrapper}>
@@ -87,7 +92,17 @@ export default function DefaultLayout({
             content={metadata.publishedTime}
           />
         )}
-        <meta name="twitter:card" content="summary" />
+        <meta property="og:image" content={imageUrl} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta
+          property="og:image:alt"
+          content={metadata.title || "AgroTab — comunidade do agronegócio"}
+        />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content={imageUrl} />
+        {metadata.noIndex && <meta name="robots" content="noindex" />}
+        {metadata.jsonLd && <JsonLd data={metadata.jsonLd} />}
       </Head>
 
       <SiteHeader />
@@ -216,14 +231,6 @@ function UserMenu({ user }) {
           amount={user.tabcoins}
           href={profileHref}
           className={styles.agroCoinCount}
-        />
-      </Header.Item>
-
-      <Header.Item className={styles.agroCash}>
-        <AgroCashCount
-          amount={user.tabcash}
-          href={profileHref}
-          className={styles.agroCashCount}
         />
       </Header.Item>
 

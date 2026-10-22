@@ -39,6 +39,10 @@ describe("Use case: Registration Flow (all successful)", () => {
         "read:recovery_token",
         "read:email_confirmation_token",
       ],
+      occupation: null,
+      crops: [],
+      state: null,
+      founder: false,
       created_at: createUserResponseBody.created_at,
       updated_at: createUserResponseBody.updated_at,
     });

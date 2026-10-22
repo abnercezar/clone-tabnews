@@ -6,6 +6,7 @@ ToDo.md
 .env.development
 .env.test
 .env.production
+.env*.local
 architecture.md
 curso-lessons.json
 aulas-curso.dev.md

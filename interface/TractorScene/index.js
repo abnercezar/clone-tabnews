@@ -31,18 +31,6 @@ export default function TractorScene() {
         <link rel="preload" as="image" href="/cena-trator.jpg" />
       </Head>
       {enhanced && <TractorCanvas />}
-      {/* Slogan decorativo: a mensagem principal da página é o h1 abaixo. */}
-      <p className={styles.title} aria-hidden="true">
-        <span className={styles.titleMark}>AGRO</span>
-        <span className={styles.titleText}>
-          para quem
-          <br />
-          produz de verdade.
-        </span>
-      </p>
-      <p className={styles.hint} aria-hidden="true">
-        Clique na cena para largar de novo
-      </p>
     </section>
   );
 }

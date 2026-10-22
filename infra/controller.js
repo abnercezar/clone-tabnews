@@ -46,16 +46,19 @@ function onErrorHandler(error, request, response) {
   response.status(publicErrorObject.statusCode).json(publicErrorObject);
 }
 
-function setSessionCookie(sessionToken, response) {
-  // Define cookie de sessão
-  const setCookie = cookie.serialize("session_id", sessionToken, {
+function serializeSessionCookie(sessionToken) {
+  return cookie.serialize("session_id", sessionToken, {
     path: "/",
     maxAge: session.EXPIRATION_IN_MILLISECONDS / 1000,
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
     sameSite: "lax",
   });
-  response.setHeader("Set-Cookie", setCookie);
+}
+
+function setSessionCookie(sessionToken, response) {
+  // Define cookie de sessão
+  response.setHeader("Set-Cookie", serializeSessionCookie(sessionToken));
 }
 
 function clearSessionCookie(response) {
@@ -173,6 +176,7 @@ const controller = {
     onError: onErrorHandler, // Manipulador para erros internos do servidor
   },
   setSessionCookie, // Função para definir o cookie de sessão
+  serializeSessionCookie, // Cookie de sessão junto com outros Set-Cookie
   clearSessionCookie, // Função para limpar o cookie de sessão
   injectAnonymousOrUser, // Middleware para injetar usuário anônimo ou autenticado
   createAnonymousUser, // Usuário anônimo para páginas renderizadas no servidor

@@ -83,7 +83,14 @@ const pageFiles = [...walkJsFiles("pages"), ...walkJsFiles("interface")].filter(
   (rel) => !rel.startsWith("pages/api/"),
 );
 
+// interface/JsonLd é a única exceção: só serializa dados estruturados com
+// JSON.stringify e escapa "<" (ver tests/unit/security/no-unsafe-html.test.js).
+const unsafeHtmlAllowlist = [path.join("interface", "JsonLd", "index.js")];
+
 for (const rel of pageFiles) {
+  if (unsafeHtmlAllowlist.includes(rel)) {
+    continue;
+  }
   const source = read(rel);
   if (source.includes("dangerouslySetInnerHTML")) {
     fail(

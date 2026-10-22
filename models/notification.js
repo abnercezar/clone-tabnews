@@ -24,6 +24,9 @@ async function notifyParentContentAuthor({ newContent, actorUsername }) {
     }
 
     const recipient = await user.findOneById(parent.owner_id);
+    if (recipient.notify_replies === false) {
+      return { sent: false, reason: "opted_out" };
+    }
     if (!isValidRecipientEmail(recipient?.email)) {
       return { sent: false, reason: "invalid_email" };
     }
@@ -95,6 +98,11 @@ function buildConversationUrl({ rootUsername, rootSlug, commentId }) {
   return `${webserver.origin}${path}${hash}`;
 }
 
+// Onde a pessoa desliga os avisos de resposta.
+function settingsUrl() {
+  return `${webserver.origin}/perfil#avisos`;
+}
+
 function truncateSnippet(body) {
   const normalized = String(body || "")
     .replace(/\s+/g, " ")
@@ -133,7 +141,9 @@ Abra a conversa:
 ${conversationUrl}
 
 Atenciosamente,
-Equipe AgroTab`;
+Equipe AgroTab
+
+Para não receber mais estes avisos, desligue em ${settingsUrl()}`;
 
   const html = `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -143,7 +153,7 @@ Equipe AgroTab`;
   <p><strong>${escapeHtml(actorUsername)}</strong> comentou na sua publicação <strong>${escapeHtml(rootTitle)}</strong>.</p>
   <blockquote style="margin: 16px 0; padding: 12px 16px; border-left: 3px solid #1a7f37; background: #f6f8fa;">${escapeHtml(snippet)}</blockquote>
   <p><a href="${escapeHtml(conversationUrl)}" style="display: inline-block; padding: 10px 16px; background: #1a7f37; color: #fff; text-decoration: none; border-radius: 6px;">Ver comentário</a></p>
-  <p style="font-size: 12px; color: #656d76;">AgroTab — comunidade do agronegócio brasileiro</p>
+  <p style="font-size: 12px; color: #656d76;">AgroTab — comunidade do agronegócio brasileiro · <a href="${escapeHtml(settingsUrl())}" style="color: #656d76;">Desligar estes avisos</a></p>
 </body>
 </html>`;
 
@@ -169,7 +179,9 @@ Abra a conversa:
 ${conversationUrl}
 
 Atenciosamente,
-Equipe AgroTab`;
+Equipe AgroTab
+
+Para não receber mais estes avisos, desligue em ${settingsUrl()}`;
 
   const html = `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -179,7 +191,7 @@ Equipe AgroTab`;
   <p><strong>${escapeHtml(actorUsername)}</strong> respondeu ao seu comentário na publicação <strong>${escapeHtml(rootTitle)}</strong>.</p>
   <blockquote style="margin: 16px 0; padding: 12px 16px; border-left: 3px solid #1a7f37; background: #f6f8fa;">${escapeHtml(snippet)}</blockquote>
   <p><a href="${escapeHtml(conversationUrl)}" style="display: inline-block; padding: 10px 16px; background: #1a7f37; color: #fff; text-decoration: none; border-radius: 6px;">Ver resposta</a></p>
-  <p style="font-size: 12px; color: #656d76;">AgroTab — comunidade do agronegócio brasileiro</p>
+  <p style="font-size: 12px; color: #656d76;">AgroTab — comunidade do agronegócio brasileiro · <a href="${escapeHtml(settingsUrl())}" style="color: #656d76;">Desligar estes avisos</a></p>
 </body>
 </html>`;
 

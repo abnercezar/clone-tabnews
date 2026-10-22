@@ -1,5 +1,4 @@
 import { useState } from "react";
-import dynamic from "next/dynamic";
 import {
   Button,
   Flash,
@@ -8,10 +7,8 @@ import {
   Text,
   TextInput,
 } from "@primer/react";
-
-const CommentEditor = dynamic(() => import("interface/CommentEditor"), {
-  ssr: false,
-});
+import ContentEditor from "interface/ContentEditor";
+import TagPicker from "interface/TagPicker";
 
 const MAX_BODY_LENGTH = 20000;
 
@@ -19,6 +16,9 @@ export default function ContentEditForm({ content, onCancel, onSaved }) {
   const isComment = Boolean(content.parent_id);
   const [title, setTitle] = useState(content.title || "");
   const [body, setBody] = useState(content.body || "");
+  const [tags, setTags] = useState(
+    (content.tags || []).map((contentTag) => contentTag.slug),
+  );
   const [errorMessage, setErrorMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isTooLong = body.length > MAX_BODY_LENGTH;
@@ -37,7 +37,7 @@ export default function ContentEditForm({ content, onCancel, onSaved }) {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(
-            isComment ? { body } : { title: title.trim(), body },
+            isComment ? { body } : { title: title.trim(), body, tags },
           ),
         },
       );
@@ -79,13 +79,21 @@ export default function ContentEditForm({ content, onCancel, onSaved }) {
           </FormControl>
         )}
 
+        {!isComment && (
+          <Stack gap="condensed">
+            <Text sx={{ fontWeight: "bold", fontSize: 1 }}>Tags</Text>
+            <TagPicker value={tags} onChange={setTags} />
+          </Stack>
+        )}
+
         <FormControl required>
           <FormControl.Label>
             {isComment ? "Comentário" : "Conteúdo"}
           </FormControl.Label>
-          <CommentEditor
+          <ContentEditor
             value={body}
             onChange={setBody}
+            label={isComment ? "Comentário" : "Conteúdo"}
             initialHeight="40vh"
             isInvalid={isTooLong}
             autofocus={false}

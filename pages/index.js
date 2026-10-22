@@ -14,10 +14,12 @@ import DefaultLayout from "interface/DefaultLayout";
 import CommunityQuestion from "interface/CommunityQuestion";
 import ContentList from "interface/ContentList";
 import FeedExample from "interface/FeedExample";
+import FeedStarter, { WeeklyQuestion } from "interface/FeedStarter";
 import HomeIntro from "interface/HomeIntro";
 import TractorScene from "interface/TractorScene";
 import HomeSidebar from "interface/HomeSidebar";
 import Sponsorship from "interface/Sponsorship";
+import TagFilter from "interface/TagFilter";
 import useUser from "interface/useUser";
 import ui from "interface/styles.module.css";
 import classes from "./index.module.css";
@@ -44,9 +46,7 @@ export default function FeedPage({ initialContents = null, initialTotal = 0 }) {
   const [feedVersion, setFeedVersion] = useState(0);
 
   const isHomeFeed = !author;
-  // Só decide intro depois do /api/v1/user — evita flash e crash de layout.
   const sessionReady = !isLoadingUser;
-  const showIntro = isHomeFeed && sessionReady;
 
   useEffect(() => {
     setPage(1);
@@ -108,6 +108,7 @@ export default function FeedPage({ initialContents = null, initialTotal = 0 }) {
   }, [page, author, router.isReady, feedVersion]);
 
   const canPublish = Boolean(user?.features?.includes("create:content"));
+  const isFewContents = Boolean(contents) && total < FEW_CONTENTS;
 
   const feedBody = (
     <>
@@ -149,18 +150,7 @@ export default function FeedPage({ initialContents = null, initialTotal = 0 }) {
         />
       )}
 
-      {isHomeFeed &&
-        contents &&
-        contents.length > 0 &&
-        contents.length < FEW_CONTENTS && (
-          <div className={classes.feedInvite}>
-            <Text as="p" className={classes.feedInviteText}>
-              Seja um dos primeiros a contar como foi sua safra. Sua experiência
-              ajuda quem está começando.
-            </Text>
-            <LinkButton href="/publicar">Contar minha experiência</LinkButton>
-          </div>
-        )}
+      {isHomeFeed && isFewContents && contents.length > 0 && <FeedStarter />}
 
       {total > PER_PAGE && (
         <Stack
@@ -187,13 +177,18 @@ export default function FeedPage({ initialContents = null, initialTotal = 0 }) {
     <DefaultLayout
       contentWidth="wide"
       metadata={{
+        title: author
+          ? `Publicações de ${author}`
+          : "Perguntas e respostas de quem vive o agro",
         description:
-          "Comunidade de perguntas, experiências e soluções práticas do agronegócio brasileiro.",
+          "Pergunte a quem já passou por isso no campo. Produtores, agrônomos e técnicos respondendo dúvidas reais da lavoura e da criação.",
       }}
     >
       {isHomeFeed && <TractorScene />}
 
-      {showIntro && <HomeIntro />}
+      {/* Vem no HTML do servidor: quem chega pelo WhatsApp ou pelo Google
+          entende o site antes de o JavaScript carregar. */}
+      {isHomeFeed && <HomeIntro />}
 
       {author && (
         <Heading as="h1" variant="medium">
@@ -209,6 +204,7 @@ export default function FeedPage({ initialContents = null, initialTotal = 0 }) {
             {sessionReady && (
               <CommunityQuestion
                 onPublished={() => setFeedVersion((version) => version + 1)}
+                fallback={isFewContents ? <WeeklyQuestion /> : null}
               />
             )}
             <section
@@ -234,6 +230,7 @@ export default function FeedPage({ initialContents = null, initialTotal = 0 }) {
                   </LinkButton>
                 )}
               </div>
+              <TagFilter />
               {feedBody}
             </section>
           </div>

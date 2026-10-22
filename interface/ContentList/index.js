@@ -2,6 +2,8 @@ import { Button, Link, Stack } from "@primer/react";
 import { CommentIcon } from "@primer/octicons-react";
 import PastTime from "interface/PastTime";
 import TabCoinButtons from "interface/TabCoinButtons";
+import AuthorCredential from "interface/AuthorCredential";
+import TagList from "interface/TagList";
 import { createExcerpt } from "interface/excerpt";
 import classes from "./index.module.css";
 
@@ -111,7 +113,7 @@ function ContentListItem({ content }) {
           ) : (
             <span className={classes.tabcoins}>{content.tabcoins ?? 0}</span>
           )}
-          {!isAd && " agrocoins · "}
+          {!isAd && " pontos · "}
           {isAd && " · "}
           <address className={classes.author}>
             <Link href={`/${content.owner_username}`}>
@@ -140,6 +142,7 @@ function ContentCard({ content }) {
             {content.title}
           </Link>
           {summary && <p className={classes.cardSummary}>{summary}</p>}
+          <TagList tags={content.tags} size="small" />
           <div className={classes.cardFooter}>
             <span className={classes.cardAuthor}>
               <span className={classes.avatar} aria-hidden="true">
@@ -150,6 +153,11 @@ function ContentCard({ content }) {
               <Link href={`/${content.owner_username}`}>
                 {content.owner_username}
               </Link>
+              <AuthorCredential
+                occupation={content.owner_occupation}
+                state={content.owner_state}
+                founder={content.owner_founder}
+              />
               <span aria-hidden="true">·</span>
               <PastTime date={content.published_at} />
             </span>

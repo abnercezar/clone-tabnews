@@ -100,6 +100,10 @@ describe("`models/authorization.js`", () => {
         id: 1,
         username: "resource",
         features: ["read:user"],
+        occupation: null,
+        crops: [],
+        state: null,
+        founder: false,
         created_at: "2026-01-01T00:00:00.000Z",
         updated_at: "2026-01-01T00:00:00.000Z",
       });
@@ -134,6 +138,10 @@ describe("`models/authorization.js`", () => {
         features: ["read:user"],
         tabcoins: 12,
         tabcash: 3,
+        occupation: null,
+        crops: [],
+        state: null,
+        founder: false,
         created_at: "2026-01-01T00:00:00.000Z",
         updated_at: "2026-01-01T00:00:00.000Z",
       });

@@ -1,14 +1,10 @@
 import { useId, useState } from "react";
-import dynamic from "next/dynamic";
 import { useReward } from "react-rewards";
 import { Button, Flash, FormControl, Text } from "@primer/react";
+import ContentEditor from "interface/ContentEditor";
 import styles from "./index.module.css";
 
 const MAX_LENGTH = 20000;
-
-const CommentEditor = dynamic(() => import("interface/CommentEditor"), {
-  ssr: false,
-});
 
 export default function CommentForm({ parentId, onCreated, onCancel }) {
   const rewardAnchorId = useId().replace(/:/g, "");
@@ -90,7 +86,12 @@ export default function CommentForm({ parentId, onCreated, onCancel }) {
       )}
       <FormControl required>
         <FormControl.Label>Seu comentário</FormControl.Label>
-        <CommentEditor value={body} onChange={setBody} isInvalid={isTooLong} />
+        <ContentEditor
+          value={body}
+          onChange={setBody}
+          isInvalid={isTooLong}
+          label="Seu comentário"
+        />
       </FormControl>
       <div className={styles.actions}>
         <Text

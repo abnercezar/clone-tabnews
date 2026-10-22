@@ -33,60 +33,38 @@ Temas adjacentes (produtividade, empreendedorismo rural, educação no campo) ta
     answer: `Algumas práticas ajudam a comunidade a aproveitar melhor o que você publica:
 
 - **Revise a escrita:** gramática e digitação claras facilitam a leitura.
-- **Formate com Markdown:** títulos, listas, trechos destacados e links de referência.
-- **Inclua imagens** hospedadas em outro lugar com \`![descrição](https://url-da-imagem)\` (como no TabNews).
+- **Escreva o título como você buscaria no Google:** por exemplo, "Como controlar percevejo na soja após o R5?".
+- **Escolha as tags** da cultura ou criação, do tema e da região: assim quem vive o mesmo problema encontra sua pergunta.
+- **Mande fotos** pelo botão **Foto** do editor, direto da câmera ou da galeria (até 6 por publicação).
+- **Use a barra do editor** para negrito, listas e links. Quem já conhece Markdown pode trocar para o modo avançado.
 - **Use fontes** quando fizer sentido: credibilidade e contexto importam no agro.
 - **Confirme os fatos:** se for opinião, deixe isso explícito.`,
   },
   {
+    id: "util",
+    question: "Para que servem os botões Útil 👍 e Não útil?",
+    answer: `Depois de ler uma pergunta, resposta ou relato, toque em **Útil 👍** se aquilo ajudou ou **Não útil** se não ajudou. Os votos fazem as melhores respostas aparecerem primeiro e mostram quem está ajudando a comunidade.
+
+Para votar é preciso ter conta. O número ao lado dos botões é o saldo de votos daquele conteúdo.`,
+  },
+  {
+    id: "agrocoin",
+    question: "O que é a reputação no perfil?",
+    answer: `É um número só, que cresce quando a comunidade marca seus conteúdos como **úteis** e diminui com votos de **não útil** ou quando um conteúdo seu é removido por quebrar as regras. Publicar com frequência e participar também ajudam.
+
+Ela não vale dinheiro: serve para mostrar, no AgroTab, quem costuma ajudar. (Por dentro, o sistema ainda chama essa pontuação de AgroCoin.)`,
+  },
+  {
     id: "agrocash",
     question: "O que é AgroCash?",
-    answer: `AgroCash é a moeda interna usada para recompensar quem qualifica conteúdos e para publicar em espaços de anúncio (por exemplo, publicações patrocinadas), sempre dentro das regras dos [Termos de Uso](/termos-de-uso).
+    answer: `É um saldo que você acumula ao votar em conteúdos de outras pessoas. Hoje ele serve só para uma coisa: **patrocinar uma publicação** na página [Publicar](/publicar), que passa a aparecer no espaço de anúncio, marcada como Patrocinado.
 
-**AgroCash não tem lastro** com dinheiro real nem com ativos financeiros externos: vale apenas dentro do ecossistema do AgroTab.`,
-  },
-  {
-    id: "ganhar-agrocash",
-    question: "Como ganhar AgroCash?",
-    answer: `Ao qualificar conteúdos de outras pessoas você consome AgroCoins e, na mesma operação, recebe AgroCash — ajuda a comunidade a destacar o que tem valor.`,
-  },
-  {
-    id: "utilizar-agrocash",
-    question: "Como utilizar meu AgroCash?",
-    answer: `Hoje o uso principal é criar **publicações patrocinadas** na página [Publicar](/publicar), marcando a opção correspondente. É preciso ter saldo suficiente de AgroCash; o valor é consumido na criação do anúncio.`,
+AgroCash **não é dinheiro** e não pode ser trocado por nada fora do AgroTab. Se você não pretende patrocinar nada, pode ignorá-lo.`,
   },
   {
     id: "publicacao-patrocinada",
     question: "Como funciona uma publicação patrocinada?",
-    answer: `É um conteúdo do tipo anúncio (\`type=ad\`) exibido em espaços de destaque do feed. O título deve ser objetivo; se houver link de fonte externo, o domínio pode aparecer junto ao título.
-
-O orçamento inicial consome AgroCash na publicação. Detalhes de consumo do orçamento podem evoluir com a plataforma.`,
-  },
-  {
-    id: "agrocoin",
-    question: "O que é AgroCoin?",
-    answer: `AgroCoin (também chamada de AgroCoins no plural) é a moeda de qualificação de conteúdos. Você gasta AgroCoins para avaliar publicações e comentários de outras pessoas e ganha ou perde AgroCoins conforme a comunidade avalia os seus.
-
-**AgroCoins não têm lastro** com a economia real: existem só dentro do AgroTab.`,
-  },
-  {
-    id: "ganhar-agrocoins",
-    question: "Como ganhar AgroCoins?",
-    answer: `As formas principais são:
-
-- **Criar conteúdo** com texto relevante (há um critério mínimo de qualidade).
-- **Receber votos positivos** em suas publicações e comentários.
-- **Participar da comunidade** ao longo do tempo — a plataforma pode ajustar recompensas conforme o uso.`,
-  },
-  {
-    id: "perder-agrocoins",
-    question: "É possível perder AgroCoins?",
-    answer: `Sim. Você pode perder AgroCoins ao apagar um conteúdo (quando houver crédito associado), ao receber votos negativos ou se a moderação remover publicações suas por violação das regras.`,
-  },
-  {
-    id: "utilizar-agrocoins",
-    question: "Como utilizar meus AgroCoins?",
-    answer: `Use AgroCoins para qualificar conteúdos de outros usuários. Em cada avaliação positiva ou negativa costumam ser consumidos AgroCoins e creditado AgroCash no seu saldo.`,
+    answer: `Ao publicar, marque a opção de patrocínio (é preciso ter AgroCash suficiente; você confirma antes de gastar). A publicação aparece no espaço de anúncio, sempre marcada como **Patrocinado**, e fica fora da lista de Relevantes.`,
   },
   {
     id: "divulgar-projeto",
@@ -108,7 +86,7 @@ Se for um pitch curto, prefira deixar isso claro no título (por exemplo: \`Pitc
   {
     id: "relevantes",
     question: 'Como funciona a página "Relevantes"?',
-    answer: `A página [Relevantes](/) prioriza publicações recentes com boa avaliação e engajamento (comentários e AgroCoins), com decadência temporal — conteúdos bons, mas antigos, cedem espaço aos mais atuais.`,
+    answer: `A página [Relevantes](/) prioriza publicações recentes com boa avaliação e engajamento (comentários e votos de útil), com decadência temporal — conteúdos bons, mas antigos, cedem espaço aos mais atuais.`,
   },
   {
     id: "recentes",
@@ -135,7 +113,8 @@ Se encontrar **falha de segurança** com dados sensíveis, reporte **em privado*
     answer: `Você contribui ao:
 
 - **Publicar e comentar** com conteúdo útil para o agro.
-- **Qualificar** com AgroCoins o que merece destaque (ou não).
+- **Votar Útil 👍** no que ajudou (e Não útil no que não ajudou).
+- **Compartilhar no WhatsApp** as discussões que podem ajudar alguém.
 - **Reportar problemas** e sugerir melhorias com respeito à comunidade.`,
   },
 ];

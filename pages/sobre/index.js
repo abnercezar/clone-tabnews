@@ -43,9 +43,9 @@ const FEATURES = [
     href: "/recentes/comentarios/1",
   },
   {
-    title: "AgroCoins",
+    title: "Útil 👍",
     description:
-      "A comunidade qualifica o que tem fundamento. O que ajuda de verdade sobe; moeda interna, sem lastro fora do AgroTab.",
+      "A comunidade marca o que ajudou de verdade. O que é útil sobe, e quem ajuda ganha reputação no perfil.",
     icon: StarFillIcon,
     tone: "yellow",
     href: "/faq#agrocoin",
