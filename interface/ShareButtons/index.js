@@ -1,34 +1,44 @@
-import { useState } from "react";
-import { Button, Tooltip } from "@primer/react";
+import { useEffect, useState } from "react";
+import { Button } from "@primer/react";
 import { ShareIcon } from "@primer/octicons-react";
 import webserver from "infra/webserver";
 import { whatsappShareHref } from "interface/whatsappShare";
+import {
+  facebookShareHref,
+  linkedinShareHref,
+  xShareHref,
+} from "interface/shareLinks";
 import classes from "./index.module.css";
 
-// Endereço canônico: o mesmo no HTML do servidor e no navegador, então o
-// link do WhatsApp funciona antes de o JavaScript carregar.
+// Endereço canônico: o mesmo no HTML do servidor e no navegador, então os
+// links funcionam antes de o JavaScript carregar.
 function contentUrl(username, slug) {
   return `${webserver.canonicalOrigin}/${username}/${slug}`;
 }
 
-export default function ShareButtons({ username, slug, title, compact }) {
+export default function ShareButtons({ username, slug, title }) {
+  const url = contentUrl(username, slug);
+  const shareTitle = title || "AgroTab";
+  const [canNativeShare, setCanNativeShare] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
-  async function handleShare() {
-    const url = contentUrl(username, slug);
-    const shareTitle = title || "AgroTab";
+  useEffect(() => {
+    setCanNativeShare(
+      typeof navigator !== "undefined" && typeof navigator.share === "function",
+    );
+  }, []);
 
+  async function handleNativeShare() {
     try {
-      if (navigator.share) {
-        await navigator.share({ title: shareTitle, url });
-        return;
-      }
+      await navigator.share({ title: shareTitle, url });
     } catch (error) {
       if (error?.name === "AbortError") {
         return;
       }
     }
+  }
 
+  async function handleCopy() {
     try {
       await navigator.clipboard.writeText(url);
       setIsCopied(true);
@@ -39,34 +49,54 @@ export default function ShareButtons({ username, slug, title, compact }) {
   }
 
   return (
-    <>
-      <a
-        className={classes.whatsapp}
-        href={whatsappShareHref({ title, url: contentUrl(username, slug) })}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label={compact ? "Compartilhar no WhatsApp" : undefined}
-      >
-        <WhatsappIcon />
-        <span>{compact ? "WhatsApp" : "Compartilhar no WhatsApp"}</span>
-      </a>
-      <Tooltip text="Compartilhar ou copiar link" direction="n">
-        <Button
-          onClick={handleShare}
-          aria-label={
-            isCopied ? "Link copiado!" : "Compartilhar ou copiar link"
-          }
+    <div className={classes.row}>
+      <nav className={classes.networks} aria-label="Compartilhar">
+        <a
+          className={classes.whatsapp}
+          href={whatsappShareHref({ title: shareTitle, url })}
+          target="_blank"
+          rel="noopener noreferrer"
         >
-          {isCopied ? (
-            <span className={classes.copied} role="status">
-              Link copiado!
-            </span>
-          ) : (
-            <ShareIcon size={16} aria-hidden="true" />
-          )}
+          <WhatsappIcon />
+          <span>WhatsApp</span>
+        </a>
+        <a
+          className={classes.network}
+          href={facebookShareHref(url)}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Facebook
+        </a>
+        <a
+          className={classes.network}
+          href={linkedinShareHref(url)}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          LinkedIn
+        </a>
+        <a
+          className={classes.network}
+          href={xShareHref({ title: shareTitle, url })}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          X
+        </a>
+      </nav>
+      {canNativeShare && (
+        <Button onClick={handleNativeShare} aria-label="Compartilhar">
+          <ShareIcon size={16} aria-hidden="true" />
         </Button>
-      </Tooltip>
-    </>
+      )}
+      <Button onClick={handleCopy} aria-label="Copiar link">
+        {isCopied ? "Copiado" : "Copiar link"}
+      </Button>
+      <span className={classes.status} role="status" aria-live="polite">
+        {isCopied ? "Link copiado" : ""}
+      </span>
+    </div>
   );
 }
 

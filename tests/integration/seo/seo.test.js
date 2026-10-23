@@ -72,6 +72,13 @@ describe("SEO e compartilhamento", () => {
     expect(html).toContain(
       '<meta name="twitter:card" content="summary_large_image"/>',
     );
+    expect(html).toContain(
+      '<meta name="twitter:title" content="Como controlar percevejo na soja após o R5?"/>',
+    );
+    expect(html).toContain("facebook.com/sharer/sharer.php");
+    expect(html).toContain("linkedin.com/sharing/share-offsite/");
+    expect(html).toContain("twitter.com/intent/tweet");
+    expect(html).toContain("logo-agrotab.png");
     expect(html).toContain('"@type":"DiscussionForumPosting"');
     expect(html).toContain(
       '"headline":"Como controlar percevejo na soja após o R5?"',
@@ -88,7 +95,7 @@ describe("SEO e compartilhamento", () => {
   test("Home tem o novo título e a imagem padrão", async () => {
     const response = await fetch(`${webserver.origin}/`);
     const html = await response.text();
-    expect(html).toContain("Pergunte a quem já passou por isso no campo.");
+    expect(html).toContain("Tire sua dúvida do campo com quem é do campo.");
     expect(html).toContain("Ver discussões");
     expect(html).toContain(
       `<meta property="og:image" content="${webserver.origin}/api/og"/>`,

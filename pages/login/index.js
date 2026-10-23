@@ -25,6 +25,7 @@ export default function LoginPage() {
       metadata={{
         title: "Entrar",
         description: "Acesse sua conta no AgroTab.",
+        noIndex: true,
       }}
     >
       <Heading as="h1" className={classes.heading}>

@@ -1,40 +1,82 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { ImageResponse } from "next/og";
-import { credentialText } from "models/profile.js";
+import webserver from "infra/webserver.js";
 
 // Imagem de prévia (1200×630) para WhatsApp, redes sociais e buscadores.
-// Roda no Edge: não acessa o banco, lê a publicação pela API pública — assim
-// o texto da imagem é sempre o publicado, nunca algo vindo da URL.
-export const config = {
-  runtime: "edge",
-};
-
+// O cartão junta a cena do trator com a logo. O texto da publicação vem da
+// API pública, nunca de parâmetros da URL.
 const WIDTH = 1200;
 const HEIGHT = 630;
 const GREEN = "#1f6f3f";
-const TITLE_MAX_LENGTH = 110;
+const TITLE_MAX_LENGTH = 90;
+const PHOTO_HEIGHT = 400;
 
-export default async function handler(request) {
-  const url = new URL(request.url);
+let cachedAssets;
+
+function serverOrigin(request) {
+  // Em desenvolvimento o Next pode não estar na porta 3000. A prévia precisa
+  // ler a publicação neste mesmo processo. Em produção segue o domínio público.
+  if (process.env.NODE_ENV === "production") {
+    return webserver.origin;
+  }
+
+  const host = request.headers.host;
+  if (typeof host === "string" && /^[a-z0-9.:-]+$/i.test(host)) {
+    return `http://${host}`;
+  }
+
+  return webserver.origin;
+}
+
+export default async function handler(request, response) {
+  const origin = serverOrigin(request);
+  const url = new URL(request.url, origin);
   const username = url.searchParams.get("username");
   const slug = url.searchParams.get("slug");
 
   let content = null;
   if (username && slug) {
-    content = await fetchContent(url.origin, username, slug);
+    content = await fetchContent(origin, username, slug);
   }
 
-  const image = content ? <ContentImage content={content} /> : <DefaultImage />;
+  const assets = await loadAssets();
+  const image = content ? (
+    <ContentImage assets={assets} content={content} />
+  ) : (
+    <DefaultImage assets={assets} />
+  );
 
-  return new ImageResponse(image, {
+  const imageResponse = new ImageResponse(image, {
     width: WIDTH,
     height: HEIGHT,
-    headers: {
-      // A URL leva a data de edição (?v=), então pode ficar no CDN.
-      "Cache-Control": content
-        ? "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800"
-        : "public, max-age=86400, s-maxage=604800",
-    },
   });
+  const buffer = Buffer.from(await imageResponse.arrayBuffer());
+
+  response.setHeader("Content-Type", "image/png");
+  response.setHeader(
+    "Cache-Control",
+    content
+      ? "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800"
+      : "public, max-age=86400, s-maxage=604800",
+  );
+  response.status(200).send(buffer);
+}
+
+async function loadAssets() {
+  if (!cachedAssets) {
+    const [tractor, logo] = await Promise.all([
+      readFile(path.join(process.cwd(), "public", "cena-trator.jpg")),
+      readFile(path.join(process.cwd(), "public", "logo-agrotab.png")),
+    ]);
+    cachedAssets = {
+      tractor: `data:image/jpeg;base64,${tractor.toString("base64")}`,
+      // O arquivo se chama .png, mas os bytes são JPEG. Satori só desenha
+      // a logo se o tipo bater com o conteúdo.
+      logo: `data:image/jpeg;base64,${logo.toString("base64")}`,
+    };
+  }
+  return cachedAssets;
 }
 
 async function fetchContent(origin, username, slug) {
@@ -59,27 +101,7 @@ function truncate(text, maxLength) {
   return `${value.slice(0, maxLength - 1).trimEnd()}…`;
 }
 
-function Logo({ size = 56 }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={GREEN}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="2" y="2" width="20" height="20" rx="3" />
-      <path d="M12 18v-6" />
-      <path d="M12 12c0-3 2-5 5-5 0 3-2 5-5 5Z" />
-      <path d="M12 14c0-2.5-1.7-4-4-4 0 2.5 1.7 4 4 4Z" />
-    </svg>
-  );
-}
-
-function Frame({ children }) {
+function Scene({ assets, children }) {
   return (
     <div
       style={{
@@ -87,116 +109,112 @@ function Frame({ children }) {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
-        padding: "64px 72px",
-        background: "linear-gradient(135deg, #f6fbf3 0%, #e4f2dc 100%)",
-        borderBottom: `16px solid ${GREEN}`,
-        color: "#1b2a1f",
-        fontFamily: "sans-serif",
+        background: "#ffffff",
       }}
     >
-      {children}
-    </div>
-  );
-}
-
-function Brand() {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-      <Logo />
-      <span style={{ fontSize: 40, fontWeight: 700, color: GREEN }}>
-        AgroTab
-      </span>
-    </div>
-  );
-}
-
-function ContentImage({ content }) {
-  const tags = Array.isArray(content.tags) ? content.tags.slice(0, 2) : [];
-  const author = content.owner_username;
-  const credential = credentialText({
-    occupation: content.owner_occupation,
-    state: content.owner_state,
-  });
-
-  return (
-    <Frame>
-      <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
-        {tags.length > 0 && (
-          <div style={{ display: "flex", gap: 12 }}>
-            {tags.map((tag) => (
-              <span
-                key={tag.slug}
-                style={{
-                  padding: "8px 20px",
-                  borderRadius: 999,
-                  background: GREEN,
-                  color: "#ffffff",
-                  fontSize: 28,
-                  fontWeight: 600,
-                }}
-              >
-                {tag.label}
-              </span>
-            ))}
-          </div>
-        )}
-        <div
-          style={{
-            display: "flex",
-            fontSize: content.title.length > 70 ? 56 : 68,
-            fontWeight: 800,
-            lineHeight: 1.15,
-            letterSpacing: "-0.02em",
-          }}
-        >
-          {truncate(content.title, TITLE_MAX_LENGTH)}
-        </div>
-      </div>
-
+      <img
+        src={assets.tractor}
+        width={WIDTH}
+        height={PHOTO_HEIGHT}
+        style={{ objectFit: "cover", objectPosition: "center" }}
+      />
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
+          flexGrow: 1,
+          gap: 28,
+          padding: "16px 36px",
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <span style={{ fontSize: 32, fontWeight: 600 }}>{author}</span>
-          {credential && (
-            <span style={{ fontSize: 26, color: "#4b5d50" }}>{credential}</span>
-          )}
-        </div>
-        <Brand />
-      </div>
-    </Frame>
-  );
-}
-
-function DefaultImage() {
-  return (
-    <Frame>
-      <Brand />
-      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+        <img
+          src={assets.logo}
+          width={168}
+          height={168}
+          style={{ objectFit: "contain" }}
+        />
         <div
           style={{
             display: "flex",
-            fontSize: 72,
-            fontWeight: 800,
-            lineHeight: 1.1,
-            letterSpacing: "-0.02em",
+            flexDirection: "column",
+            justifyContent: "center",
+            width: 900,
           }}
         >
-          Pergunte a quem já passou por isso no campo.
-        </div>
-        <div style={{ display: "flex", fontSize: 34, color: "#4b5d50" }}>
-          Produtores, agrônomos e técnicos respondendo dúvidas reais da lavoura
-          e da criação.
+          {children}
         </div>
       </div>
-      <span style={{ fontSize: 28, color: GREEN, fontWeight: 600 }}>
+    </div>
+  );
+}
+
+function ContentImage({ assets, content }) {
+  return (
+    <Scene assets={assets}>
+      <div
+        style={{
+          display: "flex",
+          fontSize: 22,
+          fontWeight: 700,
+          color: GREEN,
+        }}
+      >
+        AgroTab
+      </div>
+      <div
+        style={{
+          display: "flex",
+          marginTop: 8,
+          fontSize: 36,
+          fontWeight: 800,
+          lineHeight: 1.15,
+          letterSpacing: "-0.02em",
+          color: "#1b2a1f",
+        }}
+      >
+        {truncate(content.title, TITLE_MAX_LENGTH)}
+      </div>
+    </Scene>
+  );
+}
+
+function DefaultImage({ assets }) {
+  return (
+    <Scene assets={assets}>
+      <div
+        style={{
+          display: "flex",
+          fontSize: 22,
+          fontWeight: 700,
+          color: GREEN,
+        }}
+      >
+        AgroTab
+      </div>
+      <div
+        style={{
+          display: "flex",
+          marginTop: 8,
+          fontSize: 36,
+          fontWeight: 800,
+          lineHeight: 1.15,
+          letterSpacing: "-0.02em",
+          color: "#1b2a1f",
+        }}
+      >
+        Conhecimento do agro merece circular
+      </div>
+      <div
+        style={{
+          display: "flex",
+          marginTop: 10,
+          fontSize: 24,
+          color: GREEN,
+          fontWeight: 600,
+        }}
+      >
         agrotab.com.br
-      </span>
-    </Frame>
+      </div>
+    </Scene>
   );
 }

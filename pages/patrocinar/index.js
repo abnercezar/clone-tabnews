@@ -29,6 +29,7 @@ export default function SponsorshipPage() {
       metadata={{
         title: "Patrocinar",
         description: "Publique um link no topo do feed do AgroTab.",
+        noIndex: true,
       }}
     >
       <Heading as="h1" className={classes.heading}>

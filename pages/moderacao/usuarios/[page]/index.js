@@ -97,6 +97,7 @@ export default function ModeracaoUsuariosPage() {
       metadata={{
         title: `Página ${pagination.currentPage} · Usuários`,
         description: "Lista de usuários do AgroTab.",
+        noIndex: true,
       }}
     >
       {errorMessage && <Flash variant="danger">{errorMessage}</Flash>}

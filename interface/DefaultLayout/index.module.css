@@ -162,6 +162,14 @@
   padding-right: var(--base-size-4, 4px);
 }
 
+.agroCoinCount svg {
+  color: #ffffff;
+}
+
+.agroCashCount svg {
+  color: var(--agro-gold, #f2c94c);
+}
+
 .agroCashCount {
   padding-left: 0;
 }

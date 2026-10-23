@@ -54,6 +54,7 @@ export default function ConfirmEmailPage() {
         contentWidth="small"
         metadata={{
           title: "Confirmar alteração de email",
+          noIndex: true,
         }}
       >
         {status === "loading" && (

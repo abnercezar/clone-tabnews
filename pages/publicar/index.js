@@ -47,6 +47,7 @@ export default function PublishPage() {
         title: "Fazer uma pergunta",
         description:
           "Pergunte à comunidade do AgroTab, conte um relato de campo ou o resultado da sua safra.",
+        noIndex: true,
       }}
     >
       <Stack gap="spacious">
@@ -96,6 +97,8 @@ function PublishForm() {
   const [tags, setTags] = useState([]);
   const [isAd, setIsAd] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [errorAction, setErrorAction] = useState(null);
+  const [showDraftNote, setShowDraftNote] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [restoredDraft, setRestoredDraft] = useState(false);
   const [autoSending, setAutoSending] = useState(false);
@@ -192,19 +195,25 @@ function PublishForm() {
     setBody(template.body);
   }
 
+  function reportError(message, action = null, keepDraftNote = false) {
+    setErrorMessage(message);
+    setErrorAction(action);
+    setShowDraftNote(keepDraftNote);
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
-    setErrorMessage(null);
+    reportError(null);
 
     if (isTooLong) {
-      setErrorMessage(
+      reportError(
         `O texto ultrapassa o limite de ${MAX_BODY_LENGTH} caracteres.`,
       );
       return;
     }
 
     if (missing) {
-      setErrorMessage(`Para publicar, preencha ${missing}.`);
+      reportError(`Para publicar, preencha ${missing}.`);
       return;
     }
 
@@ -254,19 +263,15 @@ function PublishForm() {
         return;
       }
 
-      if (response.status === 403) {
-        setErrorMessage(
-          "Sua conta ainda não pode publicar. Seu texto continua guardado.",
-        );
-        return;
-      }
-
-      setErrorMessage(
+      reportError(
         responseBody.message || "Não foi possível publicar. Tente novamente.",
+        responseBody.action,
+        true,
       );
     } catch {
-      setErrorMessage(
-        "Não foi possível conectar ao servidor. Seu texto continua guardado.",
+      reportError(
+        "Não foi possível conectar ao servidor.",
+        "Seu texto continua guardado neste aparelho.",
       );
     } finally {
       setIsSubmitting(false);
@@ -295,7 +300,15 @@ function PublishForm() {
 
         {errorMessage && (
           <Flash variant="danger" role="alert">
-            {errorMessage}
+            <p className={classes.flashText}>{errorMessage}</p>
+            {errorAction && (
+              <p className={classes.flashAction}>{errorAction}</p>
+            )}
+            {showDraftNote && (
+              <p className={classes.flashAction}>
+                Seu texto continua guardado neste aparelho.
+              </p>
+            )}
           </Flash>
         )}
 
@@ -365,8 +378,8 @@ function PublishForm() {
             placeholder="Conte o que está acontecendo, onde e o que você já tentou."
           />
           <FormControl.Caption>
-            Use a barra para negrito, lista, link e fotos (até 6, da câmera ou
-            da galeria).
+            Use a barra para negrito, lista, link e fotos (até 6, JPEG, PNG ou
+            WebP, no máximo 8 MB). Vídeo não é aceito.
           </FormControl.Caption>
         </FormControl>
 

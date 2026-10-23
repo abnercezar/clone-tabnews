@@ -1,18 +1,36 @@
-/* Uma linha só, rolando para o lado: não empurra o feed para baixo no celular. */
+/* Uma linha só. A rolagem fica escondida: setas e o gesto do mouse
+   substituem a barra nativa, que destoava do restante do feed. */
+.wrap {
+  position: relative;
+  border-bottom: 1px solid var(--borderColor-muted, #d8dee4);
+}
+
 .filter {
   overflow-x: auto;
   padding: var(--base-size-8, 8px) var(--base-size-16, 16px);
-  border-bottom: 1px solid var(--borderColor-muted, #d8dee4);
-  scrollbar-width: thin;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 48px;
+}
+
+.filter::-webkit-scrollbar {
+  display: none;
+  height: 0;
 }
 
 .list {
   display: flex;
   gap: var(--base-size-8, 8px);
   margin: 0;
-  padding: 0;
+  /* Folga para a última cultura não ficar embaixo da seta. */
+  padding: 0 40px 0 0;
   list-style: none;
   white-space: nowrap;
+}
+
+.list > li {
+  scroll-snap-align: start;
 }
 
 .tag,
@@ -35,4 +53,58 @@
   border-color: var(--bgColor-success-emphasis, #1f883d);
   background: var(--bgColor-success-emphasis, #1f883d);
   color: var(--fgColor-onEmphasis, #ffffff);
+}
+
+.controlLeft,
+.controlRight {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  width: 72px;
+  pointer-events: none;
+}
+
+.controlLeft {
+  left: 0;
+  justify-content: flex-start;
+  padding-left: 6px;
+  background: linear-gradient(
+    to right,
+    var(--bgColor-default, #ffffff) 40px,
+    transparent
+  );
+}
+
+.controlRight {
+  right: 0;
+  justify-content: flex-end;
+  padding-right: 6px;
+  background: linear-gradient(
+    to left,
+    var(--bgColor-default, #ffffff) 40px,
+    transparent
+  );
+}
+
+.arrow {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--borderColor-default, #d0d7de);
+  border-radius: 999px;
+  background: var(--bgColor-default, #ffffff);
+  color: var(--fgColor-muted, #656d76);
+  cursor: pointer;
+}
+
+.arrow:hover {
+  border-color: var(--fgColor-success, #1a7f37);
+  color: var(--fgColor-default, #1f2328);
 }

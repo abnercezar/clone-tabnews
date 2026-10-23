@@ -45,7 +45,7 @@ export default function UnsubscribeNewsletterPage() {
   return (
     <DefaultLayout
       contentWidth="small"
-      metadata={{ title: "Sair da newsletter" }}
+      metadata={{ title: "Sair da newsletter", noIndex: true }}
     >
       {status === "success" ? (
         <Stack gap="normal">

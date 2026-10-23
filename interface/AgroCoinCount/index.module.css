@@ -5,6 +5,11 @@
   white-space: nowrap;
 }
 
+.icon {
+  color: #0969da;
+  flex: none;
+}
+
 .link {
   color: inherit;
   text-decoration: none !important;

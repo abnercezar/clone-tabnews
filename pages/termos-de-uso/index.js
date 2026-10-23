@@ -31,7 +31,7 @@ const BODY = `Ao utilizar o AgroTab você concorda com os termos abaixo.
 ## Garantias
 
 1. O AgroTab é um serviço em evolução e **não oferece garantia** de disponibilidade contínua nem de suporte comercial. A comunidade se esforça para manter o melhor serviço possível.
-2. As moedas digitais **AgroCoins** e **AgroCash** têm validade somente dentro do AgroTab e **não possuem vínculo ou lastro** com ativos financeiros da economia real. Imprecisões no sistema de saldos podem ocorrer; corrigiremos o que for razoável, sem transformar essas moedas em direito creditício externo.
+2. **AgroCoin** é a moeda interna de qualificação e **AgroCash** é a nota interna usada para patrocinar publicações. As duas aparecem na conta do usuário (círculo para AgroCoin e quadrado para AgroCash) e têm validade somente dentro do AgroTab. Não possuem vínculo ou lastro com ativos financeiros da economia real, não podem ser sacadas, vendidas nem transferidas para fora da plataforma. A forma de ganhar e gastar está descrita no [FAQ](/faq). Imprecisões no sistema de saldos podem ocorrer; corrigiremos o que for razoável, sem transformar esses saldos em direito creditício externo.
 
 ## Moderação
 
@@ -45,6 +45,7 @@ const BODY = `Ao utilizar o AgroTab você concorda com os termos abaixo.
 ## Histórico
 
 * Documento inicial adaptado à comunidade AgroTab.
+* Esclarecimento de que AgroCoin é moeda interna de qualificação e AgroCash é nota interna de patrocínio, sem valor fora da plataforma.
 `;
 
 export default function TermosDeUsoPage() {

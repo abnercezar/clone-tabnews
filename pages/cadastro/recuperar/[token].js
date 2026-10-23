@@ -15,6 +15,7 @@ export default function NewPasswordPage() {
       metadata={{
         title: "Defina uma nova senha",
         description: "Escolha uma nova senha para a sua conta no AgroTab.",
+        noIndex: true,
       }}
     >
       <Heading as="h1" className={classes.heading}>

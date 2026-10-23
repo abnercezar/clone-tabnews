@@ -35,7 +35,7 @@ Temas adjacentes (produtividade, empreendedorismo rural, educação no campo) ta
 - **Revise a escrita:** gramática e digitação claras facilitam a leitura.
 - **Escreva o título como você buscaria no Google:** por exemplo, "Como controlar percevejo na soja após o R5?".
 - **Escolha as tags** da cultura ou criação, do tema e da região: assim quem vive o mesmo problema encontra sua pergunta.
-- **Mande fotos** pelo botão **Foto** do editor, direto da câmera ou da galeria (até 6 por publicação).
+- **Mande fotos** pelo botão **Foto** do editor, direto da câmera ou da galeria (até 6 por publicação, JPEG, PNG ou WebP, no máximo 8 MB). Vídeo não é aceito.
 - **Use a barra do editor** para negrito, listas e links. Quem já conhece Markdown pode trocar para o modo avançado.
 - **Use fontes** quando fizer sentido: credibilidade e contexto importam no agro.
 - **Confirme os fatos:** se for opinião, deixe isso explícito.`,
@@ -43,23 +43,35 @@ Temas adjacentes (produtividade, empreendedorismo rural, educação no campo) ta
   {
     id: "util",
     question: "Para que servem os botões Útil 👍 e Não útil?",
-    answer: `Depois de ler uma pergunta, resposta ou relato, toque em **Útil 👍** se aquilo ajudou ou **Não útil** se não ajudou. Os votos fazem as melhores respostas aparecerem primeiro e mostram quem está ajudando a comunidade.
+    answer: `Depois de ler uma pergunta, resposta ou relato, toque em **Útil 👍** se aquilo ajudou ou **Não útil** se não ajudou. Os votos fazem as melhores respostas aparecerem primeiro.
 
-Para votar é preciso ter conta. O número ao lado dos botões é o saldo de votos daquele conteúdo.`,
+Para votar é preciso ter conta e pelo menos **2 AgroCoins**. Cada voto, útil ou não útil, debita 2 AgroCoins de quem vota e credita **1 AgroCash** para essa pessoa. O autor e a publicação ganham 1 AgroCoin no útil, ou perdem 1 no não útil. Não dá para votar no próprio conteúdo.`,
   },
   {
     id: "agrocoin",
-    question: "O que é a reputação no perfil?",
-    answer: `É um número só, que cresce quando a comunidade marca seus conteúdos como **úteis** e diminui com votos de **não útil** ou quando um conteúdo seu é removido por quebrar as regras. Publicar com frequência e participar também ajudam.
+    question: "O que é o AgroCoin?",
+    answer: `É a **moeda** do AgroTab. No cabeçalho e no perfil o saldo aparece com um círculo.
 
-Ela não vale dinheiro: serve para mostrar, no AgroTab, quem costuma ajudar. (Por dentro, o sistema ainda chama essa pontuação de AgroCoin.)`,
+Publicar não cobra moeda. Um texto com substância começa com **1 AgroCoin** na publicação, e o autor recebe um crédito extra conforme o prestígio das publicações recentes. Texto curto demais não gera esse crédito. Responder o próprio conteúdo também não credita AgroCoin no autor.
+
+Dá para ganhar AgroCoin de três jeitos:
+
+- **Publicando** um texto com substância, como descrito acima.
+- **Recebendo útil** em um conteúdo seu: cada voto soma 1 AgroCoin para você e para a publicação.
+- **Recompensa diária:** quem entra no site e já publicou pode receber AgroCoins uma vez por dia. Quanto melhor avaliados estiverem os conteúdos recentes e menor estiver o saldo, maior tende a ser essa recompensa.
+
+O saldo desce ao votar (2 AgroCoins por voto), ao receber **não útil** e quando um conteúdo seu é apagado: saem os AgroCoins ganhos na criação e nas avaliações positivas daquela publicação.
+
+Se o prestígio das publicações recentes ficar negativo, publicação e comentário novos são recusados até as mal avaliadas serem excluídas. AgroCoin não vale dinheiro fora do site. Ele serve para votar no conteúdo dos outros.`,
   },
   {
     id: "agrocash",
     question: "O que é AgroCash?",
-    answer: `É um saldo que você acumula ao votar em conteúdos de outras pessoas. Hoje ele serve só para uma coisa: **patrocinar uma publicação** na página [Publicar](/publicar), que passa a aparecer no espaço de anúncio, marcada como Patrocinado.
+    answer: `É a **nota** do AgroTab. No cabeçalho e no perfil o saldo aparece com um quadrado, ao lado do círculo.
 
-AgroCash **não é dinheiro** e não pode ser trocado por nada fora do AgroTab. Se você não pretende patrocinar nada, pode ignorá-lo.`,
+Cada voto que você dá, útil ou não útil, credita **1 AgroCash**. A nota serve para **patrocinar uma publicação** na página [Publicar](/publicar): custa **100 AgroCash**, você confirma antes de gastar, e o texto aparece no espaço de anúncio, marcado como Patrocinado.
+
+O anúncio não credita AgroCoin no autor. Se o texto tiver substância, a publicação patrocinada ainda começa com 1 AgroCoin. AgroCash **não é dinheiro** e não pode ser trocado, sacado nem transferido para fora do AgroTab.`,
   },
   {
     id: "publicacao-patrocinada",
@@ -81,7 +93,9 @@ Se for um pitch curto, prefira deixar isso claro no título (por exemplo: \`Pitc
   {
     id: "bloqueio-publicacao",
     question: "Não consigo criar novas publicações. O que fazer?",
-    answer: `Se a plataforma impedir novas publicações por causa de conteúdos recentes mal avaliados, revise e, se fizer sentido, remova os que estão zerados ou negativos. Isso protege a comunidade e dá espaço para você ajustar o tom antes de publicar de novo.`,
+    answer: `Se aparecer a mensagem *"Não é possível publicar porque há outras publicações mal avaliadas que ainda não foram excluídas"*, revise os conteúdos recentes com saldo zerado ou negativo.
+
+Apague os que não representam o que você quer na comunidade e tente de novo. Enquanto o prestígio continuar negativo, publicação e comentário novos continuam recusados. Isso protege a comunidade e dá espaço para ajustar o tom antes de publicar outra vez.`,
   },
   {
     id: "relevantes",

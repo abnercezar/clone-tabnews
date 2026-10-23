@@ -77,11 +77,11 @@ export default function HomeIntro() {
             Comunidade do agronegócio
           </Text>
           <Heading as="h1" id="home-intro-title" className={classes.title}>
-            Pergunte a quem já passou por isso no campo.
+            Tire sua dúvida do campo com quem é do campo.
           </Heading>
           <Text as="p" className={classes.subtitle}>
-            Produtores, agrônomos e técnicos respondendo dúvidas reais da
-            lavoura e da criação.
+            Uma comunidade nova, aberta a produtores, agrônomos e técnicos. Faça
+            a primeira pergunta ou ajude quem está começando.
           </Text>
           <div className={classes.actions}>
             <LinkButton

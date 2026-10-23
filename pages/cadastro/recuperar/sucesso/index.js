@@ -7,6 +7,7 @@ export default function RecoverPasswordSuccessPage() {
       contentWidth="small"
       metadata={{
         title: "Nova senha definida",
+        noIndex: true,
       }}
     >
       <Banner

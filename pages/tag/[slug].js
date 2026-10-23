@@ -12,7 +12,7 @@ const PER_PAGE = 30;
 
 const CATEGORY_INTRO = {
   cultura: (label) =>
-    `Perguntas, relatos de campo e resultados de safra sobre ${label.toLowerCase()}, respondidos por produtores, agrônomos e técnicos.`,
+    `Perguntas, relatos de campo e resultados de safra sobre ${label.toLowerCase()}, abertos a produtores, agrônomos e técnicos.`,
   tema: (label) =>
     `Discussões sobre ${label.toLowerCase()} no agronegócio, com a experiência de quem está no campo.`,
   regiao: (label) =>
