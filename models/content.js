@@ -236,9 +236,8 @@ async function creditOrDebitTabCoins(oldContent, newContent, options = {}) {
     if (userEarnings < 0) {
       throw new ForbiddenError({
         message:
-          "Não é possível publicar porque há outras publicações mal avaliadas que ainda não foram excluídas.",
-        action:
-          "Exclua seus conteúdos mais recentes que estiverem classificados como não relevantes.",
+          "Não é possível publicar porque há publicações recentes com saldo zerado ou negativo que ainda não foram excluídas.",
+        action: "Exclua esses conteúdos e tente publicar de novo.",
       });
     }
 
@@ -326,7 +325,7 @@ async function updateTabCashBalance(newContent, options = {}) {
   if (Number(userBalance.total) < 0) {
     throw new UnprocessableEntityError({
       message: "Não foi possível criar a publicação patrocinada.",
-      action: `Você precisa de pelo menos ${initialTabCash} TabCash para realizar esta ação.`,
+      action: `Você precisa de pelo menos ${initialTabCash} AgroCash para realizar esta ação.`,
     });
   }
 

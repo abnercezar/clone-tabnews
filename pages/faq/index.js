@@ -52,7 +52,7 @@ Para votar é preciso ter conta e pelo menos **2 AgroCoins**. Cada voto, útil o
     question: "O que é o AgroCoin?",
     answer: `É a **moeda** do AgroTab. No cabeçalho e no perfil o saldo aparece com um círculo.
 
-Publicar não cobra moeda. Um texto com substância começa com **1 AgroCoin** na publicação, e o autor recebe um crédito extra conforme o prestígio das publicações recentes. Texto curto demais não gera esse crédito. Responder o próprio conteúdo também não credita AgroCoin no autor.
+Publicar não cobra moeda. Um texto com substância começa com **1 AgroCoin** na publicação. O autor só recebe moedas a mais quando o prestígio das publicações recentes é positivo. Texto curto demais não coloca AgroCoin nem na publicação nem no autor. Responder o próprio conteúdo também não coloca AgroCoin na resposta nem no autor.
 
 Dá para ganhar AgroCoin de três jeitos:
 
@@ -60,9 +60,11 @@ Dá para ganhar AgroCoin de três jeitos:
 - **Recebendo útil** em um conteúdo seu: cada voto soma 1 AgroCoin para você e para a publicação.
 - **Recompensa diária:** quem entra no site e já publicou pode receber AgroCoins uma vez por dia. Quanto melhor avaliados estiverem os conteúdos recentes e menor estiver o saldo, maior tende a ser essa recompensa.
 
-O saldo desce ao votar (2 AgroCoins por voto), ao receber **não útil** e quando um conteúdo seu é apagado: saem os AgroCoins ganhos na criação e nas avaliações positivas daquela publicação.
+O saldo desce ao votar (2 AgroCoins por voto) e ao receber **não útil**.
 
-Se o prestígio das publicações recentes ficar negativo, publicação e comentário novos são recusados até as mal avaliadas serem excluídas. AgroCoin não vale dinheiro fora do site. Ele serve para votar no conteúdo dos outros.`,
+Se você apaga um conteúdo com saldo acima de zero, saem os AgroCoins que você ganhou na criação e nos votos úteis daquela publicação. Se o saldo estiver em zero ou negativo, sai só o crédito da criação; o que você perdeu no não útil continua fora.
+
+Publicações com saldo zero ou negativo, inclusive texto curto que nunca ganhou moeda, entram no prestígio depois de 2 dias. As 3 mais novas ficam de fora dessa média, até o limite de 20. Se a média das publicações ficar em 0,5 ou menos, ou a dos comentários em 0,4 ou menos, publicação e comentário novos são recusados até esses conteúdos serem excluídos. AgroCoin não vale dinheiro fora do site. Ele serve para votar no conteúdo dos outros.`,
   },
   {
     id: "agrocash",
@@ -93,9 +95,9 @@ Se for um pitch curto, prefira deixar isso claro no título (por exemplo: \`Pitc
   {
     id: "bloqueio-publicacao",
     question: "Não consigo criar novas publicações. O que fazer?",
-    answer: `Se aparecer a mensagem *"Não é possível publicar porque há outras publicações mal avaliadas que ainda não foram excluídas"*, revise os conteúdos recentes com saldo zerado ou negativo.
+    answer: `Se aparecer a mensagem *"Não é possível publicar porque há publicações recentes com saldo zerado ou negativo que ainda não foram excluídas"*, abra os conteúdos com mais de dois dias e saldo zerado ou negativo.
 
-Apague os que não representam o que você quer na comunidade e tente de novo. Enquanto o prestígio continuar negativo, publicação e comentário novos continuam recusados. Isso protege a comunidade e dá espaço para ajustar o tom antes de publicar outra vez.`,
+Um texto curto também fica com saldo zero e, depois de dois dias, trava a conta do mesmo jeito que uma publicação mal votada. Apague esses conteúdos e tente de novo. Enquanto o prestígio continuar negativo, publicação e comentário novos continuam recusados.`,
   },
   {
     id: "relevantes",
