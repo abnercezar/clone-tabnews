@@ -41,7 +41,7 @@ export default function ModeracaoPerguntasPage() {
   return (
     <DefaultLayout
       contentWidth="medium"
-      metadata={{ title: "Nova Pergunta da Comunidade" }}
+      metadata={{ title: "Nova Pergunta da Comunidade", noIndex: true }}
     >
       <Stack gap="spacious">
         <Stack gap="condensed">

@@ -177,6 +177,48 @@ describe("`PATCH /api/v1/contents/[username]/[slug]`", () => {
     expect(responseBody.name).toBe("ForbiddenError");
   });
 
+  test("A user with update:content:others edits another user's content", async () => {
+    const author = await orchestrator.createUser({
+      username: "donodoadminedit",
+    });
+    const activatedAuthor = await orchestrator.activateUser(author);
+    const createdContent = await orchestrator.createContent({
+      owner_id: activatedAuthor.id,
+      title: "Publicação que o admin revisa",
+      body: "Texto original do autor.",
+    });
+
+    const moderator = await orchestrator.createUser({
+      username: "admineditor",
+    });
+    const activatedModerator = await orchestrator.activateUser(moderator);
+    await orchestrator.addFeaturesToUser(activatedModerator, [
+      "update:content:others",
+    ]);
+    const moderatorSession =
+      await orchestrator.createSession(activatedModerator);
+
+    const response = await fetch(
+      `${webserver.origin}/api/v1/contents/donodoadminedit/${createdContent.slug}`,
+      {
+        method: "PATCH",
+        headers: {
+          Cookie: `session_id=${moderatorSession.token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: "Publicação revisada pelo admin",
+          body: "Texto ajustado pela moderação.",
+        }),
+      },
+    );
+
+    expect(response.status).toBe(200);
+    const responseBody = await response.json();
+    expect(responseBody.title).toBe("Publicação revisada pelo admin");
+    expect(responseBody.owner_username).toBe("donodoadminedit");
+  });
+
   test("Anonymous user cannot edit it", async () => {
     const response = await fetch(
       `${webserver.origin}/api/v1/contents/donodoedit/conteudo-protegido-da-edicao`,

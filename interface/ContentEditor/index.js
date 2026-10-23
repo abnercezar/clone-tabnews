@@ -19,6 +19,8 @@ import {
 } from "@primer/octicons-react";
 import {
   MAX_PHOTOS_PER_POST,
+  PHOTO_ACCEPT,
+  assertPhotoFile,
   compressPhoto,
   countUploadedPhotos,
   uploadPhoto,
@@ -84,9 +86,15 @@ export default function ContentEditor({
 
   async function sendPhotos(files) {
     setPhotoError(null);
-    const selected = Array.from(files || []).filter((file) =>
-      file.type.startsWith("image/"),
-    );
+    const selected = [];
+    for (const file of Array.from(files || [])) {
+      try {
+        assertPhotoFile(file);
+        selected.push(file);
+      } catch (error) {
+        setPhotoError(error.message);
+      }
+    }
 
     if (selected.length === 0) {
       return [];
@@ -345,7 +353,7 @@ function SimpleEditor({
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*"
+          accept={PHOTO_ACCEPT}
           multiple
           hidden
           onChange={handleFiles}

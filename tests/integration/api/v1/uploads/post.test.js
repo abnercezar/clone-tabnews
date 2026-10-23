@@ -41,4 +41,25 @@ describe("POST /api/v1/uploads", () => {
       status_code: 422,
     });
   });
+
+  test("Authenticated user cannot upload a video", async () => {
+    const createdUser = await orchestrator.createUser({ activate: true });
+    const session = await orchestrator.createSession(createdUser);
+
+    const response = await fetch(`${webserver.origin}/api/v1/uploads`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "video/mp4",
+        Cookie: `session_id=${session.token}`,
+      },
+      body: new Uint8Array([0, 0, 0, 24, 0x66, 0x74, 0x79, 0x70]),
+    });
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({
+      name: "ValidationError",
+      message: "Vídeo não é aceito.",
+      action: "Envie uma foto de até 8 MB, em JPEG, PNG ou WebP.",
+      status_code: 400,
+    });
+  });
 });

@@ -7,6 +7,7 @@ export default function ConfirmRegisterPage() {
       contentWidth="small"
       metadata={{
         title: "Confirme seu email",
+        noIndex: true,
       }}
     >
       <Banner

@@ -19,14 +19,19 @@ adaptar, nunca como fonte para copiar sem avaliar.
 ## Comandos
 
 - `npm run dev` — sobe serviços (Docker), espera o Postgres, roda migrations e `next dev`.
-- `npm test` — sobe serviços e roda a suíte Jest (`--runInBand`); `posttest` derruba os serviços.
+- `npm run test:isolated` — roda a suíte Jest em containers descartáveis (Postgres, Mailcatcher e
+  `next dev` próprios), sem tocar no banco do `npm run dev`. Aceita caminho/opções do Jest:
+  `npm run test:isolated -- tests/unit/models`. **Use este para testar localmente.**
+- `npm test` — sobe os serviços do `infra/compose.yaml` (os mesmos do dev) e roda a suíte;
+  `posttest` derruba os serviços. Apaga o banco de dev: é o comando do CI.
 - `npm run migrations:create -- <nome>` / `npm run migrations:up` / `...:up:dry`.
 - `npm run lint:prettier:check` / `lint:prettier:fix` / `lint:eslint:check`.
 - Commits via Conventional Commits (commitlint + husky). Opcional: `npm run commit` (commitizen).
 
-> Para auditoria/testes sem colidir com os serviços locais, suba Postgres e Mailcatcher
-> isolados em portas alternativas e aponte `POSTGRES_PORT` / `EMAIL_SMTP_PORT` /
-> `EMAIL_HTTP_PORT` para elas. Sempre remova os containers de auditoria ao terminar.
+> **Nunca rode `npx jest` no host**, nem para um arquivo de `tests/unit` (alguns usam o
+> orchestrator): `clearDatabase()` apaga o banco do `.env.development`, e o `jest.config.js`
+> carrega esse arquivo com `override`, então exportar outra `POSTGRES_PORT` não isola. Use
+> `npm run test:isolated`, que remove os próprios containers ao terminar.
 
 ## Estrutura
 
@@ -86,6 +91,9 @@ adaptar, nunca como fonte para copiar sem avaliar.
 - `agrotab-architect` — análise de arquitetura, dependências e riscos (read-only).
 - `agrotab-product` — necessidades do público agro e priorização (read-only).
 - `agrotab-tabnews-watcher` — compara o upstream TabNews e propõe oportunidades (read-only).
+- `agrotab-security-auditor` — dependências, authz/IDOR, uploads, OAuth, XSS e planos de upgrade (read-only).
+- `agrotab-migration-guardian` — revisa migrations antes de rodar: reversibilidade e risco aos dados (read-only).
+- `agrotab-seo-share` — prévia no WhatsApp, og:image, sitemap, robots, canonical e JSON-LD (read-only).
 
 Para trabalho de escrita em paralelo, isolar por git worktree ou serializar, evitando que
 dois agentes editem os mesmos arquivos. O `agrotab-code-reviewer` avalia de forma

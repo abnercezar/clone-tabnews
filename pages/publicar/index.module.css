@@ -14,3 +14,12 @@
   color: var(--fgColor-muted, #656d76);
   font-weight: 400;
 }
+
+.flashText {
+  margin: 0;
+  font-weight: 600;
+}
+
+.flashAction {
+  margin: 4px 0 0;
+}

@@ -187,8 +187,8 @@ async function rateContent(
 
   if (Number(currentBalances.user_current_tabcoin_balance) < 0) {
     throw new UnprocessableEntityError({
-      message: "Não foi possível adicionar TabCoins nesta publicação.",
-      action: `Você precisa de pelo menos ${Math.abs(tabCoinsToDebitFromUser)} TabCoins para realizar esta ação.`,
+      message: "Não foi possível qualificar esta publicação.",
+      action: `Você precisa de pelo menos ${Math.abs(tabCoinsToDebitFromUser)} AgroCoins para realizar esta ação.`,
     });
   }
 

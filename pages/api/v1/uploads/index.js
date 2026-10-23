@@ -16,6 +16,32 @@ export const config = {
   },
 };
 
+function isVideoContentType(contentType) {
+  return String(contentType || "")
+    .toLowerCase()
+    .startsWith("video/");
+}
+
+function looksLikeVideo(buffer) {
+  if (buffer.length >= 12 && buffer.toString("ascii", 4, 8) === "ftyp") {
+    return true;
+  }
+  if (
+    buffer.length >= 4 &&
+    buffer[0] === 0x1a &&
+    buffer[1] === 0x45 &&
+    buffer[2] === 0xdf &&
+    buffer[3] === 0xa3
+  ) {
+    return true;
+  }
+  return (
+    buffer.length >= 12 &&
+    buffer.toString("ascii", 0, 4) === "RIFF" &&
+    buffer.toString("ascii", 8, 12) === "AVI "
+  );
+}
+
 function detectImageType(buffer) {
   if (
     buffer.length > 3 &&
@@ -56,21 +82,36 @@ async function readBody(request) {
 }
 
 async function postHandler(request, response) {
-  if (!storage.isConfigured()) {
-    throw new UnprocessableEntityError({
-      message: "O envio de fotos ainda não está disponível.",
-      action:
-        "Por enquanto, cole o endereço de uma imagem que já está na internet.",
+  if (isVideoContentType(request.headers["content-type"])) {
+    throw new ValidationError({
+      message: "Vídeo não é aceito.",
+      action: "Envie uma foto de até 8 MB, em JPEG, PNG ou WebP.",
     });
   }
 
   const body = await readBody(request);
+
+  if (looksLikeVideo(body)) {
+    throw new ValidationError({
+      message: "Vídeo não é aceito.",
+      action: "Envie uma foto de até 8 MB, em JPEG, PNG ou WebP.",
+    });
+  }
+
   const imageType = detectImageType(body);
 
   if (!imageType) {
     throw new ValidationError({
       message: "O arquivo enviado não é uma foto válida.",
       action: "Envie uma foto em JPEG ou WebP.",
+    });
+  }
+
+  if (!storage.isConfigured()) {
+    throw new UnprocessableEntityError({
+      message: "O envio de fotos ainda não está disponível.",
+      action:
+        "Por enquanto, cole o endereço de uma imagem que já está na internet.",
     });
   }
 

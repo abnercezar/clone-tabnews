@@ -25,6 +25,7 @@ export default function RegisterPage() {
       metadata={{
         title: "Criar conta",
         description: "Crie sua conta de forma gratuita.",
+        noIndex: true,
       }}
     >
       <Heading as="h1" className={classes.heading}>

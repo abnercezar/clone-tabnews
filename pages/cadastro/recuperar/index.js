@@ -10,6 +10,7 @@ export default function RecoverPasswordPage() {
       metadata={{
         title: "Recuperação de senha",
         description: "Redefina a senha da sua conta no AgroTab.",
+        noIndex: true,
       }}
     >
       <Heading as="h1" className={classes.heading}>

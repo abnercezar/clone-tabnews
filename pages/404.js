@@ -9,6 +9,7 @@ export default function NotFoundPage() {
       metadata={{
         title: "Página não encontrada",
         description: "Este endereço não existe no AgroTab.",
+        noIndex: true,
       }}
     >
       <Stack gap="normal" align="center" className={ui.emptyState}>

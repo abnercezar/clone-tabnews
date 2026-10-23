@@ -41,7 +41,7 @@ export default function ConfirmNewsletterPage() {
   return (
     <DefaultLayout
       contentWidth="small"
-      metadata={{ title: "Confirmar newsletter" }}
+      metadata={{ title: "Confirmar newsletter", noIndex: true }}
     >
       {status === "loading" && (
         <Stack direction="horizontal" align="center" gap="condensed">

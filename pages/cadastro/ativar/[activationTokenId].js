@@ -45,6 +45,7 @@ export default function ActivateUserPage() {
       contentWidth="small"
       metadata={{
         title: "Ativar cadastro",
+        noIndex: true,
       }}
     >
       {status === "loading" && (

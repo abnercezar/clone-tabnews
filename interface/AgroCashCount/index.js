@@ -10,6 +10,7 @@ export default function AgroCashCount({
   className,
 }) {
   const numericAmount = Number(amount);
+  const label = `${numericAmount.toLocaleString("pt-BR")} AgroCash`;
   const modes = {
     tooltip: {
       iconLabel: "AgroCash",
@@ -18,7 +19,7 @@ export default function AgroCashCount({
     },
     full: {
       iconSize: 20,
-      text: `${numericAmount.toLocaleString("pt-BR")} AgroCash`,
+      text: label,
     },
   };
 
@@ -27,10 +28,10 @@ export default function AgroCashCount({
   const content = (
     <span className={`${classes.wrapper} ${className || ""}`.trim()}>
       <SquareFillIcon
+        className={classes.icon}
         aria-label={iconLabel}
-        aria-hidden={!iconLabel}
-        fill="#2da44e"
         size={iconSize}
+        fill="currentColor"
       />
       <span>{text}</span>
     </span>
@@ -43,15 +44,11 @@ export default function AgroCashCount({
   return (
     <Tooltip text="AgroCash" direction={direction}>
       {href ? (
-        <Link
-          href={href}
-          className={classes.link}
-          aria-label={`${amount} AgroCash`}
-        >
+        <Link href={href} className={classes.link} aria-label={label}>
           {content}
         </Link>
       ) : (
-        <span tabIndex={0} aria-label={`${amount} AgroCash`}>
+        <span tabIndex={0} aria-label={label}>
           {content}
         </span>
       )}

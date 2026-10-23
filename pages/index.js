@@ -23,6 +23,7 @@ import TagFilter from "interface/TagFilter";
 import useUser from "interface/useUser";
 import ui from "interface/styles.module.css";
 import classes from "./index.module.css";
+import { siteJsonLd } from "interface/siteJsonLd";
 import controller from "infra/controller.js";
 import authorization from "models/authorization.js";
 import contentModel from "models/content.js";
@@ -180,8 +181,10 @@ export default function FeedPage({ initialContents = null, initialTotal = 0 }) {
         title: author
           ? `Publicações de ${author}`
           : "Perguntas e respostas de quem vive o agro",
-        description:
-          "Pergunte a quem já passou por isso no campo. Produtores, agrônomos e técnicos respondendo dúvidas reais da lavoura e da criação.",
+        description: author
+          ? `Publicações de ${author} no AgroTab.`
+          : "Tire sua dúvida do campo com quem é do campo. Uma comunidade nova, aberta a produtores, agrônomos e técnicos.",
+        jsonLd: author ? undefined : siteJsonLd(),
       }}
     >
       {isHomeFeed && <TractorScene />}

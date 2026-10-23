@@ -1,9 +1,7 @@
 import { Link, Tooltip } from "@primer/react";
-import { ThumbsupIcon } from "@primer/octicons-react";
+import { DotFillIcon } from "@primer/octicons-react";
 import classes from "./index.module.css";
 
-// Na tela, o saldo de AgroCoins aparece como "reputação": a soma dos votos
-// "útil" recebidos. A regra de pontuação no backend não muda.
 export default function AgroCoinCount({
   amount = 0,
   href,
@@ -12,15 +10,19 @@ export default function AgroCoinCount({
   className,
 }) {
   const numericAmount = Number(amount);
+  const label =
+    numericAmount === 1 || numericAmount === -1
+      ? `${numericAmount.toLocaleString("pt-BR")} AgroCoin`
+      : `${numericAmount.toLocaleString("pt-BR")} AgroCoins`;
   const modes = {
     tooltip: {
-      iconLabel: "Reputação",
+      iconLabel: "AgroCoin",
       iconSize: 16,
       text: numericAmount.toLocaleString("pt-BR"),
     },
     full: {
       iconSize: 20,
-      text: `${numericAmount.toLocaleString("pt-BR")} de reputação`,
+      text: label,
     },
   };
 
@@ -28,11 +30,11 @@ export default function AgroCoinCount({
 
   const content = (
     <span className={`${classes.wrapper} ${className || ""}`.trim()}>
-      <ThumbsupIcon
+      <DotFillIcon
+        className={classes.icon}
         aria-label={iconLabel}
-        aria-hidden={!iconLabel}
-        fill="#1a7f37"
         size={iconSize}
+        fill="currentColor"
       />
       <span>{text}</span>
     </span>
@@ -43,17 +45,13 @@ export default function AgroCoinCount({
   }
 
   return (
-    <Tooltip text="Reputação: votos de útil recebidos" direction={direction}>
+    <Tooltip text="AgroCoin" direction={direction}>
       {href ? (
-        <Link
-          href={href}
-          className={classes.link}
-          aria-label={`${amount} de reputação`}
-        >
+        <Link href={href} className={classes.link} aria-label={label}>
           {content}
         </Link>
       ) : (
-        <span tabIndex={0} aria-label={`${amount} de reputação`}>
+        <span tabIndex={0} aria-label={label}>
           {content}
         </span>
       )}

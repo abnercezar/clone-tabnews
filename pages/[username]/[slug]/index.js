@@ -127,26 +127,14 @@ function ContentPage({
   }, [username, slug, initialContent, notFound]);
 
   async function handleDelete() {
-    const confirmed = await confirm({
-      title: "Excluir esta publicação?",
-      body: "Essa ação não pode ser desfeita.",
-      confirmLabel: "Excluir",
-      danger: true,
-    });
-    if (!confirmed) {
-      return;
-    }
-
-    const response = await fetch(`/api/v1/contents/${username}/${slug}`, {
-      method: "DELETE",
-    });
-
-    if (response.ok) {
+    const result = await deleteContent(confirm, content);
+    if (result === "deleted") {
       location.href = "/";
       return;
     }
-
-    setErrorMessage("Não foi possível excluir a publicação.");
+    if (result === "failed") {
+      setErrorMessage("Não foi possível excluir a publicação.");
+    }
   }
 
   return (
@@ -222,7 +210,7 @@ function ContentPage({
                     <PastTime date={content.published_at} />
                   </div>
                   {(canEditContent(user, content) ||
-                    user?.id === content.owner_id) &&
+                    canDeleteContent(user, content)) &&
                     !isEditing && (
                       <ContentOptionsMenu
                         onEdit={
@@ -231,7 +219,7 @@ function ContentPage({
                             : undefined
                         }
                         onDelete={
-                          user?.id === content.owner_id
+                          canDeleteContent(user, content)
                             ? handleDelete
                             : undefined
                         }
@@ -324,6 +312,11 @@ function ContentPage({
                   user={user}
                   router={router}
                   isLoadingUser={isLoadingUser}
+                  onDeleted={() =>
+                    setComments((current) =>
+                      current.filter((item) => item.id !== comment.id),
+                    )
+                  }
                 />
               ))}
             </Stack>
@@ -343,11 +336,19 @@ function ContentPage({
   );
 }
 
-function CommentItem({ comment: initialComment, user, router, isLoadingUser }) {
+function CommentItem({
+  comment: initialComment,
+  user,
+  router,
+  isLoadingUser,
+  onDeleted,
+}) {
+  const confirm = useConfirmDialog();
   const [comment, setComment] = useState(initialComment);
   const [replies, setReplies] = useState([]);
   const [isReplying, setIsReplying] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
   const parts = splitComment(comment.body);
 
   useEffect(() => {
@@ -371,6 +372,17 @@ function CommentItem({ comment: initialComment, user, router, isLoadingUser }) {
       ignore = true;
     };
   }, [comment.owner_username, comment.slug]);
+
+  async function handleDelete() {
+    const result = await deleteContent(confirm, comment);
+    if (result === "deleted") {
+      onDeleted?.();
+      return;
+    }
+    if (result === "failed") {
+      setDeleteError("Não foi possível excluir o comentário.");
+    }
+  }
 
   return (
     <article id={`comentario-${comment.id}`} className={ui.commentWithVotes}>
@@ -397,10 +409,21 @@ function CommentItem({ comment: initialComment, user, router, isLoadingUser }) {
             <span>·</span>
             <PastTime date={comment.published_at} />
           </div>
-          {canEditContent(user, comment) && !isEditing && (
-            <ContentOptionsMenu onEdit={() => setIsEditing(true)} />
-          )}
+          {(canEditContent(user, comment) || canDeleteContent(user, comment)) &&
+            !isEditing && (
+              <ContentOptionsMenu
+                onEdit={
+                  canEditContent(user, comment)
+                    ? () => setIsEditing(true)
+                    : undefined
+                }
+                onDelete={
+                  canDeleteContent(user, comment) ? handleDelete : undefined
+                }
+              />
+            )}
         </div>
+        {deleteError && <Flash variant="danger">{deleteError}</Flash>}
         {isEditing ? (
           <ContentEditForm
             content={comment}
@@ -437,16 +460,38 @@ function CommentItem({ comment: initialComment, user, router, isLoadingUser }) {
           )}
         </ReplyBox>
         {replies.map((reply) => (
-          <ReplyItem key={reply.id} reply={reply} user={user} />
+          <ReplyItem
+            key={reply.id}
+            reply={reply}
+            user={user}
+            onDeleted={() =>
+              setReplies((current) =>
+                current.filter((item) => item.id !== reply.id),
+              )
+            }
+          />
         ))}
       </Stack>
     </article>
   );
 }
 
-function ReplyItem({ reply: initialReply, user }) {
+function ReplyItem({ reply: initialReply, user, onDeleted }) {
+  const confirm = useConfirmDialog();
   const [reply, setReply] = useState(initialReply);
   const [isEditing, setIsEditing] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+
+  async function handleDelete() {
+    const result = await deleteContent(confirm, reply);
+    if (result === "deleted") {
+      onDeleted?.();
+      return;
+    }
+    if (result === "failed") {
+      setDeleteError("Não foi possível excluir o comentário.");
+    }
+  }
 
   return (
     <article id={`comentario-${reply.id}`} className={ui.reply}>
@@ -462,10 +507,21 @@ function ReplyItem({ reply: initialReply, user }) {
             <span>·</span>
             <PastTime date={reply.published_at} />
           </div>
-          {canEditContent(user, reply) && !isEditing && (
-            <ContentOptionsMenu onEdit={() => setIsEditing(true)} />
-          )}
+          {(canEditContent(user, reply) || canDeleteContent(user, reply)) &&
+            !isEditing && (
+              <ContentOptionsMenu
+                onEdit={
+                  canEditContent(user, reply)
+                    ? () => setIsEditing(true)
+                    : undefined
+                }
+                onDelete={
+                  canDeleteContent(user, reply) ? handleDelete : undefined
+                }
+              />
+            )}
         </div>
+        {deleteError && <Flash variant="danger">{deleteError}</Flash>}
         {isEditing ? (
           <ContentEditForm
             content={reply}
@@ -506,6 +562,13 @@ function buildJsonLd(content, comments) {
     datePublished: content.published_at,
     dateModified: content.updated_at,
     author: person(content.owner_username),
+    image: `${origin}${ogImagePath(content)}`,
+    publisher: {
+      "@type": "Organization",
+      name: "AgroTab",
+      url: origin,
+      logo: `${origin}/logo-agrotab.png`,
+    },
     keywords:
       (content.tags || []).map((tag) => tag.label).join(", ") || undefined,
     interactionStatistic: [
@@ -541,15 +604,56 @@ function ogImagePath(content) {
 }
 
 function canEditContent(user, content) {
+  return canManageContent(
+    user,
+    content,
+    "update:content",
+    "update:content:others",
+  );
+}
+
+function canDeleteContent(user, content) {
+  return canManageContent(
+    user,
+    content,
+    "delete:content",
+    "delete:content:others",
+  );
+}
+
+// O autor mexe só no que é dele. Quem tem a feature `:others` (admin)
+// mexe em qualquer publicação, comentário ou resposta.
+function canManageContent(user, content, ownFeature, othersFeature) {
   if (!user || !content) {
     return false;
   }
 
   if (user.id === content.owner_id) {
-    return Boolean(user.features?.includes("update:content"));
+    return Boolean(user.features?.includes(ownFeature));
   }
 
-  return Boolean(user.features?.includes("update:content:others"));
+  return Boolean(user.features?.includes(othersFeature));
+}
+
+async function deleteContent(confirm, target) {
+  const isComment = Boolean(target.parent_id);
+  const confirmed = await confirm({
+    title: isComment ? "Excluir este comentário?" : "Excluir esta publicação?",
+    body: "Essa ação não pode ser desfeita.",
+    confirmLabel: "Excluir",
+    danger: true,
+  });
+
+  if (!confirmed) {
+    return "cancelled";
+  }
+
+  const response = await fetch(
+    `/api/v1/contents/${encodeURIComponent(target.owner_username)}/${encodeURIComponent(target.slug)}`,
+    { method: "DELETE" },
+  );
+
+  return response.ok ? "deleted" : "failed";
 }
 
 function ContentOptionsMenu({ onEdit, onDelete }) {
@@ -635,12 +739,7 @@ function ReplyBox({
             </Button>
           </Tooltip>
         )}
-        <ShareButtons
-          username={username}
-          slug={slug}
-          title={title}
-          compact={!framed}
-        />
+        <ShareButtons username={username} slug={slug} title={title} />
       </div>
       {children}
     </div>

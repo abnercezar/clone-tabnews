@@ -12,6 +12,7 @@
     "start": "next start",
     "test": "npm run services:up && env -u POSTGRES_PORT -u EMAIL_SMTP_PORT -u EMAIL_HTTP_PORT concurrently -n next,jest --hide next -k -s command-jest \"FIREWALL_ENABLED=false next dev\" \"npm run services:wait:webserver && jest --runInBand --verbose\"",
     "posttest": "npm run services:stop",
+    "test:isolated": "sh infra/scripts/test-isolated.sh",
     "test:watch": "env -u POSTGRES_PORT -u EMAIL_SMTP_PORT -u EMAIL_HTTP_PORT jest --watchAll --runInBand --verbose",
     "services:up": "docker compose -f infra/compose.yaml up -d",
     "services:stop": "docker compose -f infra/compose.yaml stop",

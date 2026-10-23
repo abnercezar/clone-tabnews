@@ -8,6 +8,7 @@ const STATIC_PATHS = [
   "/sobre",
   "/faq",
   "/termos-de-uso",
+  "/contato",
 ];
 
 function escapeXml(value) {
@@ -25,12 +26,26 @@ function urlEntry(path, lastModified) {
   return `<url><loc>${escapeXml(`${webserver.canonicalOrigin}${path}`)}</loc>${lastmod}</url>`;
 }
 
+// Uma consulta que falha (tabela ainda não migrada em produção, por exemplo)
+// não pode derrubar o sitemap inteiro: as URLs que deram certo continuam.
+async function loadOrEmpty(label, load) {
+  try {
+    return await load();
+  } catch (error) {
+    console.error(
+      `sitemap: falha ao listar ${label}:`,
+      error?.cause?.message || error?.message || error,
+    );
+    return [];
+  }
+}
+
 // Gerado a cada pedido (com cache no CDN): publicações e tags novas
 // aparecem para o Google sem precisar de deploy.
 export async function getServerSideProps({ res }) {
   const [contents, tags] = await Promise.all([
-    contentModel.findAllForSitemap(),
-    tagModel.findAllWithPublishedCount(),
+    loadOrEmpty("publicações", () => contentModel.findAllForSitemap()),
+    loadOrEmpty("tags", () => tagModel.findAllWithPublishedCount()),
   ]);
 
   const entries = [

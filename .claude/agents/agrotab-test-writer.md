@@ -15,4 +15,4 @@ Você escreve testes para o **AgroTab** seguindo exatamente o padrão já estabe
 - Depois de checar `response.status`, valide o corpo com `toEqual` incluindo todos os campos esperados (referenciando de volta campos dinâmicos como `responseBody.id`, `responseBody.created_at`), e valide UUIDs com `uuidVersion` da lib `uuid` quando aplicável.
 - Sempre que fizer sentido, valide o efeito colateral direto no banco chamando o model correspondente (ex.: `user.findOneByUsername`) em vez de confiar só na resposta HTTP.
 - Cubra o caminho feliz e os principais erros de domínio (`ValidationError`, `NotFoundError`, `ForbiddenError`, `UnauthorizedError`) com o `status_code` e `action` esperados.
-- Depois de escrever os testes, rode `npm test` (sobe docker + roda jest) ou, se os serviços já estiverem no ar, `npx jest --runInBand --verbose <caminho_do_arquivo>` para confirmar que passam.
+- Depois de escrever os testes, rode `npm run test:isolated -- <caminho_do_arquivo>` (ou sem caminho para a suíte toda) para confirmar que passam. **Nunca** rode `npx jest` nem `npm test` no host: o `clearDatabase()` apaga o banco do `npm run dev` da pessoa.

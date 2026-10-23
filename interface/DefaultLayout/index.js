@@ -25,6 +25,7 @@ import {
   SunIcon,
   ThreeBarsIcon,
 } from "@primer/octicons-react";
+import AgroCashCount from "interface/AgroCashCount";
 import AgroCoinCount from "interface/AgroCoinCount";
 import AgroTabLogo from "interface/AgroTabLogo";
 import JsonLd from "interface/JsonLd";
@@ -99,7 +100,14 @@ export default function DefaultLayout({
           property="og:image:alt"
           content={metadata.title || "AgroTab — comunidade do agronegócio"}
         />
+        {imagePath.startsWith("/api/og") && (
+          <meta property="og:image:type" content="image/png" />
+        )}
         <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={metadata.title || "AgroTab"} />
+        {metadata.description && (
+          <meta name="twitter:description" content={metadata.description} />
+        )}
         <meta name="twitter:image" content={imageUrl} />
         {metadata.noIndex && <meta name="robots" content="noindex" />}
         {metadata.jsonLd && <JsonLd data={metadata.jsonLd} />}
@@ -231,6 +239,14 @@ function UserMenu({ user }) {
           amount={user.tabcoins}
           href={profileHref}
           className={styles.agroCoinCount}
+        />
+      </Header.Item>
+
+      <Header.Item className={styles.agroCash}>
+        <AgroCashCount
+          amount={user.tabcash}
+          href={profileHref}
+          className={styles.agroCashCount}
         />
       </Header.Item>
 

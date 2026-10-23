@@ -45,7 +45,7 @@ const FEATURES = [
   {
     title: "Útil 👍",
     description:
-      "A comunidade marca o que ajudou de verdade. O que é útil sobe, e quem ajuda ganha reputação no perfil.",
+      "A comunidade marca o que ajudou de verdade. Cada voto útil custa 2 AgroCoins e devolve 1 AgroCash a quem votou.",
     icon: StarFillIcon,
     tone: "yellow",
     href: "/faq#agrocoin",
@@ -76,7 +76,7 @@ export default function SobrePage() {
               Comunidade do agronegócio
             </Text>
             <Heading as="h1" className="hero-title">
-              Pergunte a quem já passou por isso no campo.
+              Tire sua dúvida do campo com quem é do campo.
             </Heading>
             <Text as="p" className="hero-lead">
               Produtores, técnicos e consultores trocam perguntas, relatos e

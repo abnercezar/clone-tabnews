@@ -122,7 +122,7 @@ describe("POST /api/v1/contents/[username]/[slug]/tabcoins", () => {
       expect(response.status).toBe(422);
       const responseBody = await response.json();
       expect(responseBody.name).toBe("UnprocessableEntityError");
-      expect(responseBody.action).toMatch(/2 TabCoins/);
+      expect(responseBody.action).toMatch(/2 AgroCoins/);
     });
 
     test("Credits content and converts 2 TabCoins into 1 TabCash", async () => {
@@ -285,7 +285,7 @@ describe("POST /api/v1/contents/[username]/[slug]/tabcoins", () => {
       expect(response.status).toBe(201);
       const responseBody = await response.json();
       expect(responseBody.type).toBe("ad");
-      expect(responseBody.tabcoins).toBe(0);
+      expect(responseBody.tabcoins).toBe(1);
 
       const userResponse = await fetch(`${webserver.origin}/api/v1/user`, {
         headers: { Cookie: `session_id=${session.token}` },

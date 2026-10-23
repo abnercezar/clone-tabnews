@@ -15,7 +15,7 @@ Você é o **QA Human Tester — Agrotab**. Testa a aplicação como uma pessoa 
 ## Antes de agir
 
 1. Leia o inventário e o código da rota (`pages/`, `pages/api/`). Não invente rota nem funcionalidade.
-2. Confirme o ambiente. Teste com efeito colateral só em localhost com banco de desenvolvimento ou com os containers isolados do `npm test`. Se a URL for `agrotab.com.br`, um preview, ou qualquer banco de produção, pare.
+2. Confirme o ambiente. Teste com efeito colateral só em localhost com banco de desenvolvimento ou com os containers do `npm run test:isolated`. Se a URL for `agrotab.com.br`, um preview, ou qualquer banco de produção, pare.
 3. Não dispare e-mail real, pagamento, SMS nem carga. O Mailcatcher local é o único destino de e-mail aceitável.
 4. Use dados sintéticos (faker ou nomes óbvios de teste, como `qa...`). Não use dados pessoais reais nem contas de terceiros.
 5. Não limpe o banco inteiro fora do `beforeAll` do Jest. No navegador, apague só o registro que você criou, se a tela permitir.
@@ -49,7 +49,7 @@ Jornadas reais, quando for a hora de explorar:
 
 Defeito corrigido ganha um `test` no Jest, no arquivo que espelha a rota, antes de ser dado como fechado. Não apague teste antigo para a suíte ficar verde. Não afrouxe asserção para aceitar comportamento errado.
 
-Rode o arquivo com os serviços de teste isolados (portas que não sejam as do `npm run dev` da pessoa) ou `npm test` quando puder derrubar o dev. `clearDatabase` apaga o schema: nunca aponte o Jest para o banco que o dev local está usando.
+Rode o arquivo com `npm run test:isolated -- <caminho>` (containers descartáveis, não toca no banco do `npm run dev`). Não use `npx jest` nem `npm test` no host. `clearDatabase` apaga o schema: nunca aponte o Jest para o banco que o dev local está usando.
 
 ## Quando bloquear uma versão
 

@@ -90,6 +90,43 @@ describe("`DELETE /api/v1/contents/[username]/[slug]`", () => {
     expect(responseBody.name).toBe("ForbiddenError");
   });
 
+  test("A user with delete:content:others removes another user's content", async () => {
+    const author = await orchestrator.createUser({
+      username: "donodoadmindelete",
+    });
+    const activatedAuthor = await orchestrator.activateUser(author);
+    const createdContent = await orchestrator.createContent({
+      owner_id: activatedAuthor.id,
+      title: "Publicação que o admin exclui",
+      body: "Só a moderação apaga isto.",
+    });
+
+    const moderator = await orchestrator.createUser({
+      username: "adminexclusao",
+    });
+    const activatedModerator = await orchestrator.activateUser(moderator);
+    await orchestrator.addFeaturesToUser(activatedModerator, [
+      "delete:content:others",
+    ]);
+    const moderatorSession =
+      await orchestrator.createSession(activatedModerator);
+
+    const response = await fetch(
+      `${webserver.origin}/api/v1/contents/donodoadmindelete/${createdContent.slug}`,
+      {
+        method: "DELETE",
+        headers: {
+          Cookie: `session_id=${moderatorSession.token}`,
+        },
+      },
+    );
+
+    expect(response.status).toBe(200);
+    const responseBody = await response.json();
+    expect(responseBody.status).toBe("deleted");
+    expect(responseBody.owner_username).toBe("donodoadmindelete");
+  });
+
   test("Anonymous user cannot delete it", async () => {
     const response = await fetch(
       `${webserver.origin}/api/v1/contents/donodopost/conteudo-protegido`,

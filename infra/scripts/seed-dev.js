@@ -35,6 +35,9 @@ const ACTIVATED_FEATURES = [
   "create:sponsorship",
   "read:sponsorship",
   "read:recovery_token",
+  "read:email_confirmation_token",
+  "read:community_question",
+  "create:community_question_vote",
   "create:newsletter_subscription",
   "update:newsletter_subscription",
 ];
@@ -51,6 +54,7 @@ const ADMIN_FEATURES = [
   "ban:user",
   "read:firewall",
   "review:firewall",
+  "create:community_question",
   "send:newsletter",
 ];
 
@@ -66,6 +70,8 @@ const USERS = [
   {
     username: "produtorsoja",
     email: "produtorsoja@agrotab.local",
+    occupation: "produtor",
+    state: "MT",
     tabcoins: 24,
     tabcash: 150,
     daysAgo: 55,
@@ -73,6 +79,8 @@ const USERS = [
   {
     username: "tecnicoagrario",
     email: "tecnico@agrotab.local",
+    occupation: "tecnico-agricola",
+    state: "PR",
     tabcoins: 18,
     tabcash: 40,
     daysAgo: 50,
@@ -80,6 +88,8 @@ const USERS = [
   {
     username: "pecuaristago",
     email: "pecuaria@agrotab.local",
+    occupation: "produtor",
+    state: "GO",
     tabcoins: 12,
     tabcash: 20,
     daysAgo: 42,
@@ -87,6 +97,8 @@ const USERS = [
   {
     username: "consultoramilho",
     email: "milho@agrotab.local",
+    occupation: "agronomo",
+    state: "MG",
     tabcoins: 8,
     tabcash: 10,
     daysAgo: 35,
@@ -94,6 +106,8 @@ const USERS = [
   {
     username: "jornaleirarural",
     email: "jornal@agrotab.local",
+    occupation: "consultor",
+    state: "SP",
     tabcoins: 6,
     tabcash: 5,
     daysAgo: 28,
@@ -101,6 +115,8 @@ const USERS = [
   {
     username: "irrigantemg",
     email: "irrigante@agrotab.local",
+    occupation: "produtor",
+    state: "MG",
     tabcoins: 14,
     tabcash: 30,
     daysAgo: 20,
@@ -108,6 +124,8 @@ const USERS = [
   {
     username: "apicultoraba",
     email: "apicultura@agrotab.local",
+    occupation: "produtor",
+    state: "BA",
     tabcoins: 10,
     tabcash: 15,
     daysAgo: 12,
@@ -115,6 +133,8 @@ const USERS = [
   {
     username: "silvicultorpr",
     email: "silvicultura@agrotab.local",
+    occupation: "tecnico-agricola",
+    state: "PR",
     tabcoins: 9,
     tabcash: 12,
     daysAgo: 5,
@@ -369,13 +389,23 @@ async function ensureUser(client, userSeed, passwordHash) {
           SET
             created_at = $2,
             updated_at = $2,
-            features = $3
+            features = $3,
+            occupation = $4,
+            state = $5
           WHERE id = $1
         `,
-        [existing.id, daysAgoDate(userSeed.daysAgo, 9), features],
+        [
+          existing.id,
+          daysAgoDate(userSeed.daysAgo, 9),
+          features,
+          userSeed.occupation || null,
+          userSeed.state || null,
+        ],
       );
     }
     existing.features = features;
+    existing.occupation = userSeed.occupation || null;
+    existing.state = userSeed.state || null;
     console.log(`  · usuário já existe: ${userSeed.username}`);
     return existing;
   }
@@ -384,12 +414,20 @@ async function ensureUser(client, userSeed, passwordHash) {
   const result = await client.query(
     `
       INSERT INTO users
-        (username, email, password, features, created_at, updated_at)
+        (username, email, password, features, occupation, state, created_at, updated_at)
       VALUES
-        ($1, $2, $3, $4, $5, $5)
+        ($1, $2, $3, $4, $5, $6, $7, $7)
       RETURNING *
     `,
-    [userSeed.username, userSeed.email, passwordHash, features, createdAt],
+    [
+      userSeed.username,
+      userSeed.email,
+      passwordHash,
+      features,
+      userSeed.occupation || null,
+      userSeed.state || null,
+      createdAt,
+    ],
   );
 
   console.log(

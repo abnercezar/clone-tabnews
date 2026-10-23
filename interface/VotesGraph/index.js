@@ -427,13 +427,13 @@ function JoinInteractions({
   return (
     <>
       {positives > 0 && (
-        <span>{`➔ +${positives} TabCoin${positives > 1 ? "s" : ""}${
+        <span>{`➔ +${positives} AgroCoin${positives > 1 ? "s" : ""}${
           positiveVoteUsers.length > 0 ? " com\xA0" : ""
         }`}</span>
       )}
       <JoinLinksWithCommaOrAnd paths={positiveVoteUsers} />
       {negatives > 0 && (
-        <span>{`${positives > 0 ? " " : ""}➔ -${negatives} TabCoin${
+        <span>{`${positives > 0 ? " " : ""}➔ -${negatives} AgroCoin${
           negatives > 1 ? "s" : ""
         }${negativeVoteUsers.length > 0 ? " com\xA0" : ""}`}</span>
       )}

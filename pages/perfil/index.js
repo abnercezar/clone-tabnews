@@ -34,6 +34,7 @@ export default function ProfilePage() {
         title: "Editar perfil",
         description:
           "Atualize seu usuário, ocupação, culturas, e-mail e senha no AgroTab.",
+        noIndex: true,
       }}
     >
       <Heading as="h1" className={classes.heading}>

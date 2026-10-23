@@ -20,6 +20,7 @@ import {
   GearIcon,
   KebabHorizontalIcon,
 } from "@primer/octicons-react";
+import AgroCashCount from "interface/AgroCashCount";
 import AgroCoinCount from "interface/AgroCoinCount";
 import AuthorCredential from "interface/AuthorCredential";
 import ContentList from "interface/ContentList";
@@ -285,6 +286,9 @@ function UserProfile({
         <div className={classes.statsGroup}>
           {userFound.tabcoins !== undefined && (
             <AgroCoinCount amount={userFound.tabcoins} mode="full" />
+          )}
+          {userFound.tabcash !== undefined && (
+            <AgroCashCount amount={userFound.tabcash} mode="full" />
           )}
           <div className={classes.pastTimeWrapper}>
             <PastTime
