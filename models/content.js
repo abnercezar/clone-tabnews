@@ -232,6 +232,7 @@ async function creditOrDebitTabCoins(oldContent, newContent, options = {}) {
       transaction: options.transaction,
     });
 
+    // TabNews: prestígio negativo impede a publicação.
     if (userEarnings < 0) {
       throw new ForbiddenError({
         message:
@@ -241,11 +242,10 @@ async function creditOrDebitTabCoins(oldContent, newContent, options = {}) {
       });
     }
 
-    // AgroTab: anúncios não recebem TabCoin inicial no conteúdo (só TabCash via budget).
-    // Gap vs TN, que ainda aplica contentEarnings=1 em ads.
+    // TabNews: anúncio não credita AgroCoin no autor.
+    // O conteúdo do anúncio continua com +1 inicial, se o texto for substancial.
     if (newContent.type !== "content") {
       userEarnings = 0;
-      contentEarnings = 0;
     }
 
     if (newContent.body.split(/[a-z]{5,}/i, 6).length < 6) {
@@ -253,8 +253,20 @@ async function creditOrDebitTabCoins(oldContent, newContent, options = {}) {
     }
 
     if (newContent.parent_id) {
-      const parent = await findPublishedById(newContent.parent_id, options);
-      if (parent.owner_id === newContent.owner_id) {
+      let parentOwnerId = newContent.parent_owner_id;
+
+      if (parentOwnerId === undefined) {
+        const parentResult = await database.query(
+          {
+            text: "SELECT owner_id FROM contents WHERE id = $1",
+            values: [newContent.parent_id],
+          },
+          options,
+        );
+        parentOwnerId = parentResult.rows[0].owner_id;
+      }
+
+      if (parentOwnerId === newContent.owner_id) {
         return;
       }
     }
@@ -292,7 +304,7 @@ async function creditOrDebitTabCoins(oldContent, newContent, options = {}) {
 }
 
 async function updateTabCashBalance(newContent, options = {}) {
-  if (newContent.type !== "ad") {
+  if (newContent.type === "content") {
     return;
   }
 
