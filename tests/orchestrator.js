@@ -120,12 +120,30 @@ async function runPendingMigrations() {
   return migrated;
 }
 
+// O faker pt_BR repete usernames e emails com frequência (dezenas por milhar),
+// e um arquivo de teste cria muitos usuários sem limpar o banco entre eles.
+// Contador + trecho aleatório garantem unicidade, respeitando o limite de
+// 30 caracteres e o padrão alfanumérico do username.
+let generatedUserCount = 0;
+
+function uniqueUsername() {
+  generatedUserCount += 1;
+  const base = faker.internet
+    .username()
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .slice(0, 16);
+  const suffix = `${generatedUserCount.toString(36)}${faker.string.alphanumeric(6)}`;
+  return `${base || "produtor"}${suffix}`;
+}
+
 // Cria um usuário de teste
 async function createUser(userObject) {
+  const username = userObject?.username || uniqueUsername();
   const newUser = await user.create({
-    username:
-      userObject?.username || faker.internet.username().replace(/[_.-]/g, ""),
-    email: userObject?.email || faker.internet.email(),
+    username,
+    email:
+      userObject?.email ||
+      `${username.toLowerCase()}@${faker.internet.domainName()}`,
     password: userObject?.password || "validpassword",
   });
 
