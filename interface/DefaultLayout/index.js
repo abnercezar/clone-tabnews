@@ -20,6 +20,7 @@ import {
   MoonIcon,
   PersonIcon,
   PlusIcon,
+  RssIcon,
   ShieldLockIcon,
   SignOutIcon,
   SunIcon,
@@ -302,6 +303,14 @@ function UserMenu({ user }) {
                     <MailIcon />
                   </ActionList.LeadingVisual>
                   Newsletter
+                </ActionList.LinkItem>
+              )}
+              {user.features?.includes("review:news") && (
+                <ActionList.LinkItem href="/moderacao/noticias">
+                  <ActionList.LeadingVisual>
+                    <RssIcon />
+                  </ActionList.LeadingVisual>
+                  Curadoria de notícias
                 </ActionList.LinkItem>
               )}
               <ActionList.Divider />

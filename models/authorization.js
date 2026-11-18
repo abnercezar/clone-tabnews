@@ -37,6 +37,9 @@ const availableFeatures = [
   "update:newsletter_subscription",
   "send:newsletter",
 
+  // NEWS (curadoria diária)
+  "review:news",
+
   // ACTIVATION_TOKEN
   "read:activation_token",
 
@@ -93,6 +96,7 @@ const adminFeatures = [
   "review:firewall",
   "create:community_question",
   "send:newsletter",
+  "review:news",
 ];
 
 function can(user, feature, resource) {
@@ -327,6 +331,31 @@ function filterOutput(user, feature, resource) {
       confirmed_at: resource.confirmed_at,
       unsubscribed_at: resource.unsubscribed_at,
     };
+  }
+
+  if (feature === "review:news") {
+    const filterNewsItem = (item) => ({
+      id: item.id,
+      source_name: item.source_name,
+      source_url: item.source_url,
+      original_title: item.original_title,
+      title: item.title,
+      summary: item.summary,
+      discussion_question: item.discussion_question,
+      tags: item.tags || [],
+      relevance: Number(item.relevance ?? 0),
+      ai_curated: Boolean(item.ai_curated),
+      source_published_at: item.source_published_at,
+      status: item.status,
+      content_id: item.content_id ?? null,
+      reviewed_at: item.reviewed_at ?? null,
+      created_at: item.created_at,
+      updated_at: item.updated_at,
+    });
+
+    return Array.isArray(resource)
+      ? resource.map(filterNewsItem)
+      : filterNewsItem(resource);
   }
 
   if (feature === "send:newsletter") {
