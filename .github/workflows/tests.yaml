@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Faz o checkout do repositório
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Configura o Node.js
       - uses: actions/setup-node@v4
