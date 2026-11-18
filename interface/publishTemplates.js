@@ -63,10 +63,6 @@ export const PUBLISH_TEMPLATES = [
   },
 ];
 
-export function findPublishTemplate(id) {
-  return PUBLISH_TEMPLATES.find((template) => template.id === id) || null;
-}
-
 // Roteiro intacto, sem título: a pessoa ainda não escreveu nada, então o
 // formulário não deve reabrir já preenchido.
 export function isUntouchedTemplateDraft(draft) {

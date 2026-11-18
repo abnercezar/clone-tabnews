@@ -41,21 +41,18 @@ export default function FeedStarter() {
   return (
     <section className={classes.starter} aria-labelledby="feed-starter-title">
       <Heading as="h2" id="feed-starter-title" className={classes.heading}>
-        Comece por um modelo
+        O que publicar
       </Heading>
       <Text as="p" className={classes.muted}>
-        A comunidade está começando. Escolha o tipo de publicação e o AgroTab
-        mostra o que vale contar.
+        A comunidade está começando. Publique uma pergunta, um relato de campo
+        ou o resultado da safra.
       </Text>
       <ul className={classes.templates}>
         {PUBLISH_TEMPLATES.map((template) => {
           const Icon = TEMPLATE_ICONS[template.id] || QuestionIcon;
           return (
             <li key={template.id}>
-              <Link
-                href={`/publicar?modelo=${template.id}`}
-                className={classes.template}
-              >
+              <Link href="/publicar" className={classes.template}>
                 <span className={classes.icon} aria-hidden="true">
                   <Icon size={20} />
                 </span>

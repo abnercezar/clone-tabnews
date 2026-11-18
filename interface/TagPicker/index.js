@@ -13,11 +13,16 @@ const CATEGORY_LABELS = {
 // Lista de tags vinda da API; fica em memória entre os formulários da página.
 let cachedTags = null;
 
-export function useTags() {
-  const [tags, setTags] = useState(cachedTags);
+// `initialTags`: lista já vinda do servidor (getServerSideProps), evita a busca.
+export function useTags(initialTags = null) {
+  const [tags, setTags] = useState(cachedTags ?? initialTags);
 
   useEffect(() => {
     if (cachedTags) {
+      return;
+    }
+    if (Array.isArray(initialTags)) {
+      cachedTags = initialTags;
       return;
     }
     let ignore = false;
@@ -35,7 +40,7 @@ export function useTags() {
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [initialTags]);
 
   return tags;
 }

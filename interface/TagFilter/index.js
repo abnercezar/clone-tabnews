@@ -7,8 +7,12 @@ import classes from "./index.module.css";
 const SCROLL_STEP = 220;
 
 // Atalhos do feed para as páginas de cultura/criação (/tag/soja...).
-export default function TagFilter({ category = "cultura", current }) {
-  const tags = useTags();
+export default function TagFilter({
+  category = "cultura",
+  current,
+  initialTags = null,
+}) {
+  const tags = useTags(initialTags);
   const scrollerRef = useRef(null);
   const [edges, setEdges] = useState({ left: false, right: false });
 

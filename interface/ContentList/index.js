@@ -20,6 +20,17 @@ function excerpt(text, maxLength = 255) {
   return `${plain.slice(0, maxLength).trimEnd()}…`;
 }
 
+const CARD_SUMMARY_LENGTH = 180;
+
+// Resumo do cartão. A home já manda `summary` pronto do servidor (sem o corpo
+// inteiro no HTML); as páginas buscadas pela API ainda trazem `body`.
+export function cardSummary(content) {
+  if (typeof content.summary === "string") {
+    return content.summary;
+  }
+  return createExcerpt(content.body, CARD_SUMMARY_LENGTH);
+}
+
 // variant="cards" (home): cartões com resumo; padrão é a lista numerada.
 export default function ContentList({
   contentList,
@@ -131,7 +142,7 @@ function ContentListItem({ content }) {
 function ContentCard({ content }) {
   const href = `/${content.owner_username}/${content.slug}`;
   const isAd = content.type === "ad";
-  const summary = createExcerpt(content.body, 180);
+  const summary = cardSummary(content);
 
   return (
     <li className={classes.card}>

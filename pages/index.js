@@ -12,7 +12,7 @@ import {
 } from "@primer/react";
 import DefaultLayout from "interface/DefaultLayout";
 import CommunityQuestion from "interface/CommunityQuestion";
-import ContentList from "interface/ContentList";
+import ContentList, { cardSummary } from "interface/ContentList";
 import FeedExample from "interface/FeedExample";
 import FeedStarter, { WeeklyQuestion } from "interface/FeedStarter";
 import HomeIntro from "interface/HomeIntro";
@@ -27,12 +27,17 @@ import { siteJsonLd } from "interface/siteJsonLd";
 import controller from "infra/controller.js";
 import authorization from "models/authorization.js";
 import contentModel from "models/content.js";
+import tagModel from "models/tag.js";
 
 const PER_PAGE = 30;
 // Com poucas publicações, o feed termina com um convite em vez de espaço vazio.
 const FEW_CONTENTS = 5;
 
-export default function FeedPage({ initialContents = null, initialTotal = 0 }) {
+export default function FeedPage({
+  initialContents = null,
+  initialTotal = 0,
+  initialTags = null,
+}) {
   const router = useRouter();
   const { user, isLoading: isLoadingUser } = useUser();
   const author =
@@ -233,7 +238,7 @@ export default function FeedPage({ initialContents = null, initialTotal = 0 }) {
                   </LinkButton>
                 )}
               </div>
-              <TagFilter />
+              <TagFilter initialTags={initialTags} />
               {feedBody}
             </section>
           </div>
@@ -257,11 +262,16 @@ export async function getServerSideProps({ query, res }) {
   }
 
   try {
-    const published = await contentModel.findPublished({
-      page: 1,
-      perPage: PER_PAGE,
-      strategy: "relevant",
-    });
+    const [published, tags] = await Promise.all([
+      contentModel.findPublished({
+        page: 1,
+        perPage: PER_PAGE,
+        strategy: "relevant",
+      }),
+      // Filtro de culturas já no HTML: sem requisição extra nem salto de layout.
+      // Se falhar, o TagFilter busca pela API como antes.
+      tagModel.findAll().catch(() => null),
+    ]);
     const secureOutputValues = authorization.filterOutput(
       controller.createAnonymousUser(),
       "read:content",
@@ -279,8 +289,18 @@ export async function getServerSideProps({ query, res }) {
 
     return {
       props: {
-        initialContents: JSON.parse(JSON.stringify(secureOutputValues)),
+        // O cartão só mostra um resumo: mandar o corpo inteiro das 30
+        // publicações inflaria o HTML (__NEXT_DATA__) à toa.
+        initialContents: JSON.parse(
+          JSON.stringify(
+            secureOutputValues.map(({ body, ...content }) => ({
+              ...content,
+              summary: cardSummary({ body }),
+            })),
+          ),
+        ),
         initialTotal: published.pagination.total,
+        initialTags: tags,
       },
     };
   } catch (error) {

@@ -5,6 +5,7 @@ import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { loadCattle } from "./cattleBake.js";
 import { animateHerd } from "./three/cattle.js";
 import { animateDriver } from "./three/driver.js";
 import { FinishShader, createParticles, createSky } from "./three/effects.js";
@@ -68,8 +69,12 @@ function speedAt(t) {
   return SPEED * (1 - Math.pow(1 - k, 3));
 }
 
-export default function TractorCanvas() {
+// `cattle`: malhas do gado já prontas (ver TractorScene). Com elas a cena
+// compila os shaders uma vez só e aparece já no primeiro quadro. Sem elas
+// (o cálculo atrasou), o gado entra depois, quando ficar pronto.
+export default function TractorCanvas({ cattle = null }) {
   const canvasRef = useRef(null);
+  const initialCattle = useRef(cattle);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
@@ -381,6 +386,11 @@ export default function TractorCanvas() {
       }
     }
 
+    const hasCattle = Boolean(initialCattle.current);
+    if (hasCattle) {
+      scenery.addCattle(initialCattle.current);
+    }
+
     resize();
 
     let raf = 0;
@@ -456,6 +466,8 @@ export default function TractorCanvas() {
       composer.render();
       stage.dataset.painted = "true";
       showed = true;
+    } else if (hasCattle) {
+      showScene();
     } else {
       update(0, 0);
       composer.render();
@@ -496,35 +508,27 @@ export default function TractorCanvas() {
     document.addEventListener("visibilitychange", onVisibility);
     start();
 
-    // O gado é gerado num worker e entra na cena quando fica pronto, sem
-    // travar a largada. Sem suporte a worker, gera na thread principal.
+    // Gado atrasado: entra quando `loadCattle` (já disparado pelo
+    // TractorScene) terminar, sem travar a largada.
     let disposed = false;
-    let cattleWorker = null;
-    function receiveCattle(baked) {
-      if (disposed) {
-        return;
-      }
-      scenery.addCattle(baked);
-      showScene();
+    if (!hasCattle) {
+      loadCattle()
+        .then((baked) => {
+          if (disposed) {
+            return;
+          }
+          scenery.addCattle(baked);
+          showScene();
+        })
+        .catch(() => {
+          // Sem gado: o showFallback abaixo mostra a cena mesmo assim.
+        });
+      showFallback = window.setTimeout(showScene, 2500);
     }
-    try {
-      cattleWorker = new Worker(
-        new URL("./three/cattle.worker.js", import.meta.url),
-      );
-      cattleWorker.onmessage = (event) => receiveCattle(event.data);
-      cattleWorker.postMessage("bake");
-    } catch {
-      import("./three/cattleShape.js").then(({ bakeCattle }) =>
-        receiveCattle(bakeCattle()),
-      );
-    }
-
-    showFallback = window.setTimeout(showScene, 2500);
 
     return () => {
       disposed = true;
       window.clearTimeout(showFallback);
-      cattleWorker?.terminate();
       window.cancelAnimationFrame(raf);
       canvas.removeEventListener("click", onClick);
       resizeObserver.disconnect();
