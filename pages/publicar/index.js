@@ -20,11 +20,9 @@ import DefaultLayout from "interface/DefaultLayout";
 import useUser from "interface/useUser";
 import { loginHref } from "interface/loginRedirect";
 import {
-  PUBLISH_TEMPLATES,
   SEND_AFTER_LOGIN_PATH,
   VISITOR_DRAFT_ID,
   clearPublishDraft,
-  findPublishTemplate,
   findTemplateGuides,
   isUntouchedTemplateDraft,
   moveVisitorDraft,
@@ -142,14 +140,8 @@ function PublishForm() {
       if (user && router.query.enviar === "1") {
         setAutoSending(true);
       }
-    } else {
-      const template = findPublishTemplate(router.query.modelo);
-      if (template) {
-        setBody(template.body);
-      }
-      if (typeof router.query.tag === "string") {
-        setTags([router.query.tag]);
-      }
+    } else if (typeof router.query.tag === "string") {
+      setTags([router.query.tag]);
     }
     draftReady.current = true;
     // Só na abertura do formulário.
@@ -178,21 +170,6 @@ function PublishForm() {
     setBody("");
     setTags([]);
     setRestoredDraft(false);
-  }
-
-  async function applyTemplate(template) {
-    if (body.trim()) {
-      const confirmed = await confirm({
-        title: "Substituir o texto atual?",
-        body: "O texto atual será trocado pelo modelo selecionado.",
-        confirmLabel: "Substituir",
-      });
-
-      if (!confirmed) {
-        return;
-      }
-    }
-    setBody(template.body);
   }
 
   function reportError(message, action = null, keepDraftNote = false) {
@@ -347,24 +324,6 @@ function PublishForm() {
           </Text>
           <TagPicker value={tags} onChange={setTags} />
         </fieldset>
-
-        <Stack gap="condensed">
-          <Text sx={{ color: "fg.muted", fontSize: 1 }}>
-            Não sabe por onde começar? Use um modelo:
-          </Text>
-          <Stack direction="horizontal" gap="condensed" wrap="wrap">
-            {PUBLISH_TEMPLATES.map((template) => (
-              <Button
-                key={template.label}
-                type="button"
-                size="small"
-                onClick={() => applyTemplate(template)}
-              >
-                {template.label}
-              </Button>
-            ))}
-          </Stack>
-        </Stack>
 
         <FormControl required>
           <FormControl.Label>Texto</FormControl.Label>

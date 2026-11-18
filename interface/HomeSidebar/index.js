@@ -85,17 +85,14 @@ function TemplatesCard() {
   return (
     <section className={classes.card}>
       <Heading as="h2" className={classes.cardTitle}>
-        Comece por um modelo
+        O que publicar
       </Heading>
       <ul className={classes.templateList}>
         {PUBLISH_TEMPLATES.map((template) => {
           const Icon = TEMPLATE_ICONS[template.id] || QuestionIcon;
           return (
             <li key={template.id}>
-              <Link
-                href={`/publicar?modelo=${template.id}`}
-                className={classes.templateLink}
-              >
+              <Link href="/publicar" className={classes.templateLink}>
                 <span className={classes.templateIcon}>
                   <Icon size={16} />
                 </span>
