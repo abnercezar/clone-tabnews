@@ -6,9 +6,10 @@ import authorization from "models/authorization.js";
 import event from "models/event.js";
 import news from "models/news.js";
 
-// A coleta lê vários feeds e pode chamar a IA: dá folga além dos 10 s padrão.
+// A coleta lê vários feeds (até 10 s) e chama a IA (até 40 s). 60 s é o
+// limite aceito em todos os planos da Vercel.
 export const config = {
-  maxDuration: 120,
+  maxDuration: 60,
 };
 
 function sameSecret(received, expected) {

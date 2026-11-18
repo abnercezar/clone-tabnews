@@ -216,7 +216,7 @@ async function curateWithAi(candidates, { limit, allowedSlugs }) {
     )
     .join("\n\n");
 
-  const client = new Anthropic({ timeout: 100000, maxRetries: 1 });
+  const client = new Anthropic({ timeout: 40000, maxRetries: 0 });
 
   const response = await client.beta.messages.create({
     model: process.env.NEWS_AI_MODEL || DEFAULT_MODEL,
