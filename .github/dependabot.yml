@@ -15,6 +15,12 @@ updates:
       - security
     commit-message:
       prefix: "chore(deps)"
+    ignore:
+      # A partir da v8 o node-pg-migrate é só ESM e quebra o Jest (CommonJS) ao
+      # carregar models/migrator.js. Upgrade de major fica para uma migração planejada.
+      - dependency-name: node-pg-migrate
+        update-types:
+          - "version-update:semver-major"
     groups:
       production-minor-patch:
         dependency-type: production
