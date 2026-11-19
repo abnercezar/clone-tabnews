@@ -47,6 +47,18 @@ export default function TabCoinButtons({ content, onBalanceChange }) {
     setContentObject(content);
   }, [content]);
 
+  useEffect(() => {
+    if (!errorMessage) {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      setErrorMessage(null);
+    }, 3000);
+
+    return () => clearTimeout(timeoutId);
+  }, [errorMessage]);
+
   async function transactTabCoin(transactionType) {
     setErrorMessage(null);
 
