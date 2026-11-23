@@ -38,7 +38,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@anthropic-ai/sdk": "1.10.0",
+    "@anthropic-ai/sdk": "1.11.0",
     "@bytemd/plugin-breaks": "^1.22.0",
     "@bytemd/plugin-gemoji": "^1.22.0",
     "@bytemd/plugin-gfm": "^1.22.0",
